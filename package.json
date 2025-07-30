@@ -1,0 +1,61 @@
+{
+  "name": "shesaw",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "build:clean": "rm -rf .next && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "husky init && echo 'pnpm exec lint-staged' > .husky/pre-commit && echo 'pnpm run lint:fix' > .husky/pre-push",
+    "format": "prettier --write --cache .",
+    "lint:fix": "eslint --fix --cache .",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.8.4",
+    "classnames": "^2.3.2",
+    "next": "^13.5.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.52.2",
+    "sass": "^1.63.3",
+    "styled-components": "^6.0.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@next/eslint-plugin-next": "^13.1.6",
+    "@svgr/webpack": "^6.5.1",
+    "@tanstack/react-query-devtools": "^5.8.8",
+    "@types/node": "20.3.0",
+    "@types/react": "18.2.11",
+    "@types/react-dom": "18.2.4",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "8.33.0",
+    "eslint-config-next": "13.1.6",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.4.2",
+    "typescript": "^5.1.6",
+    "typescript-eslint": "^8.38.0",
+    "typescript-plugin-css-modules": "^5.1.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,scss,css}": [
+      "prettier --write"
+    ]
+  }
+}
