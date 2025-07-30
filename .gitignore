@@ -1,4 +1,6 @@
 node_modules
 .next
 .eslintcache
-package-lock.json
+
+# Git template (keep local)
+.gitmessage

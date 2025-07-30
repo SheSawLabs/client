@@ -13,7 +13,10 @@
       "Bash(pnpm dlx:*)",
       "Bash(rm:*)",
       "Bash(git add:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git config:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
