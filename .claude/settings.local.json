@@ -12,7 +12,8 @@
       "Bash(npx tailwindcss init:*)",
       "Bash(pnpm dlx:*)",
       "Bash(rm:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
