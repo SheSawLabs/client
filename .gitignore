@@ -1,2 +1,4 @@
 node_modules
 .next
+.eslintcache
+package-lock.json
