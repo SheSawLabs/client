@@ -1,8 +1,8 @@
 node_modules
 .next
 .eslintcache
+.env
 
-# Git template (keep local)
 .claude
 .gitmessage
 .claudekakao-navigation-mcp/
