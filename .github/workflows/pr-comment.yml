@@ -1,0 +1,200 @@
+name: PR Comment Handler
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle-pr-comment:
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '@claude') && contains(github.event.comment.body, 'PR 작성해줘') }}
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Get PR number
+        id: pr-number
+        run: echo "pr_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+      
+      - name: Get PR details
+        id: pr-details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.pr-number.outputs.pr_number }}
+            });
+            
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.pr-number.outputs.pr_number }}
+            });
+            
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.pr-number.outputs.pr_number }}
+            });
+            
+            return {
+              title: pr.title,
+              body: pr.body,
+              branch: pr.head.ref,
+              base: pr.base.ref,
+              files: files.map(f => ({
+                filename: f.filename,
+                status: f.status,
+                additions: f.additions,
+                deletions: f.deletions,
+                patch: f.patch
+              })),
+              commits: commits.map(c => ({
+                message: c.commit.message,
+                sha: c.sha
+              }))
+            };
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Generate PR content with Claude
+        id: generate-content
+        run: |
+          node -e "
+          const https = require('https');
+          const fs = require('fs');
+          
+          const prData = ${{ steps.pr-details.outputs.result }};
+          
+          const prompt = \`다음 PR 정보를 바탕으로 한국어로 명확하고 상세한 PR 제목과 설명을 작성해주세요:
+          
+          **현재 제목:** \${prData.title}
+          **브랜치:** \${prData.branch} → \${prData.base}
+          
+          **변경된 파일들:**
+          \${prData.files.map(f => \`- \${f.filename} (\${f.status}, +\${f.additions}/-\${f.deletions})\`).join('\\n')}
+          
+          **커밋 메시지들:**
+          \${prData.commits.map(c => \`- \${c.message}\`).join('\\n')}
+          
+          **파일 변경 내용:**
+          \${prData.files.map(f => f.patch ? \`\${f.filename}:\\n\${f.patch}\\n\` : '').join('\\n')}
+          
+          다음 형식으로 응답해주세요:
+          
+          ## 제목
+          [개선된 PR 제목]
+          
+          ## 설명
+          [상세한 PR 설명]
+          \`;
+          
+          const data = JSON.stringify({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 4000,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ]
+          });
+          
+          const options = {
+            hostname: 'api.anthropic.com',
+            port: 443,
+            path: '/v1/messages',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': data.length,
+              'x-api-key': '${{ secrets.CLAUDE_API_KEY }}',
+              'anthropic-version': '2023-06-01'
+            }
+          };
+          
+          const req = https.request(options, (res) => {
+            let responseBody = '';
+            res.on('data', (chunk) => {
+              responseBody += chunk;
+            });
+            res.on('end', () => {
+              try {
+                const response = JSON.parse(responseBody);
+                if (response.content && response.content[0] && response.content[0].text) {
+                  const content = response.content[0].text;
+                  const titleMatch = content.match(/## 제목\\n(.+?)\\n/);
+                  const descMatch = content.match(/## 설명\\n([\\s\\S]+)/);
+                  
+                  const title = titleMatch ? titleMatch[1].trim() : prData.title;
+                  const description = descMatch ? descMatch[1].trim() : content;
+                  
+                  fs.writeFileSync('pr_title.txt', title);
+                  fs.writeFileSync('pr_description.txt', description);
+                  console.log('PR content generated successfully');
+                } else {
+                  console.error('Unexpected response format:', response);
+                  process.exit(1);
+                }
+              } catch (error) {
+                console.error('Error parsing Claude response:', error);
+                console.error('Response body:', responseBody);
+                process.exit(1);
+              }
+            });
+          });
+          
+          req.on('error', (error) => {
+            console.error('Error calling Claude API:', error);
+            process.exit(1);
+          });
+          
+          req.write(data);
+          req.end();
+          "
+      
+      - name: Update PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const title = fs.readFileSync('pr_title.txt', 'utf8');
+            const body = fs.readFileSync('pr_description.txt', 'utf8');
+            
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.pr-number.outputs.pr_number }},
+              title: title,
+              body: body
+            });
+            
+            // Add reaction to the comment
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: ${{ github.event.comment.id }},
+              content: '+1'
+            });
+            
+            // Reply to the comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr-number.outputs.pr_number }},
+              body: '✅ PR 내용이 Claude에 의해 업데이트되었습니다!'
+            });

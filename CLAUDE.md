@@ -66,6 +66,7 @@ import { card } from "@/components/ui/card"; // 소문자
 
 ## 개발 명령어
 
+- 기본적으로 pnpm을 사용합니다.
 - `pnpm run dev` - 개발 서버 실행
 - `pnpm run lint:fix` - ESLint 실행 및 자동 수정
 - `pnpm dlx shadcn@latest add [component]` - shadcn/ui 컴포넌트 추가
