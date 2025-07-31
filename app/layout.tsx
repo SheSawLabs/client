@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import QueryProvider from "../components/providers/QueryProvider";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Shesaw",
@@ -15,6 +16,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
+        <Script
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_API_KEY}&libraries=services&autoload=false`}
+          strategy="beforeInteractive"
+        />
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
