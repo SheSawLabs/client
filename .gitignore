@@ -3,5 +3,6 @@ node_modules
 .eslintcache
 
 # Git template (keep local)
+.claude
 .gitmessage
 .claudekakao-navigation-mcp/
