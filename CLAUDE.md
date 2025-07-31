@@ -37,6 +37,33 @@ PR 생성 시 자동으로 템플릿이 적용되며, 다음 항목들을 확인
 - **Test Plan**: 테스트 완료 여부 체크
 - **Checklist**: 코드 리뷰 준비사항 확인
 
+## 컴포넌트 네이밍 규칙
+
+### shadcn/ui 컴포넌트
+
+- 모든 컴포넌트는 **PascalCase**로 명명
+- 파일명과 컴포넌트명 모두 동일하게 적용
+
+```typescript
+// ✅ 올바른 사용법
+import { Button } from "@/components/ui/Button";
+import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Typography } from "@/components/ui/Typography";
+
+// ❌ 잘못된 사용법
+import { Button } from "@/components/ui/button"; // 소문자
+import { card } from "@/components/ui/card"; // 소문자
+```
+
+### 설치된 컴포넌트 목록
+
+- `Button` - 다양한 버튼 스타일과 크기
+- `Input` - 입력 필드 컴포넌트
+- `Card` - 카드 레이아웃 컴포넌트
+- `Checkbox` - 체크박스 컴포넌트
+- `Sheet` - 사이드바/오버레이 컴포넌트
+- `Typography` - 텍스트 스타일링 컴포넌트 (커스텀)
+
 ## 개발 명령어
 
 - `pnpm run dev` - 개발 서버 실행
