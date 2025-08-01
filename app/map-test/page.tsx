@@ -113,7 +113,7 @@ export default function MapTestPage() {
 
         const customAddress = `<div class="bg-blue-500 px-2 py-1 rounded-lg shadow-md">
           <a href="#" class="text-white hover:underline">
-            Address Here</a>
+            ${data.result.address_name}</a>
           </div>`;
 
         if (customOverlay) {
