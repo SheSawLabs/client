@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import type {
+  MapInstance,
+  MarkerInstance,
+  CustomOverlayInterface,
+  KakakoMap,
+  LatNLng,
+} from "@/types/kakao";
 
 declare global {
   interface Window {
@@ -12,52 +19,36 @@ declare global {
   }
 }
 
-interface KakakoMap {
-  LatLng: new (lat: number, lng: number) => { lat: number; lng: number };
-  Map: new (
-    container: HTMLElement,
-    options: {
-      center: {
-        lat: number;
-        lng: number;
-      };
-      level: number;
-    },
-  ) => {
-    setCenter: (coords: string) => void;
-    setLevel: (level: number) => void;
-  };
-  load: (callback: () => void) => void;
-}
-
 export default function MapTestPage() {
   const [searchAddress, setSearchAddress] = useState("");
-  const [map, setMap] = useState<unknown>(null);
+  const [map, setMap] = useState<MapInstance | null>(null);
+  const [marker, setMarker] = useState<MarkerInstance | null>(null);
 
   useEffect(() => {
     window.kakao.maps.load(() => {
-      console.log("Kakao Maps API loaded");
       initializeMap();
     });
   }, []);
 
   // 카카오맵 초기화
   const initializeMap = () => {
-    console.log("window.kakao:", window.kakao);
     if (typeof window !== "undefined" && window.kakao && window.kakao.maps) {
-      console.log("Kakao Maps API loaded");
       const container = document.getElementById("map");
       if (!container) {
         console.error("지도 컨테이너가 없습니다.");
         return;
       }
 
+      const center: LatNLng = new window.kakao.maps.LatLng(37.5665, 126.978); // 서울시청 좌표
       const options = {
-        center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울시청 좌표
+        center,
         level: 8,
       };
 
-      const kakaoMap = new window.kakao.maps.Map(container, options);
+      const kakaoMap: MapInstance = new window.kakao.maps.Map(
+        container,
+        options,
+      );
       setMap(kakaoMap);
     }
   };
@@ -88,25 +79,42 @@ export default function MapTestPage() {
 
       // 지도에 결과 표시
       if (window.kakao && map) {
-        // const coords = new window.kakao.maps.LatLng(data.result.y, data.result.x);
-        // // 지도 중심 이동
-        // map.setCenter(coords);
-        // map.setLevel(3);
-        // // 기존 마커 제거
-        // if (marker) {
-        //   marker.setMap(null);
-        // }
-        // // 새 마커 생성
-        // const newMarker = new window.kakao.maps.Marker({
-        //   position: coords,
-        //   map: map
-        // });
-        // setMarker(newMarker);
-        // // 인포윈도우 생성
-        // const infowindow = new window.kakao.maps.InfoWindow({
-        //   content: `<div style="padding:5px;">${data.result.address_name}</div>`
-        // });
-        // infowindow.open(map, newMarker);
+        const coords: LatNLng = new window.kakao.maps.LatLng(
+          data.result.y,
+          data.result.x,
+        );
+        // 지도 중심 이동
+        map.setCenter(coords);
+        map.setLevel(3);
+        // 기존 마커 제거
+        if (marker) {
+          marker.setMap(null);
+        }
+        // 새 마커 생성
+        const newMarker: MarkerInstance = new window.kakao.maps.Marker({
+          position: coords,
+          map: map,
+        });
+
+        setMarker(newMarker);
+
+        const customAddress = `<div className="customOverlay">
+          <a href="#" className="text-blue-500 hover:underline">
+            Address Here</a>
+          </div>`;
+
+        const customOverlay: CustomOverlayInterface =
+          new window.kakao.maps.CustomOverlay({
+            map: map,
+            clickable: true,
+            content: customAddress,
+            position: coords,
+            xAnchor: 0.5,
+            yAnchor: 0,
+            zIndex: 3,
+          });
+
+        customOverlay.setMap(map);
       }
     } catch (error) {
       console.error("검색 중 오류 발생:", error);
