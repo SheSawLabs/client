@@ -110,8 +110,25 @@ export interface CustomOverlayInterface {
   setPositionByLatLngObjectArray: (latLng: LatNLng[]) => void;
 }
 
+export interface MarkerImageInstance {
+  getSize: () => { width: number; height: number };
+  getOffset: () => { x: number; y: number };
+}
+
 export interface KakakoMap {
   LatLng: new (lat: number, lng: number) => LatNLng;
+  Size: new (
+    width: number,
+    height: number,
+  ) => { width: number; height: number };
+  Point: new (x: number, y: number) => { x: number; y: number };
+  MarkerImage: new (
+    src: string,
+    size: { width: number; height: number },
+    options?: {
+      offset?: { x: number; y: number };
+    },
+  ) => MarkerImageInstance;
   Map: new (
     container: HTMLElement,
     options: {
@@ -122,6 +139,7 @@ export interface KakakoMap {
   Marker: new (options: {
     position: LatNLng;
     map?: MapInstance | null;
+    image?: MarkerImageInstance;
   }) => MarkerInstance;
   InfoWindow: new (options: { content: string }) => InfoWindowInstance;
   load: (callback: () => void) => void;

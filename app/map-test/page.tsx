@@ -20,9 +20,12 @@ declare global {
 }
 
 export default function MapTestPage() {
-  const [searchAddress, setSearchAddress] = useState("");
+  const [searchAddress, setSearchAddress] =
+    useState("서울시 강남구 테헤란로20길 5");
   const [map, setMap] = useState<MapInstance | null>(null);
   const [marker, setMarker] = useState<MarkerInstance | null>(null);
+  const [customOverlay, setCustomOverlay] =
+    useState<CustomOverlayInterface | null>(null);
 
   useEffect(() => {
     window.kakao.maps.load(() => {
@@ -90,20 +93,34 @@ export default function MapTestPage() {
         if (marker) {
           marker.setMap(null);
         }
+        // 커스텀 마커 이미지 설정
+        const markerImage = new window.kakao.maps.MarkerImage(
+          "/icons/marker.svg",
+          new window.kakao.maps.Size(35, 60), // 마커 이미지 크기
+          {
+            offset: new window.kakao.maps.Point(15, 50), // 마커 이미지 offset (중앙 하단)
+          },
+        );
+
         // 새 마커 생성
         const newMarker: MarkerInstance = new window.kakao.maps.Marker({
           position: coords,
+          image: markerImage,
           map: map,
         });
 
         setMarker(newMarker);
 
-        const customAddress = `<div className="customOverlay">
-          <a href="#" className="text-blue-500 hover:underline">
+        const customAddress = `<div class="bg-blue-500 px-2 py-1 rounded-lg shadow-md">
+          <a href="#" class="text-white hover:underline">
             Address Here</a>
           </div>`;
 
-        const customOverlay: CustomOverlayInterface =
+        if (customOverlay) {
+          customOverlay.setMap(null);
+        }
+
+        const newCustomOverlay: CustomOverlayInterface =
           new window.kakao.maps.CustomOverlay({
             map: map,
             clickable: true,
@@ -114,7 +131,9 @@ export default function MapTestPage() {
             zIndex: 3,
           });
 
-        customOverlay.setMap(map);
+        setCustomOverlay(newCustomOverlay);
+
+        newCustomOverlay.setMap(map);
       }
     } catch (error) {
       console.error("검색 중 오류 발생:", error);
