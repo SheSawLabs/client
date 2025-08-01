@@ -10,6 +10,8 @@ import type {
   KakakoMap,
   LatNLng,
 } from "@/types/kakao";
+import { generateMarkerSVG } from "@/utils/markerUtils";
+import { MARKER_COLORS, type MarkerColorType } from "@/constants/markerColors";
 
 declare global {
   interface Window {
@@ -26,6 +28,7 @@ export default function MapTestPage() {
   const [marker, setMarker] = useState<MarkerInstance | null>(null);
   const [customOverlay, setCustomOverlay] =
     useState<CustomOverlayInterface | null>(null);
+  const [markerColor, setMarkerColor] = useState<MarkerColorType>("PRIMARY");
 
   useEffect(() => {
     window.kakao.maps.load(() => {
@@ -95,7 +98,7 @@ export default function MapTestPage() {
         }
         // 커스텀 마커 이미지 설정
         const markerImage = new window.kakao.maps.MarkerImage(
-          "/icons/marker.svg",
+          generateMarkerSVG(markerColor),
           new window.kakao.maps.Size(35, 60), // 마커 이미지 크기
           {
             offset: new window.kakao.maps.Point(15, 50), // 마커 이미지 offset (중앙 하단)
@@ -151,6 +154,26 @@ export default function MapTestPage() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">카카오맵 검색 테스트</h1>
+
+      {/* 마커 색상 선택 UI */}
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold mb-2">마커 색상 선택</h3>
+        <div className="flex gap-2">
+          {Object.entries(MARKER_COLORS).map(([key, color]) => (
+            <button
+              key={key}
+              onClick={() => setMarkerColor(key as MarkerColorType)}
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                markerColor === key
+                  ? "border-gray-800 scale-110"
+                  : "border-gray-300"
+              }`}
+              style={{ backgroundColor: color }}
+              title={key}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* 검색 UI */}
       <div className="flex gap-4 mb-6">
