@@ -1,0 +1,137 @@
+export interface LatNLng {
+  lat: number;
+  lng: number;
+}
+
+export interface MapInstance {
+  setCenter: (coords: LatNLng) => void;
+  setLevel: (level: number) => void;
+  getCenter: () => LatNLng;
+  getLevel: () => number;
+  setMapTypeId: (mapTypeId: string) => void;
+  setZoomable: (zoomable: boolean) => void;
+  setDraggable: (draggable: boolean) => void;
+  setClickable: (clickable: boolean) => void;
+  addOverlayMapTypeId: (mapTypeId: string) => void;
+  removeOverlayMapTypeId: (mapTypeId: string) => void;
+  getOverlayMapTypeId: () => string[];
+  setBounds: (bounds: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  }) => void;
+  getBounds: () => { north: number; south: number; east: number; west: number };
+  getSize: () => { width: number; height: number };
+  getContainer: () => HTMLElement;
+  getProjection: () => {
+    fromLatLngToPoint: (latLng: LatNLng) => { x: number; y: number };
+    fromPointToLatLng: (point: { x: number; y: number }) => LatNLng;
+  };
+  setCenterByCoords: (coords: LatNLng) => void;
+  setCenterByLatLng: (lat: number, lng: number) => void;
+  setCenterByLatLngObject: (latLng: LatNLng) => void;
+  setCenterByLatLngString: (latLng: string) => void;
+  setCenterByLatLngArray: (latLng: [number, number]) => void;
+  setCenterByLatLngObjectArray: (latLng: LatNLng[]) => void;
+  setZoomByCoords: (coords: LatNLng) => void;
+  setZoomByLatLng: (lat: number, lng: number) => void;
+  setZoomByLatLngObject: (latLng: LatNLng) => void;
+  setZoomByLatLngString: (latLng: string) => void;
+  setZoomByLatLngArray: (latLng: [number, number]) => void;
+  setZoomByLatLngObjectArray: (latLng: LatNLng[]) => void;
+  setMapTypeByCoords: (coords: LatNLng) => void;
+  setMapTypeByLatLng: (lat: number, lng: number) => void;
+  setMapTypeByLatLngObject: (latLng: LatNLng) => void;
+  setMapTypeByLatLngString: (latLng: string) => void;
+  setMapTypeByLatLngArray: (latLng: [number, number]) => void;
+  setMapTypeByLatLngObjectArray: (latLng: LatNLng[]) => void;
+  setMapTypeById: (mapTypeId: string) => void;
+  setMapTypeByName: (mapTypeName: string) => void;
+  setMapTypeByCoordsAndId: (coords: LatNLng, mapTypeId: string) => void;
+}
+
+export interface MarkerInstance {
+  setMap: (map: MapInstance | null) => void;
+  setPosition: (position: LatNLng) => void;
+  getPosition: () => LatNLng;
+  setTitle: (title: string) => void;
+  setContent: (content: string) => void;
+  setClickable: (clickable: boolean) => void;
+  setZIndex: (zIndex: number) => void;
+  setImage: (image: {
+    src: string;
+    size: { width: number; height: number };
+    options?: { offset?: { x: number; y: number } };
+  }) => void;
+  setDraggable: (draggable: boolean) => void;
+  setShadow: (shadow: {
+    src: string;
+    size: { width: number; height: number };
+    options?: { offset?: { x: number; y: number } };
+  }) => void;
+  setMapTypeId: (mapTypeId: string) => void;
+  setVisible: (visible: boolean) => void;
+  setPositionByCoords: (coords: LatNLng) => void;
+  setPositionByLatLng: (lat: number, lng: number) => void;
+  setPositionByLatLngObject: (latLng: LatNLng) => void;
+  setPositionByLatLngString: (latLng: string) => void;
+  setPositionByLatLngArray: (latLng: [number, number]) => void;
+  setPositionByLatLngObjectArray: (latLng: LatNLng[]) => void;
+}
+
+export interface InfoWindowInstance {
+  open: (map: MapInstance, marker?: MarkerInstance | null) => void;
+  close: () => void;
+  setContent: (content: string) => void;
+  setPosition: (position: LatNLng) => void;
+  setZIndex: (zIndex: number) => void;
+  setMap: (map: MapInstance | null) => void;
+  setPositionByCoords: (coords: LatNLng) => void;
+  setPositionByLatLng: (lat: number, lng: number) => void;
+  setPositionByLatLngObject: (latLng: LatNLng) => void;
+  setPositionByLatLngString: (latLng: string) => void;
+  setPositionByLatLngArray: (latLng: [number, number]) => void;
+  setPositionByLatLngObjectArray: (latLng: LatNLng[]) => void;
+}
+
+export interface CustomOverlayInterface {
+  open: (map: MapInstance, marker?: MarkerInstance | null) => void;
+  close: () => void;
+  setContent: (content: string) => void;
+  setPosition: (position: LatNLng) => void;
+  setZIndex: (zIndex: number) => void;
+  setMap: (map: MapInstance | null) => void;
+  setPositionByCoords: (coords: LatNLng) => void;
+  setPositionByLatLng: (lat: number, lng: number) => void;
+  setPositionByLatLngObject: (latLng: LatNLng) => void;
+  setPositionByLatLngString: (latLng: string) => void;
+  setPositionByLatLngArray: (latLng: [number, number]) => void;
+  setPositionByLatLngObjectArray: (latLng: LatNLng[]) => void;
+}
+
+export interface KakakoMap {
+  LatLng: new (lat: number, lng: number) => LatNLng;
+  Map: new (
+    container: HTMLElement,
+    options: {
+      center: LatNLng;
+      level: number;
+    },
+  ) => MapInstance;
+  Marker: new (options: {
+    position: LatNLng;
+    map?: MapInstance | null;
+  }) => MarkerInstance;
+  InfoWindow: new (options: { content: string }) => InfoWindowInstance;
+  load: (callback: () => void) => void;
+  CustomOverlay: new (options: {
+    map?: MapInstance | null;
+    content: string;
+    position: LatNLng;
+    xAnchor?: number;
+    yAnchor?: number;
+    zIndex?: number;
+    clickable?: boolean;
+  }) => CustomOverlayInterface;
+}
