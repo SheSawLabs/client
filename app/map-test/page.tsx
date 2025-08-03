@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import type {
   MapInstance,
   MarkerInstance,
@@ -10,8 +9,9 @@ import type {
   KakakoMap,
   LatNLng,
 } from "@/types/kakao";
-import { generateMarkerSVG } from "@/utils/markerUtils";
-import { MARKER_COLORS, type MarkerColorType } from "@/constants/markerColors";
+import { generateMarkerSVGByLevel } from "@/utils/markerUtils";
+import { SAFETY_LEVEL_BG_CLASSES } from "@/constants/markerColors";
+import type { AddressData } from "@/types/address";
 
 declare global {
   interface Window {
@@ -22,19 +22,182 @@ declare global {
 }
 
 export default function MapTestPage() {
-  const [searchAddress, setSearchAddress] =
-    useState("서울시 강남구 테헤란로20길 5");
   const [map, setMap] = useState<MapInstance | null>(null);
-  const [marker, setMarker] = useState<MarkerInstance | null>(null);
-  const [customOverlay, setCustomOverlay] =
-    useState<CustomOverlayInterface | null>(null);
-  const [markerColor, setMarkerColor] = useState<MarkerColorType>("PRIMARY");
+  const [markers, setMarkers] = useState<MarkerInstance[]>([]);
+  const [customOverlays, setCustomOverlays] = useState<
+    CustomOverlayInterface[]
+  >([]);
+
+  // 샘플 주소 데이터
+
+  // 배열에서 한개일때는 에러가 안나는데 두개일때 남..
+  const [addressData] = useState<AddressData[]>([
+    { address: "서울시 강남구 테헤란로 20길 5", level: 1 },
+    // { address: "서울시 종로구 종로 1", level: 3 },
+    { address: "서울시 이태원로55길 60-16", level: 5 },
+    // { address: "서울시 종로구 창경궁로16길 38", level: 2 },
+    // { address: "서울시 서대문구 통일로 420", level: 4 },
+  ]);
 
   useEffect(() => {
     window.kakao.maps.load(() => {
       initializeMap();
     });
+
+    return () => {
+      clearMarkersAndOverlays();
+    };
   }, []);
+
+  // map이 설정된 후에 마커 생성
+  useEffect(() => {
+    if (map) {
+      createMultipleMarkers();
+    }
+  }, [map]);
+
+  // 모든 마커와 오버레이 제거
+  const clearMarkersAndOverlays = () => {
+    markers.forEach((marker) => marker.setMap(null));
+    customOverlays.forEach((overlay) => overlay.setMap(null));
+    setMarkers([]);
+    setCustomOverlays([]);
+  };
+
+  // 여러 주소를 지오코딩하고 마커 생성
+  const createMultipleMarkers = async () => {
+    if (!map) return;
+
+    const newMarkers: MarkerInstance[] = [];
+    const newOverlays: CustomOverlayInterface[] = [];
+    const coordinates: LatNLng[] = [];
+
+    for (const data of addressData) {
+      try {
+        // 지오코딩 API 호출
+        const response = await fetch("/api/geocode", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ address: data.address }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const coords: LatNLng = new window.kakao.maps.LatLng(
+            parseFloat(result.result.y),
+            parseFloat(result.result.x),
+          );
+          coordinates.push(coords);
+
+          // 마커 이미지 생성
+          const markerImage = new window.kakao.maps.MarkerImage(
+            generateMarkerSVGByLevel(data.level),
+            new window.kakao.maps.Size(35, 60),
+            {
+              offset: new window.kakao.maps.Point(15, 50),
+            },
+          );
+
+          // 마커 생성
+          const marker: MarkerInstance = new window.kakao.maps.Marker({
+            position: coords,
+            image: markerImage,
+            map: map,
+          });
+
+          newMarkers.push(marker);
+
+          // 오버레이 위치를 마커보다 약간 위로 조정
+          const overlayCoords = new window.kakao.maps.LatLng(
+            parseFloat(result.result.y) + 0.0004, // 위도를 약간 위로
+            parseFloat(result.result.x),
+          );
+
+          // 커스텀 오버레이 생성
+          const bgClass = SAFETY_LEVEL_BG_CLASSES[data.level];
+          const customAddress = `<div class="${bgClass} px-2 py-1 rounded-lg shadow-md">
+            <a href="#" class="text-white hover:underline text-xs">
+              ${result.result.address_name}</a>
+            </div>`;
+
+          const customOverlay: CustomOverlayInterface =
+            new window.kakao.maps.CustomOverlay({
+              map: map,
+              clickable: true,
+              content: customAddress,
+              position: overlayCoords,
+              xAnchor: 0.5,
+              yAnchor: 1,
+              zIndex: 10,
+            });
+
+          newOverlays.push(customOverlay);
+        }
+      } catch (error) {
+        console.error(`주소 "${data.address}" 지오코딩 실패:`, error);
+      }
+    }
+
+    setMarkers(newMarkers);
+    setCustomOverlays(newOverlays);
+
+    // 모든 마커가 보이도록 지도 영역 조정
+    if (coordinates.length > 0) {
+      fitMapToBounds(coordinates);
+    }
+  };
+
+  // 모든 좌표가 보이도록 지도 영역 조정
+  const fitMapToBounds = (coordinates: LatNLng[]) => {
+    if (!map || coordinates.length === 0) return;
+
+    if (coordinates.length === 1) {
+      // 마커가 하나인 경우 중심 이동
+      map.setCenter(coordinates[0]);
+      map.setLevel(3);
+    } else {
+      // 여러 마커인 경우 경계 계산
+      const bounds = coordinates.reduce(
+        (acc, coord) => ({
+          minLat: Math.min(acc.minLat, coord.lat),
+          maxLat: Math.max(acc.maxLat, coord.lat),
+          minLng: Math.min(acc.minLng, coord.lng),
+          maxLng: Math.max(acc.maxLng, coord.lng),
+        }),
+        {
+          minLat: coordinates[0].lat,
+          maxLat: coordinates[0].lat,
+          minLng: coordinates[0].lng,
+          maxLng: coordinates[0].lng,
+        },
+      );
+
+      // 중심점 계산
+      const centerLat = (bounds.minLat + bounds.maxLat) / 2;
+      const centerLng = (bounds.minLng + bounds.maxLng) / 2;
+      const center = new window.kakao.maps.LatLng(centerLat, centerLng);
+
+      map.setCenter(center);
+
+      // 적절한 줌 레벨 계산 (간단한 방식)
+      const latDiff = bounds.maxLat - bounds.minLat;
+      const lngDiff = bounds.maxLng - bounds.minLng;
+      const maxDiff = Math.max(latDiff, lngDiff);
+
+      let level = 10;
+      if (maxDiff < 0.01) level = 4;
+      else if (maxDiff < 0.02) level = 5;
+      else if (maxDiff < 0.05) level = 6;
+      else if (maxDiff < 0.1) level = 7;
+      else if (maxDiff < 0.2) level = 8;
+      else if (maxDiff < 0.5) level = 9;
+
+      map.setLevel(level);
+    }
+  };
 
   // 카카오맵 초기화
   const initializeMap = () => {
@@ -59,141 +222,42 @@ export default function MapTestPage() {
     }
   };
 
-  // 검색 처리
-  const handleSearch = async () => {
-    if (!searchAddress.trim()) {
-      alert("주소를 입력해주세요.");
-      return;
-    }
-
-    try {
-      // 카카오 REST API를 통한 지오코딩
-      const response = await fetch("/api/geocode", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ address: searchAddress }),
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        alert(data.error || "검색 중 오류가 발생했습니다.");
-        return;
-      }
-
-      // 지도에 결과 표시
-      if (window.kakao && map) {
-        const coords: LatNLng = new window.kakao.maps.LatLng(
-          data.result.y,
-          data.result.x,
-        );
-        // 지도 중심 이동
-        map.setCenter(coords);
-        map.setLevel(3);
-        // 기존 마커 제거
-        if (marker) {
-          marker.setMap(null);
-        }
-        // 커스텀 마커 이미지 설정
-        const markerImage = new window.kakao.maps.MarkerImage(
-          generateMarkerSVG(markerColor),
-          new window.kakao.maps.Size(35, 60), // 마커 이미지 크기
-          {
-            offset: new window.kakao.maps.Point(15, 50), // 마커 이미지 offset (중앙 하단)
-          },
-        );
-
-        // 새 마커 생성
-        const newMarker: MarkerInstance = new window.kakao.maps.Marker({
-          position: coords,
-          image: markerImage,
-          map: map,
-        });
-
-        setMarker(newMarker);
-
-        const customAddress = `<div class="bg-blue-500 px-2 py-1 rounded-lg shadow-md">
-          <a href="#" class="text-white hover:underline">
-            ${data.result.address_name}</a>
-          </div>`;
-
-        if (customOverlay) {
-          customOverlay.setMap(null);
-        }
-
-        const newCustomOverlay: CustomOverlayInterface =
-          new window.kakao.maps.CustomOverlay({
-            map: map,
-            clickable: true,
-            content: customAddress,
-            position: coords,
-            xAnchor: 0.5,
-            yAnchor: 0,
-            zIndex: 3,
-          });
-
-        setCustomOverlay(newCustomOverlay);
-
-        newCustomOverlay.setMap(map);
-      }
-    } catch (error) {
-      console.error("검색 중 오류 발생:", error);
-      alert("검색 중 오류가 발생했습니다.");
-    }
-  };
-
-  // Enter 키 처리
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">카카오맵 검색 테스트</h1>
+      <h1 className="text-3xl font-bold mb-6">다중 마커 지도 테스트</h1>
 
-      {/* 마커 색상 선택 UI */}
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2">마커 색상 선택</h3>
-        <div className="flex gap-2">
-          {Object.entries(MARKER_COLORS).map(([key, color]) => (
-            <button
-              key={key}
-              onClick={() => setMarkerColor(key as MarkerColorType)}
-              className={`w-8 h-8 rounded-full border-2 transition-all ${
-                markerColor === key
-                  ? "border-gray-800 scale-110"
-                  : "border-gray-300"
-              }`}
-              style={{ backgroundColor: color }}
-              title={key}
-            />
-          ))}
-        </div>
+      {/* 다중 마커 생성 버튼 */}
+      <div className="mb-6">
+        <Button onClick={createMultipleMarkers} size="lg">
+          다중 마커 표시하기
+        </Button>
       </div>
 
-      {/* 검색 UI */}
-      <div className="flex gap-4 mb-6">
-        <Input
-          type="text"
-          placeholder="주소를 입력하세요 (예: 서울시 강남구 테헤란로)"
-          value={searchAddress}
-          onChange={(e) => setSearchAddress(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="flex-1"
-        />
-        <Button onClick={handleSearch}>검색</Button>
+      {/* 주소 데이터 표시 */}
+      <div className="mb-6">
+        <h3 className="font-semibold mb-3">표시할 주소 목록:</h3>
+        <div className="space-y-2">
+          {addressData.map((data, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 p-2 bg-gray-50 rounded"
+            >
+              <div
+                className={`w-4 h-4 rounded-full ${SAFETY_LEVEL_BG_CLASSES[data.level]}`}
+              />
+              <span className="flex-1">{data.address}</span>
+              <span className="text-sm text-gray-600">레벨 {data.level}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 지도 컨테이너 */}
       <div className="relative">
         <div
           id="map"
-          className="w-full h-96 border border-gray-300 rounded-lg"
-          style={{ height: "400px" }}
+          className="w-full border border-gray-300 rounded-lg"
+          style={{ height: "500px" }}
         />
       </div>
 
@@ -202,11 +266,33 @@ export default function MapTestPage() {
         <h3 className="font-semibold mb-2">사용 방법:</h3>
         <ol className="list-decimal list-inside space-y-1 text-sm">
           <li>
-            검색창에 주소를 입력하고 &ldquo;검색&rdquo; 버튼을 클릭하거나
-            Enter를 누릅니다.
+            &ldquo;다중 마커 표시하기&rdquo; 버튼을 클릭하면 모든 주소에 마커가
+            표시됩니다.
           </li>
-          <li>검색된 위치에 마커가 표시되고 지도 중심이 이동됩니다.</li>
+          <li>마커 색상은 안전도 레벨에 따라 자동으로 결정됩니다.</li>
+          <li>모든 마커가 보이도록 지도 영역이 자동으로 조정됩니다.</li>
         </ol>
+        <div className="mt-3">
+          <h4 className="font-medium mb-1">안전도 레벨:</h4>
+          <div className="flex gap-4 text-xs">
+            <span className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              레벨 1 (매우 위험)
+            </span>
+            <span className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+              레벨 2-3 (위험-보통)
+            </span>
+            <span className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+              레벨 4 (안전)
+            </span>
+            <span className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              레벨 5 (매우 안전)
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
