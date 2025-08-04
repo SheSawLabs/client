@@ -200,10 +200,6 @@ export default function MapTestPage() {
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <h3 className="font-semibold mb-2">사용 방법:</h3>
         <ol className="list-decimal list-inside space-y-1 text-sm">
-          <li>
-            &ldquo;다중 마커 표시하기&rdquo; 버튼을 클릭하면 모든 주소에 마커가
-            표시됩니다.
-          </li>
           <li>마커 색상은 안전도 레벨에 따라 자동으로 결정됩니다.</li>
           <li>모든 마커가 보이도록 지도 영역이 자동으로 조정됩니다.</li>
         </ol>
