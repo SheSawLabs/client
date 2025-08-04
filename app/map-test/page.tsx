@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import type {
   MapInstance,
   MarkerInstance,
@@ -27,13 +26,11 @@ export default function MapTestPage() {
   const [customOverlays, setCustomOverlays] = useState<
     CustomOverlayInterface[]
   >([]);
-  const [coordinates, setCoordinates] = useState<LatNLng[]>([]);
 
   // 샘플 주소 데이터
 
-  // 배열에서 한개일때는 에러가 안나는데 두개일때 남..
   const [addressData] = useState<AddressData[]>([
-    { address: "서울시 강남구 테헤란로 20길 5", level: 1 },
+    // { address: "서울시 강남구 테헤란로 20길 5", level: 1 },
     // { address: "서울시 종로구 종로 1", level: 3 },
     { address: "서울시 이태원로55길 60-16", level: 5 },
     { address: "서울시 종로구 창경궁로16길 38", level: 2 },
@@ -98,7 +95,7 @@ export default function MapTestPage() {
             generateMarkerSVGByLevel(data.level),
             new window.kakao.maps.Size(35, 60),
             {
-              offset: new window.kakao.maps.Point(15, 50),
+              offset: new window.kakao.maps.Point(15, 80),
             },
           );
 
@@ -111,9 +108,8 @@ export default function MapTestPage() {
 
           newMarkers.push(marker);
 
-          // 오버레이 위치를 마커보다 약간 위로 조정
           const overlayCoords = new window.kakao.maps.LatLng(
-            parseFloat(result.result.y) + 0.0004, // 위도를 약간 위로
+            parseFloat(result.result.y),
             parseFloat(result.result.x),
           );
 
@@ -144,76 +140,6 @@ export default function MapTestPage() {
 
     setMarkers(newMarkers);
     setCustomOverlays(newOverlays);
-    setCoordinates(coordinates);
-  };
-
-  useEffect(() => {
-    // 모든 마커가 보이도록 지도 영역 조정
-    if (coordinates.length > 0) {
-      fitMapToBounds(coordinates);
-    }
-  }, [coordinates]);
-
-  // 모든 좌표가 보이도록 지도 영역 조정
-  const fitMapToBounds = (coordinates: LatNLng[]) => {
-    if (!map || coordinates.length === 0) return;
-
-    if (coordinates.length === 1) {
-      // 마커가 하나인 경우 중심 이동
-      map.setCenter(coordinates[0]);
-      map.setLevel(3);
-    } else {
-      // 여러 마커인 경우 경계 계산
-      const bounds = coordinates.reduce(
-        (acc, coord) => {
-          const lat = coord.getLat ? coord.getLat() : coord.lat;
-          const lng = coord.getLng ? coord.getLng() : coord.lng;
-
-          return {
-            minLat: Math.min(acc.minLat, lat),
-            maxLat: Math.max(acc.maxLat, lat),
-            minLng: Math.min(acc.minLng, lng),
-            maxLng: Math.max(acc.maxLng, lng),
-          };
-        },
-        {
-          minLat: coordinates[0].getLat
-            ? coordinates[0].getLat()
-            : coordinates[0].lat,
-          maxLat: coordinates[0].getLat
-            ? coordinates[0].getLat()
-            : coordinates[0].lat,
-          minLng: coordinates[0].getLng
-            ? coordinates[0].getLng()
-            : coordinates[0].lng,
-          maxLng: coordinates[0].getLng
-            ? coordinates[0].getLng()
-            : coordinates[0].lng,
-        },
-      );
-
-      // 중심점 계산
-      const centerLat = (bounds.minLat + bounds.maxLat) / 2;
-      const centerLng = (bounds.minLng + bounds.maxLng) / 2;
-      const center = new window.kakao.maps.LatLng(centerLat, centerLng);
-
-      map.setCenter(center);
-
-      // 적절한 줌 레벨 계산 (간단한 방식)
-      const latDiff = bounds.maxLat - bounds.minLat;
-      const lngDiff = bounds.maxLng - bounds.minLng;
-      const maxDiff = Math.max(latDiff, lngDiff);
-
-      let level = 10;
-      if (maxDiff < 0.01) level = 4;
-      else if (maxDiff < 0.02) level = 5;
-      else if (maxDiff < 0.05) level = 6;
-      else if (maxDiff < 0.1) level = 7;
-      else if (maxDiff < 0.2) level = 8;
-      else if (maxDiff < 0.5) level = 9;
-
-      map.setLevel(level);
-    }
   };
 
   // 카카오맵 초기화
@@ -242,14 +168,6 @@ export default function MapTestPage() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">다중 마커 지도 테스트</h1>
-
-      {/* 다중 마커 생성 버튼 */}
-      <div className="mb-6">
-        <Button onClick={createMultipleMarkers} size="lg">
-          다중 마커 표시하기
-        </Button>
-      </div>
-
       {/* 주소 데이터 표시 */}
       <div className="mb-6">
         <h3 className="font-semibold mb-3">표시할 주소 목록:</h3>
