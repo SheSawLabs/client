@@ -1,6 +1,8 @@
 export interface LatNLng {
   lat: number;
   lng: number;
+  getLat?: () => number;
+  getLng?: () => number;
 }
 
 export interface MapInstance {
