@@ -27,6 +27,7 @@ export default function MapTestPage() {
   const [customOverlays, setCustomOverlays] = useState<
     CustomOverlayInterface[]
   >([]);
+  const [coordinates, setCoordinates] = useState<LatNLng[]>([]);
 
   // 샘플 주소 데이터
 
@@ -35,7 +36,7 @@ export default function MapTestPage() {
     { address: "서울시 강남구 테헤란로 20길 5", level: 1 },
     // { address: "서울시 종로구 종로 1", level: 3 },
     { address: "서울시 이태원로55길 60-16", level: 5 },
-    // { address: "서울시 종로구 창경궁로16길 38", level: 2 },
+    { address: "서울시 종로구 창경궁로16길 38", level: 2 },
     // { address: "서울시 서대문구 통일로 420", level: 4 },
   ]);
 
@@ -143,12 +144,15 @@ export default function MapTestPage() {
 
     setMarkers(newMarkers);
     setCustomOverlays(newOverlays);
+    setCoordinates(coordinates);
+  };
 
+  useEffect(() => {
     // 모든 마커가 보이도록 지도 영역 조정
     if (coordinates.length > 0) {
       fitMapToBounds(coordinates);
     }
-  };
+  }, [coordinates]);
 
   // 모든 좌표가 보이도록 지도 영역 조정
   const fitMapToBounds = (coordinates: LatNLng[]) => {
@@ -161,17 +165,30 @@ export default function MapTestPage() {
     } else {
       // 여러 마커인 경우 경계 계산
       const bounds = coordinates.reduce(
-        (acc, coord) => ({
-          minLat: Math.min(acc.minLat, coord.lat),
-          maxLat: Math.max(acc.maxLat, coord.lat),
-          minLng: Math.min(acc.minLng, coord.lng),
-          maxLng: Math.max(acc.maxLng, coord.lng),
-        }),
+        (acc, coord) => {
+          const lat = coord.getLat ? coord.getLat() : coord.lat;
+          const lng = coord.getLng ? coord.getLng() : coord.lng;
+
+          return {
+            minLat: Math.min(acc.minLat, lat),
+            maxLat: Math.max(acc.maxLat, lat),
+            minLng: Math.min(acc.minLng, lng),
+            maxLng: Math.max(acc.maxLng, lng),
+          };
+        },
         {
-          minLat: coordinates[0].lat,
-          maxLat: coordinates[0].lat,
-          minLng: coordinates[0].lng,
-          maxLng: coordinates[0].lng,
+          minLat: coordinates[0].getLat
+            ? coordinates[0].getLat()
+            : coordinates[0].lat,
+          maxLat: coordinates[0].getLat
+            ? coordinates[0].getLat()
+            : coordinates[0].lat,
+          minLng: coordinates[0].getLng
+            ? coordinates[0].getLng()
+            : coordinates[0].lng,
+          maxLng: coordinates[0].getLng
+            ? coordinates[0].getLng()
+            : coordinates[0].lng,
         },
       );
 
