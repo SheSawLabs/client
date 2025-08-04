@@ -87,6 +87,7 @@ export default function PolygonTestPage() {
     try {
       const response = await fetch("/data/seoul.json");
       const data: GeoJSONData = await response.json();
+      console.log("data", data);
       setGeoJsonData(data);
       console.log("GeoJSON 데이터 로드 완료:", data.features.length, "개 구역");
     } catch (error) {
@@ -101,7 +102,7 @@ export default function PolygonTestPage() {
     if (!map || !geoJsonData) return;
 
     // 기존 폴리곤 제거
-    clearPolygons();
+    // clearPolygons();
     const newPolygons: PolygonInstance[] = [];
 
     geoJsonData.features.forEach((feature) => {
@@ -110,7 +111,6 @@ export default function PolygonTestPage() {
         feature.geometry.coordinates.forEach((polygonCoords) => {
           // 외곽선만 사용 (첫 번째 링)
           const outerRing = polygonCoords[0]; // 첫 번째 링이 외곽선
-
           // 좌표를 카카오맵 LatLng 객체로 변환
           const paths: LatNLng[] = outerRing.map(
             (coord: number[]) =>
@@ -128,6 +128,7 @@ export default function PolygonTestPage() {
             fillOpacity: 0.2,
           });
 
+          polygon.setMap(map);
           newPolygons.push(polygon);
 
           // 폴리곤 클릭 이벤트
