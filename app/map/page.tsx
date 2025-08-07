@@ -212,14 +212,14 @@ export default function MapPage() {
 
       ctx.closePath();
 
-      // 폴리곤 채우기 (흰색)
-      ctx.fillStyle = "#ffffff";
+      // 폴리곤 채우기 (흰색, 선택시 연한 회색)
+      ctx.fillStyle =
+        district.name === selectedDistrict ? "#f3f4f6" : "#ffffff";
       ctx.fill();
 
-      // 테두리 그리기 (검은색, 선택시 빨간색)
-      ctx.strokeStyle =
-        district.name === selectedDistrict ? "#ff0000" : "#000000";
-      ctx.lineWidth = district.name === selectedDistrict ? 3 : 1;
+      // 테두리 그리기 (검은색)
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
       ctx.stroke();
 
       // 구 이름 표시 (중앙에)
@@ -241,14 +241,21 @@ export default function MapPage() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const clickY = event.clientY - rect.top;
+
+    // Canvas의 실제 크기와 CSS 크기를 고려한 스케일 계산
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    // 스케일이 적용된 클릭 좌표
+    const clickX = (event.clientX - rect.left) * scaleX;
+    const clickY = (event.clientY - rect.top) * scaleY;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // 각 구역 폴리곤 내부 클릭 확인
-    for (const district of processedDistricts) {
+    // 각 구역 폴리곤 내부 클릭 확인 (역순으로 검사하여 나중에 그려진 것 우선)
+    for (let i = processedDistricts.length - 1; i >= 0; i--) {
+      const district = processedDistricts[i];
       ctx.beginPath();
 
       district.coordinates.forEach((coord, index) => {
@@ -265,6 +272,10 @@ export default function MapPage() {
 
       if (ctx.isPointInPath(clickX, clickY)) {
         setSelectedDistrict(district.name);
+        console.log("선택된 구:", district.name, "클릭 좌표:", {
+          clickX,
+          clickY,
+        });
         break;
       }
     }
