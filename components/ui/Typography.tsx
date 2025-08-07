@@ -24,17 +24,17 @@ export function Typography({
   ...props
 }: TypographyProps) {
   const variants = {
-    h1: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl",
-    h2: "scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0",
-    h3: "scroll-m-20 text-2xl font-semibold tracking-tight",
-    h4: "scroll-m-20 text-xl font-semibold tracking-tight",
-    p: "leading-7 [&:not(:first-child)]:mt-6",
-    blockquote: "mt-6 border-l-2 pl-6 italic",
-    list: "my-6 ml-6 list-disc [&>li]:mt-2",
-    lead: "text-xl text-muted-foreground",
-    large: "text-lg font-semibold",
-    small: "text-sm font-medium leading-none",
-    muted: "text-sm text-muted-foreground",
+    h1: "text-2xl font-bold tracking-tight text-gray-900 leading-tight",
+    h2: "text-xl font-semibold tracking-tight text-gray-900 leading-tight",
+    h3: "text-lg font-semibold tracking-tight text-gray-900 leading-tight",
+    h4: "text-base font-semibold tracking-tight text-gray-900 leading-tight",
+    p: "text-base leading-relaxed text-gray-700 [&:not(:first-child)]:mt-4",
+    blockquote: "mt-4 border-l-2 border-gray-300 pl-4 italic text-gray-600",
+    list: "my-4 ml-4 list-disc text-gray-700 [&>li]:mt-1",
+    lead: "text-lg text-gray-600 leading-relaxed",
+    large: "text-lg font-medium text-gray-900",
+    small: "text-sm font-medium leading-tight text-gray-600",
+    muted: "text-sm text-gray-500 leading-tight",
   };
 
   const Component =

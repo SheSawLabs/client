@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import QueryProvider from "../components/providers/QueryProvider";
+import { MobileLayout } from "../components/ui/MobileLayout";
 import Script from "next/script";
 
 export const metadata: Metadata = {
@@ -20,7 +21,9 @@ export default function RootLayout({
           src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_API_KEY}&libraries=services&autoload=false`}
           strategy="beforeInteractive"
         />
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <MobileLayout>{children}</MobileLayout>
+        </QueryProvider>
       </body>
     </html>
   );
