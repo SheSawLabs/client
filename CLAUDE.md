@@ -70,3 +70,12 @@ import { card } from "@/components/ui/card"; // 소문자
 - `pnpm run dev` - 개발 서버 실행
 - `pnpm run lint:fix` - ESLint 실행 및 자동 수정
 - `pnpm dlx shadcn@latest add [component]` - shadcn/ui 컴포넌트 추가
+
+# MCP 서버
+
+## Figma Dev Mode MCP 규칙
+
+- Figma Dev Mode MCP 서버는 이미지 및 SVG 에셋을 제공할 수 있는 끝점을 제공합니다.
+- 중요: Figma Dev Mode MCP 서버가 이미지 또는 SVG에 대한 로컬 호스트 소스를 반환하는 경우 해당 이미지 또는 SVG 소스를 직접 사용하세요.
+- 중요: 새로운 아이콘 패키지를 가져오거나 추가하지 마세요. 모든 에셋은 Figma 페이로드에 있어야 합니다.
+- 중요: 로컬 호스트 소스가 제공되는 경우 입력 예시를 사용하거나 생성하지 마세요.
