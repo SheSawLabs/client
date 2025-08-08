@@ -2,7 +2,17 @@
 
 import { Button } from "@/components/ui/Button";
 import { TopNav } from "@/components/ui/TopNav";
-import { RefreshCw, Heart, Settings } from "lucide-react";
+import { SideNavigationItem } from "@/components/ui/SideNavigationItem";
+import {
+  RefreshCw,
+  Heart,
+  Settings,
+  User,
+  MapPin,
+  BookOpen,
+  MessageCircle,
+  Star,
+} from "lucide-react";
 
 export default function PlaygroundPage() {
   return (
@@ -276,6 +286,170 @@ export default function PlaygroundPage() {
                 </p>
                 <p>
                   <code>onNotificationClick</code>: 알림 버튼 클릭시 실행될 함수
+                </p>
+                <p>
+                  <code>className</code>: 추가 CSS 클래스
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SideNavigationItem Examples */}
+        <section>
+          <h2 className="text-2xl font-semibold mb-6">
+            SideNavigationItem 컴포넌트
+          </h2>
+          <div className="space-y-6">
+            {/* Basic SideNavigationItem */}
+            <div className="border rounded-lg overflow-hidden">
+              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
+                기본 SideNavigationItem
+              </h3>
+              <div className="bg-white">
+                <SideNavigationItem
+                  text="관심 목록"
+                  onClick={() => alert("관심 목록 클릭!")}
+                />
+              </div>
+            </div>
+
+            {/* Custom Icons */}
+            <div className="border rounded-lg overflow-hidden">
+              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
+                커스텀 아이콘 (children 사용)
+              </h3>
+              <div className="bg-white divide-y">
+                <SideNavigationItem
+                  text="내 정보"
+                  onClick={() => alert("내 정보 클릭!")}
+                >
+                  <User className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="주변 안전시설"
+                  onClick={() => alert("주변 안전시설 클릭!")}
+                >
+                  <MapPin className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="정책 정보"
+                  onClick={() => alert("정책 정보 클릭!")}
+                >
+                  <BookOpen className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="커뮤니티"
+                  onClick={() => alert("커뮤니티 클릭!")}
+                >
+                  <MessageCircle className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+              </div>
+            </div>
+
+            {/* Different Text Examples */}
+            <div className="border rounded-lg overflow-hidden">
+              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
+                다양한 텍스트
+              </h3>
+              <div className="bg-white divide-y">
+                <SideNavigationItem
+                  text="즐겨찾기"
+                  onClick={() => alert("즐겨찾기 클릭!")}
+                >
+                  <Star className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="설정"
+                  onClick={() => alert("설정 클릭!")}
+                >
+                  <Settings className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="도움말 및 지원"
+                  onClick={() => alert("도움말 및 지원 클릭!")}
+                >
+                  <RefreshCw className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+              </div>
+            </div>
+
+            {/* Real Use Case - Menu List */}
+            <div className="border rounded-lg overflow-hidden">
+              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
+                실제 메뉴 예시
+              </h3>
+              <div className="bg-white divide-y">
+                <SideNavigationItem
+                  text="내 활동"
+                  onClick={() => alert("내 활동으로 이동")}
+                >
+                  <User className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="찜한 장소"
+                  onClick={() => alert("찜한 장소로 이동")}
+                >
+                  <Heart className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="최근 검색"
+                  onClick={() => alert("최근 검색으로 이동")}
+                >
+                  <RefreshCw className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+                <SideNavigationItem
+                  text="환경설정"
+                  onClick={() => alert("환경설정으로 이동")}
+                >
+                  <Settings className="w-6 h-6 text-gray-400" />
+                </SideNavigationItem>
+              </div>
+            </div>
+          </div>
+
+          {/* SideNavigationItem Code Examples */}
+          <div className="mt-8 space-y-4">
+            <h3 className="text-xl font-medium">
+              SideNavigationItem 코드 예시
+            </h3>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium mb-2">기본 사용법</h4>
+              <code className="text-sm block whitespace-pre">
+                {`<SideNavigationItem 
+  text="관심 목록"
+  onClick={() => handleItemClick()}
+/>`}
+              </code>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium mb-2">커스텀 아이콘 (children)</h4>
+              <code className="text-sm block whitespace-pre">
+                {`<SideNavigationItem 
+  text="내 정보"
+  onClick={() => router.push('/profile')}
+>
+  <User className="w-6 h-6 text-gray-400" />
+</SideNavigationItem>`}
+              </code>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium mb-2">Props 설명</h4>
+              <div className="text-sm space-y-1">
+                <p>
+                  <code>text</code>: 표시할 텍스트 (기본: &quot;관심 목록&quot;)
+                </p>
+                <p>
+                  <code>icon</code>: 아이콘 컴포넌트 (선택적)
+                </p>
+                <p>
+                  <code>onClick</code>: 클릭 시 실행할 함수
+                </p>
+                <p>
+                  <code>children</code>: 아이콘 영역에 표시할 커스텀 컴포넌트
                 </p>
                 <p>
                   <code>className</code>: 추가 CSS 클래스
