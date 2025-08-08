@@ -64,15 +64,15 @@ export function NavigationBar({ className }: NavigationBarProps) {
                   )}
                   style={{
                     filter: isActive
-                      ? "brightness(0) saturate(100%) invert(31%) sepia(11%) saturate(297%) hue-rotate(167deg) brightness(92%) contrast(96%)" // 진회색 (#4A4A4A)
+                      ? "brightness(0) saturate(100%) invert(31%) sepia(81%) saturate(1651%) hue-rotate(201deg) brightness(96%) contrast(98%)" // 파란색 (#0F5FDA)
                       : "brightness(0) saturate(100%) invert(71%) sepia(8%) saturate(290%) hue-rotate(202deg) brightness(93%) contrast(87%)", // 밝은회색 (#9CA3AF)
                   }}
                 />
               </div>
               <span
                 className={cn(
-                  "text-xs font-medium transition-colors duration-200",
-                  isActive ? "text-gray-700" : "text-gray-400",
+                  "text-xs font-semibold transition-colors duration-200 tracking-tight",
+                  isActive ? "text-[#0f5fda]" : "text-gray-400",
                 )}
               >
                 {item.label}

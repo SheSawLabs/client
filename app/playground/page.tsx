@@ -6,7 +6,7 @@ import { RefreshCw, Heart, Settings } from "lucide-react";
 
 export default function PlaygroundPage() {
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-4xl pb-24">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Button 컴포넌트 Playground</h1>
         <p className="text-gray-600">
