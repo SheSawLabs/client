@@ -23,7 +23,7 @@ const navigationItems: NavigationItem[] = [
     id: "community",
     label: "커뮤니티",
     icon: "/icons/people.svg",
-    href: "/community",
+    href: "/community/groups",
   },
 ];
 
