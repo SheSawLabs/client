@@ -19,6 +19,7 @@ const categoryTabs: CategoryTab[] = [
   { id: "safety", label: "안전 수리", key: "안전 수리" },
   { id: "small_group", label: "소분 모임", key: "소분 모임" },
   { id: "hobby", label: "취미·기타", key: "취미·기타" },
+  { id: "general", label: "일반", key: "일반" },
 ];
 
 const sortOptions: SortOption[] = [
@@ -58,23 +59,25 @@ export function CommunityFilters({
   return (
     <div className={cn("bg-white border-b border-gray-100", className)}>
       {/* 카테고리 탭 */}
-      <div className="px-4 py-3">
-        <div className="flex justify-center gap-2 overflow-x-auto scrollbar-hide">
-          {categoryTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onCategoryChange(tab.key)}
-              className={cn(
-                "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
-                activeCategory === tab.key
-                  ? "bg-[#2ECC71]/10 text-[#2ECC71] font-semibold"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
-              )}
-              aria-label={`${tab.label} 카테고리 선택`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className="py-3">
+        <div className="overflow-x-auto scrollbar-hide pl-4">
+          <div className="flex gap-3 pr-4" style={{ width: "max-content" }}>
+            {categoryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onCategoryChange(tab.key)}
+                className={cn(
+                  "flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                  activeCategory === tab.key
+                    ? "bg-[#0f5fda]/10 text-[#0f5fda] font-semibold"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+                )}
+                aria-label={`${tab.label} 카테고리 선택`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
