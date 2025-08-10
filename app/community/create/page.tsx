@@ -104,7 +104,7 @@ export default function CreatePage() {
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
                   className={cn(
-                    "px-4 py-2 text-sm rounded-full transition-colors duration-100",
+                    "flex-1 px-4 py-2 text-sm rounded-lg transition-colors duration-100",
                     activeCategory === category.id
                       ? "bg-gray-600 text-white"
                       : "bg-gray-100 text-gray-700",
@@ -119,8 +119,8 @@ export default function CreatePage() {
 
         {/* 목록형 입력 (모임일 때만) */}
         {isGroup && (
-          <div className="space-y-0">
-            <div className="flex items-center h-12 py-0">
+          <div className="space-y-0 px-4 -mx-4">
+            <div className="flex items-center h-12 py-0 px-4">
               <Calendar
                 size={16}
                 className="text-gray-500"
@@ -131,18 +131,18 @@ export default function CreatePage() {
               </span>
               <span className="text-sm text-gray-900">{meetingDate}</span>
             </div>
-            <div className="h-px bg-gray-200"></div>
+            <div className="h-px bg-gray-200 mx-4"></div>
 
-            <div className="flex items-center h-12 py-0">
+            <div className="flex items-center h-12 py-0 px-4">
               <MapPin size={16} className="text-gray-500" aria-hidden="true" />
               <span className="ml-3 text-sm text-gray-500 flex-1">
                 모임 장소
               </span>
               <span className="text-sm text-gray-900">{meetingPlace}</span>
             </div>
-            <div className="h-px bg-gray-200"></div>
+            <div className="h-px bg-gray-200 mx-4"></div>
 
-            <div className="flex items-center h-12 py-0">
+            <div className="flex items-center h-12 py-0 px-4">
               <Users size={16} className="text-gray-500" aria-hidden="true" />
               <span className="ml-3 text-sm text-gray-500 flex-1">
                 최대 멤버 수
@@ -181,19 +181,16 @@ export default function CreatePage() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 하단 고정 CTA */}
-      <div className="border-t border-gray-200 bg-white p-4">
-        <button
-          onClick={handleSubmit}
-          className="w-full h-12 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          style={{
-            paddingBottom: `max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px))`,
-          }}
-        >
-          {isGroup ? "모임 만들기" : "게시글 작성하기"}
-        </button>
+        {/* 버튼 */}
+        <div className="pt-6">
+          <button
+            onClick={handleSubmit}
+            className="w-full h-12 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            {isGroup ? "모임 만들기" : "게시글 작성하기"}
+          </button>
+        </div>
       </div>
     </div>
   );
