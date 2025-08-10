@@ -1,463 +1,155 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TopNav } from "@/components/ui/TopNav";
 import { SideNavigationItem } from "@/components/ui/SideNavigationItem";
-import {
-  RefreshCw,
-  Heart,
-  Settings,
-  User,
-  MapPin,
-  BookOpen,
-  MessageCircle,
-  Star,
-} from "lucide-react";
+import { NavigationBar } from "@/components/ui/NavigationBar";
+import { Heart, User, ChevronRight } from "lucide-react";
+
+// iPhone 16 Preview Component (393x852)
+function MobilePreview({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="flex flex-col">
+      <h3 className="text-sm font-medium mb-2 text-center text-gray-600">
+        {title}
+      </h3>
+      <div className="w-[393px] h-[500px] bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden relative">
+        <div className="absolute inset-0 overflow-y-auto">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+interface ComponentCardProps {
+  title: string;
+  description: string;
+  route: string;
+  preview: React.ReactNode;
+}
+
+function ComponentCard({
+  title,
+  description,
+  route,
+  preview,
+}: ComponentCardProps) {
+  const router = useRouter();
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+          <button
+            onClick={() => router.push(route)}
+            className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+          >
+            자세히 보기
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </button>
+        </div>
+        <p className="text-gray-600 mb-6">{description}</p>
+
+        <div className="flex justify-center">{preview}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function PlaygroundPage() {
   return (
-    <div className="container mx-auto p-6 max-w-4xl pb-24">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Button 컴포넌트 Playground</h1>
-        <p className="text-gray-600">
-          Button 컴포넌트의 다양한 사용 예시를 확인해보세요.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl font-bold mb-4 text-gray-900">
+            UI 컴포넌트 Playground
+          </h1>
+          <p className="text-lg text-gray-600">
+            모바일 앱의 UI 컴포넌트들을 실시간으로 테스트해보세요.
+          </p>
+        </div>
 
-      <div className="space-y-12">
-        {/* Size Variants */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">사이즈 variants</h2>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              <Button size="sm">Small 버튼</Button>
-              <Button size="md">Medium 버튼</Button>
-              <Button size="lg">Large 버튼</Button>
-            </div>
-            <div className="w-full max-w-md">
-              <Button size="wide">Wide 버튼 (전체 너비)</Button>
-            </div>
-          </div>
-        </section>
-
-        {/* State Variants */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">상태 variants</h2>
-          <div className="flex items-center gap-4 flex-wrap">
-            <Button>활성 상태</Button>
-            <Button disabled>비활성 상태</Button>
-          </div>
-        </section>
-
-        {/* With Icons */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">아이콘과 함께</h2>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              <Button size="sm">
-                <RefreshCw className="w-3 h-3" />
-                초기화
-              </Button>
-              <Button size="md">
-                <Heart className="w-4 h-4" />
-                좋아요
-              </Button>
-              <Button size="lg">
-                <Settings className="w-5 h-5" />
-                설정
-              </Button>
-            </div>
-            <div className="w-full max-w-md">
-              <Button size="wide">
-                <RefreshCw className="w-5 h-5" />
-                전체 새로고침
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Real Use Cases */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">실제 사용 예시</h2>
-          <div className="space-y-6">
-            {/* Form Actions */}
-            <div className="border rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-4">폼 액션</h3>
-              <div className="flex gap-3">
-                <Button size="md">저장</Button>
-                <Button disabled size="md">
-                  취소
-                </Button>
-              </div>
-            </div>
-
-            {/* Card Actions */}
-            <div className="border rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-4">카드 액션</h3>
-              <div className="flex justify-between items-center">
-                <div>
-                  <h4 className="font-medium">카드 제목</h4>
-                  <p className="text-sm text-gray-600">카드 설명입니다.</p>
+        {/* Component Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <ComponentCard
+            title="Button"
+            description="다양한 크기와 상태를 가진 버튼 컴포넌트. 아이콘과 함께 사용할 수 있으며, 활성/비활성 상태를 지원합니다."
+            route="/playground/button"
+            preview={
+              <MobilePreview title="">
+                <div className="p-6 space-y-4 flex flex-col items-center">
+                  <Button size="md">기본 버튼</Button>
+                  <Button size="md">
+                    <Heart className="w-4 h-4" />
+                    아이콘 버튼
+                  </Button>
+                  <Button size="wide">전체 너비 버튼</Button>
                 </div>
-                <Button size="sm">자세히 보기</Button>
-              </div>
-            </div>
+              </MobilePreview>
+            }
+          />
 
-            {/* Navigation */}
-            <div className="border rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-4">내비게이션</h3>
-              <div className="space-y-3">
-                <Button size="wide">
-                  <Heart className="w-4 h-4" />내 찜 목록
-                </Button>
-                <Button size="wide">
-                  <Settings className="w-4 h-4" />
-                  설정
-                </Button>
-              </div>
-            </div>
+          <ComponentCard
+            title="TopNav"
+            description="앱 상단 네비게이션 바. 뒤로가기, 제목, 알림 버튼을 포함하며, 각 요소를 선택적으로 표시할 수 있습니다."
+            route="/playground/topnav"
+            preview={
+              <MobilePreview title="">
+                <div>
+                  <TopNav
+                    title="마이페이지"
+                    onBackClick={() => {}}
+                    onNotificationClick={() => {}}
+                  />
+                  <div className="p-6 text-center">
+                    <p className="text-gray-600">페이지 내용</p>
+                  </div>
+                </div>
+              </MobilePreview>
+            }
+          />
 
-            {/* Loading State Example */}
-            <div className="border rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-4">
-                로딩 상태 (disabled 사용)
-              </h3>
-              <div className="flex gap-3">
-                <Button disabled>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  로딩 중...
-                </Button>
-                <Button size="sm" disabled>
-                  처리 중
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+          <ComponentCard
+            title="SideNavigationItem"
+            description="사이드바나 메뉴에서 사용하는 네비게이션 아이템. 아이콘과 텍스트, 화살표를 포함하며 클릭 이벤트를 지원합니다."
+            route="/playground/sidenavitem"
+            preview={
+              <MobilePreview title="">
+                <div className="divide-y">
+                  <SideNavigationItem text="관심 목록" onClick={() => {}} />
+                  <SideNavigationItem text="내 정보" onClick={() => {}}>
+                    <User className="w-6 h-6 text-gray-400" />
+                  </SideNavigationItem>
+                  <SideNavigationItem text="설정" onClick={() => {}} />
+                </div>
+              </MobilePreview>
+            }
+          />
 
-        {/* Code Examples */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">코드 예시</h2>
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">기본 사용법</h4>
-              <code className="text-sm">
-                {`<Button size="md">클릭하세요</Button>
-<Button size="lg" disabled>비활성 버튼</Button>`}
-              </code>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">아이콘과 함께</h4>
-              <code className="text-sm">
-                {`<Button size="md">
-  <Heart className="w-4 h-4" />
-  좋아요
-</Button>`}
-              </code>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">전체 너비</h4>
-              <code className="text-sm">
-                {`<Button size="wide">전체 너비 버튼</Button>`}
-              </code>
-            </div>
-          </div>
-        </section>
-
-        {/* TopNav Examples */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">TopNav 컴포넌트</h2>
-          <div className="space-y-6">
-            {/* Basic TopNav */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                기본 TopNav
-              </h3>
-              <TopNav
-                title="마이페이지"
-                onBackClick={() => alert("뒤로가기 클릭!")}
-                onNotificationClick={() => alert("알림 클릭!")}
-              />
-            </div>
-
-            {/* TopNav without back button */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                뒤로가기 버튼 없음
-              </h3>
-              <TopNav
-                title="홈"
-                showBackButton={false}
-                onNotificationClick={() => alert("알림 클릭!")}
-              />
-            </div>
-
-            {/* TopNav without notification */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                알림 버튼 없음
-              </h3>
-              <TopNav
-                title="설정"
-                showNotification={false}
-                onBackClick={() => alert("뒤로가기 클릭!")}
-              />
-            </div>
-
-            {/* Different titles */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                다양한 제목
-              </h3>
-              <div className="space-y-0 divide-y">
-                <TopNav
-                  title="내 정보"
-                  onBackClick={() => alert("뒤로가기")}
-                  onNotificationClick={() => alert("알림")}
-                />
-                <TopNav
-                  title="주변 안전시설"
-                  onBackClick={() => alert("뒤로가기")}
-                  onNotificationClick={() => alert("알림")}
-                />
-                <TopNav
-                  title="커뮤니티"
-                  onBackClick={() => alert("뒤로가기")}
-                  onNotificationClick={() => alert("알림")}
-                />
-              </div>
-            </div>
-
-            {/* Minimal TopNav */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                최소 구성
-              </h3>
-              <TopNav
-                title="제목만"
-                showBackButton={false}
-                showNotification={false}
-              />
-            </div>
-          </div>
-
-          {/* TopNav Code Examples */}
-          <div className="mt-8 space-y-4">
-            <h3 className="text-xl font-medium">TopNav 코드 예시</h3>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">기본 사용법</h4>
-              <code className="text-sm block whitespace-pre">
-                {`<TopNav 
-  title="마이페이지"
-  onBackClick={() => router.back()}
-  onNotificationClick={() => setShowNotifications(true)}
-/>`}
-              </code>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">옵션 비활성화</h4>
-              <code className="text-sm block whitespace-pre">
-                {`<TopNav 
-  title="홈"
-  showBackButton={false}
-  showNotification={false}
-/>`}
-              </code>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">Props 설명</h4>
-              <div className="text-sm space-y-1">
-                <p>
-                  <code>title</code>: 네비게이션 바 중앙에 표시될 제목
-                </p>
-                <p>
-                  <code>showBackButton</code>: 뒤로가기 버튼 표시 여부 (기본:
-                  true)
-                </p>
-                <p>
-                  <code>onBackClick</code>: 뒤로가기 버튼 클릭시 실행될 함수
-                </p>
-                <p>
-                  <code>showNotification</code>: 알림 버튼 표시 여부 (기본:
-                  true)
-                </p>
-                <p>
-                  <code>onNotificationClick</code>: 알림 버튼 클릭시 실행될 함수
-                </p>
-                <p>
-                  <code>className</code>: 추가 CSS 클래스
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SideNavigationItem Examples */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">
-            SideNavigationItem 컴포넌트
-          </h2>
-          <div className="space-y-6">
-            {/* Basic SideNavigationItem */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                기본 SideNavigationItem
-              </h3>
-              <div className="bg-white">
-                <SideNavigationItem
-                  text="관심 목록"
-                  onClick={() => alert("관심 목록 클릭!")}
-                />
-              </div>
-            </div>
-
-            {/* Custom Icons */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                커스텀 아이콘 (children 사용)
-              </h3>
-              <div className="bg-white divide-y">
-                <SideNavigationItem
-                  text="내 정보"
-                  onClick={() => alert("내 정보 클릭!")}
-                >
-                  <User className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="주변 안전시설"
-                  onClick={() => alert("주변 안전시설 클릭!")}
-                >
-                  <MapPin className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="정책 정보"
-                  onClick={() => alert("정책 정보 클릭!")}
-                >
-                  <BookOpen className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="커뮤니티"
-                  onClick={() => alert("커뮤니티 클릭!")}
-                >
-                  <MessageCircle className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-              </div>
-            </div>
-
-            {/* Different Text Examples */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                다양한 텍스트
-              </h3>
-              <div className="bg-white divide-y">
-                <SideNavigationItem
-                  text="즐겨찾기"
-                  onClick={() => alert("즐겨찾기 클릭!")}
-                >
-                  <Star className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="설정"
-                  onClick={() => alert("설정 클릭!")}
-                >
-                  <Settings className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="도움말 및 지원"
-                  onClick={() => alert("도움말 및 지원 클릭!")}
-                >
-                  <RefreshCw className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-              </div>
-            </div>
-
-            {/* Real Use Case - Menu List */}
-            <div className="border rounded-lg overflow-hidden">
-              <h3 className="text-lg font-medium p-4 bg-gray-50 border-b">
-                실제 메뉴 예시
-              </h3>
-              <div className="bg-white divide-y">
-                <SideNavigationItem
-                  text="내 활동"
-                  onClick={() => alert("내 활동으로 이동")}
-                >
-                  <User className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="찜한 장소"
-                  onClick={() => alert("찜한 장소로 이동")}
-                >
-                  <Heart className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="최근 검색"
-                  onClick={() => alert("최근 검색으로 이동")}
-                >
-                  <RefreshCw className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-                <SideNavigationItem
-                  text="환경설정"
-                  onClick={() => alert("환경설정으로 이동")}
-                >
-                  <Settings className="w-6 h-6 text-gray-400" />
-                </SideNavigationItem>
-              </div>
-            </div>
-          </div>
-
-          {/* SideNavigationItem Code Examples */}
-          <div className="mt-8 space-y-4">
-            <h3 className="text-xl font-medium">
-              SideNavigationItem 코드 예시
-            </h3>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">기본 사용법</h4>
-              <code className="text-sm block whitespace-pre">
-                {`<SideNavigationItem 
-  text="관심 목록"
-  onClick={() => handleItemClick()}
-/>`}
-              </code>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">커스텀 아이콘 (children)</h4>
-              <code className="text-sm block whitespace-pre">
-                {`<SideNavigationItem 
-  text="내 정보"
-  onClick={() => router.push('/profile')}
->
-  <User className="w-6 h-6 text-gray-400" />
-</SideNavigationItem>`}
-              </code>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">Props 설명</h4>
-              <div className="text-sm space-y-1">
-                <p>
-                  <code>text</code>: 표시할 텍스트 (기본: &quot;관심 목록&quot;)
-                </p>
-                <p>
-                  <code>icon</code>: 아이콘 컴포넌트 (선택적)
-                </p>
-                <p>
-                  <code>onClick</code>: 클릭 시 실행할 함수
-                </p>
-                <p>
-                  <code>children</code>: 아이콘 영역에 표시할 커스텀 컴포넌트
-                </p>
-                <p>
-                  <code>className</code>: 추가 CSS 클래스
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+          <ComponentCard
+            title="NavigationBar"
+            description="하단 탭 네비게이션 바. 현재 경로를 자동으로 감지하여 활성화 상태를 표시하며, 각 탭은 파란색으로 강조됩니다."
+            route="/playground/navigationbar"
+            preview={
+              <MobilePreview title="">
+                <div className="relative h-full flex flex-col">
+                  <div className="flex-1 p-6 flex items-center justify-center">
+                    <p className="text-center text-gray-600">앱 컨텐츠</p>
+                  </div>
+                  <NavigationBar />
+                </div>
+              </MobilePreview>
+            }
+          />
+        </div>
       </div>
     </div>
   );
