@@ -2,7 +2,8 @@ export interface Post {
   id: string;
   region: string;
   createdAgo: string;
-  badge?: { label: string; tone: "default" | "success" | "secondary" };
+  category: "안전 수리" | "소분 모임" | "취미·기타" | "일반";
+  participants?: { current: number; max: number }; // 모집 인원 (소분 모임일 때만)
   title: string;
   excerpt: string;
   author: { name: string; avatarUrl?: string };

@@ -47,27 +47,7 @@ export default function GroupsPage() {
 
     // 카테고리 필터링
     if (activeCategory !== "전체") {
-      filtered = filtered.filter((post) => {
-        if (activeCategory === "안전 수리") {
-          return (
-            post.title.includes("CCTV") ||
-            post.title.includes("가로등") ||
-            post.title.includes("수리")
-          );
-        }
-        if (activeCategory === "소분 모임") {
-          return post.badge?.label === "소분 모임";
-        }
-        if (activeCategory === "취미·기타") {
-          return (
-            !post.badge ||
-            (post.badge.label !== "소분 모임" &&
-              !post.title.includes("CCTV") &&
-              !post.title.includes("가로등"))
-          );
-        }
-        return true;
-      });
+      filtered = filtered.filter((post) => post.category === activeCategory);
     }
 
     // 관심글 필터링 (임시로 좋아요 15개 이상으로 필터)
@@ -94,14 +74,6 @@ export default function GroupsPage() {
   const handlePostClick = (post: Post) => {
     console.log("게시글 클릭:", post.title);
     // TODO: 게시글 상세 페이지로 이동
-  };
-
-  const handleMenuAction = (
-    action: "create_group" | "create_post",
-    post: Post,
-  ) => {
-    console.log(`${action} 선택:`, post.title);
-    // TODO: 모임 개설 또는 일반 게시글 작성 페이지로 이동
   };
 
   const handleNotificationClick = () => {
@@ -196,12 +168,7 @@ export default function GroupsPage() {
       <div id="main-content" className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4 pb-24">
           {filteredPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onClick={handlePostClick}
-              onMenuAction={handleMenuAction}
-            />
+            <PostCard key={post.id} post={post} onClick={handlePostClick} />
           ))}
 
           {filteredPosts.length === 0 && (
