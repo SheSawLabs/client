@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X, Calendar, MapPin, Users } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { LocationSearchModal } from "@/components/ui/LocationSearchModal";
+import type { KakaoPlace } from "@/types/kakao";
 
 const categories = [
   { id: "safety", label: "안전 수리" },
@@ -20,7 +22,8 @@ export default function CreatePage() {
   const [activeCategory, setActiveCategory] = useState("small_group");
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("2025-08-01");
-  const [meetingPlace] = useState("신림동 하이마트");
+  const [meetingPlace, setMeetingPlace] = useState("신림동 하이마트");
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [maxMembers] = useState("12명");
 
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +55,15 @@ export default function CreatePage() {
     if (dateInputRef.current) {
       dateInputRef.current.showPicker();
     }
+  };
+
+  const handleLocationClick = () => {
+    setShowLocationSearch(true);
+  };
+
+  const handleLocationSelect = (place: KakaoPlace) => {
+    setMeetingPlace(place.place_name);
+    setShowLocationSearch(false);
   };
 
   const formatDisplayDate = (dateString: string | number | Date) => {
@@ -169,7 +181,10 @@ export default function CreatePage() {
             </div>
             <div className="h-px bg-gray-200 mx-4"></div>
 
-            <div className="flex items-center h-12 py-0 px-4">
+            <div
+              className="flex items-center h-12 py-0 px-4 cursor-pointer hover:bg-gray-50"
+              onClick={handleLocationClick}
+            >
               <MapPin size={16} className="text-gray-500" aria-hidden="true" />
               <span className="ml-3 text-sm text-gray-500 flex-1">
                 모임 장소
@@ -228,6 +243,13 @@ export default function CreatePage() {
           </button>
         </div>
       </div>
+
+      {/* 장소 검색 모달 */}
+      <LocationSearchModal
+        isOpen={showLocationSearch}
+        onClose={() => setShowLocationSearch(false)}
+        onSelect={handleLocationSelect}
+      />
     </div>
   );
 }
