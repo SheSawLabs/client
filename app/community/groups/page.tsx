@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CommunityHeader } from "@/components/ui/CommunityHeader";
 import { CommunityFilters } from "@/components/ui/CommunityFilters";
 import { PostCard } from "@/components/ui/PostCard";
@@ -9,11 +10,36 @@ import { mockPosts } from "@/data/mockPosts";
 import { Post, CategoryTab, SortOption, PostState } from "@/types/community";
 
 export default function GroupsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [activeCategory, setActiveCategory] =
     useState<CategoryTab["key"]>("소분 모임");
   const [isInterestOnly, setIsInterestOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption["value"]>("등록순");
   const [postState] = useState<PostState>("loaded");
+
+  // URL 쿼리에서 정렬 상태 초기화
+  useEffect(() => {
+    const sortParam = searchParams.get("sort");
+    if (sortParam === "recent") {
+      setSortBy("최신순");
+    } else {
+      setSortBy("등록순");
+    }
+  }, [searchParams]);
+
+  // 정렬 변경 시 URL 업데이트
+  const handleSortChange = (newSort: SortOption["value"]) => {
+    setSortBy(newSort);
+    const params = new URLSearchParams(searchParams);
+    if (newSort === "최신순") {
+      params.set("sort", "recent");
+    } else {
+      params.set("sort", "created");
+    }
+    router.replace(`/community/groups?${params.toString()}`);
+  };
 
   // 필터링된 포스트 목록
   const filteredPosts = useMemo(() => {
@@ -127,7 +153,7 @@ export default function GroupsPage() {
           sortBy={sortBy}
           onCategoryChange={setActiveCategory}
           onInterestToggle={() => setIsInterestOnly(!isInterestOnly)}
-          onSortChange={setSortBy}
+          onSortChange={handleSortChange}
         />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -163,7 +189,7 @@ export default function GroupsPage() {
         sortBy={sortBy}
         onCategoryChange={setActiveCategory}
         onInterestToggle={() => setIsInterestOnly(!isInterestOnly)}
-        onSortChange={setSortBy}
+        onSortChange={handleSortChange}
       />
 
       {/* 피드 */}
