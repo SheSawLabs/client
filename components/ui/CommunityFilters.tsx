@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Heart, ChevronDown } from "lucide-react";
+import { Heart } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { CategoryTab, SortOption } from "@/types/community";
 
@@ -36,11 +35,24 @@ export function CommunityFilters({
   onSortChange,
   className,
 }: CommunityFiltersProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const handleSortChange = (value: SortOption["value"]) => {
-    onSortChange(value);
-    setIsDropdownOpen(false);
+  const handleSortKeyDown = (
+    e: React.KeyboardEvent,
+    value: SortOption["value"],
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSortChange(value);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      const currentIndex = sortOptions.findIndex(
+        (option) => option.value === sortBy,
+      );
+      const nextIndex =
+        e.key === "ArrowRight"
+          ? (currentIndex + 1) % sortOptions.length
+          : (currentIndex - 1 + sortOptions.length) % sortOptions.length;
+      onSortChange(sortOptions[nextIndex].value);
+    }
   };
 
   return (
@@ -67,14 +79,14 @@ export function CommunityFilters({
       </div>
 
       {/* 보조 필터 */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-50">
+      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-50">
         {/* 관심글 토글 */}
         <button
           onClick={onInterestToggle}
           className={cn(
             "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
             isInterestOnly
-              ? "bg-[#2ECC71]/10 text-[#2ECC71]"
+              ? "bg-[#0f5fda]/10 text-[#0f5fda]"
               : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
           )}
           aria-label="관심글만 보기"
@@ -86,48 +98,36 @@ export function CommunityFilters({
           <span>관심글</span>
         </button>
 
-        {/* 정렬 드롭다운 */}
-        <div className="relative">
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            aria-label="정렬 옵션 선택"
-            aria-expanded={isDropdownOpen}
-          >
-            <span>{sortBy}</span>
-            <ChevronDown
-              size={14}
-              className={cn(
-                "transition-transform duration-200",
-                isDropdownOpen ? "rotate-180" : "",
+        {/* 정렬 세그먼트 토글 */}
+        <div
+          className="flex items-center gap-5"
+          role="tablist"
+          aria-label="정렬 옵션"
+        >
+          {sortOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => onSortChange(option.value)}
+              onKeyDown={(e) => handleSortKeyDown(e, option.value)}
+              className="inline-flex items-center gap-2 text-sm transition-colors duration-200"
+              role="tab"
+              aria-selected={sortBy === option.value}
+              tabIndex={sortBy === option.value ? 0 : -1}
+            >
+              {sortBy === option.value && (
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0f5fda]" />
               )}
-            />
-          </button>
-
-          {isDropdownOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setIsDropdownOpen(false)}
-              />
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-20 min-w-[100px]">
-                {sortOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleSortChange(option.value)}
-                    className={cn(
-                      "w-full px-3 py-2 text-sm text-left hover:bg-gray-50 transition-colors",
-                      sortBy === option.value
-                        ? "text-[#2ECC71] font-medium"
-                        : "text-gray-700",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+              <span
+                className={cn(
+                  sortBy === option.value
+                    ? "text-[#0f5fda] font-semibold"
+                    : "text-[#6B7280]",
+                )}
+              >
+                {option.label}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     </div>
