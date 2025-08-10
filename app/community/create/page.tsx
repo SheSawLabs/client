@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X, Calendar, MapPin, Users } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -19,10 +19,11 @@ export default function CreatePage() {
   const [title, setTitle] = useState("");
   const [activeCategory, setActiveCategory] = useState("small_group");
   const [description, setDescription] = useState("");
-  const [meetingDate] = useState("2025-08-01");
+  const [meetingDate, setMeetingDate] = useState("2025-08-01");
   const [meetingPlace] = useState("신림동 하이마트");
   const [maxMembers] = useState("12명");
 
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const isGroup = type === "group";
 
   const handleBack = () => {
@@ -45,6 +46,21 @@ export default function CreatePage() {
         description,
       });
     }
+  };
+
+  const handleDateRowClick = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker();
+    }
+  };
+
+  const formatDisplayDate = (dateString: string | number | Date) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
@@ -120,7 +136,10 @@ export default function CreatePage() {
         {/* 목록형 입력 (모임일 때만) */}
         {isGroup && (
           <div className="space-y-0 px-4 -mx-4">
-            <div className="flex items-center h-12 py-0 px-4">
+            <div
+              className="flex items-center h-12 py-0 px-4 cursor-pointer hover:bg-gray-50 relative"
+              onClick={handleDateRowClick}
+            >
               <Calendar
                 size={16}
                 className="text-gray-500"
@@ -129,7 +148,24 @@ export default function CreatePage() {
               <span className="ml-3 text-sm text-gray-500 flex-1">
                 모임 날짜
               </span>
-              <span className="text-sm text-gray-900">{meetingDate}</span>
+              <div className="relative">
+                <span className="text-sm text-gray-900">
+                  {formatDisplayDate(meetingDate)}
+                </span>
+                <input
+                  ref={dateInputRef}
+                  type="date"
+                  value={meetingDate}
+                  onChange={(e) => setMeetingDate(e.target.value)}
+                  className="absolute top-0 opacity-0 pointer-events-none"
+                  style={{
+                    right: "0",
+                    top: "-10px",
+                    width: "200px",
+                    height: "40px",
+                  }}
+                />
+              </div>
             </div>
             <div className="h-px bg-gray-200 mx-4"></div>
 
