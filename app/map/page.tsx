@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/Button";
+import { TopNav } from "@/components/ui/TopNav";
 
 interface DistrictFeature {
   type: "Feature";
@@ -214,7 +215,7 @@ export default function MapPage() {
 
       // 폴리곤 채우기 (흰색, 선택시 연한 회색)
       ctx.fillStyle =
-        district.name === selectedDistrict ? "#f3f4f6" : "#ffffff";
+        district.name === selectedDistrict ? "#DAE6FD" : "#ffffff";
       ctx.fill();
 
       // 테두리 그리기 (검은색)
@@ -298,24 +299,22 @@ export default function MapPage() {
 
   return (
     <div className="pb-20">
+      <TopNav title="동네 안전" showBackButton={true} />
       {currentStep === "district-selection" && (
         <div className="p-4">
-          <h1 className="text-2xl font-bold mb-4">구 선택</h1>
-
           {isLoading && (
             <div className="mb-4 px-4 py-2 bg-gray-100 rounded-lg">
               <span className="text-gray-600">데이터 로딩 중...</span>
             </div>
           )}
 
-          {selectedDistrict && (
-            <div className="mb-4 px-4 py-2 bg-blue-100 rounded-lg">
-              <span className="font-semibold">
-                선택된 구: {selectedDistrict}
-              </span>
-            </div>
-          )}
+          <div className="mb-1 py-1 rounded-lg h-1 flex justify-center items-center">
+            {selectedDistrict && (
+              <p className="font-semibold text-center">{selectedDistrict}</p>
+            )}
+          </div>
 
+          <p className="text-center">안전을 확인하고 싶은 구를 선택해주세요.</p>
           <div className="mb-4 py-4">
             <canvas
               ref={canvasRef}
@@ -331,6 +330,7 @@ export default function MapPage() {
             <Button
               onClick={handleNext}
               disabled={!selectedDistrict}
+              size="wide"
               className="px-6 py-2"
             >
               다음
@@ -342,7 +342,7 @@ export default function MapPage() {
       {currentStep === "dong-selection" && (
         <div className="p-4">
           <h1 className="text-2xl font-bold mb-4">동선택 페이지</h1>
-          <p>선택된 구: {funnelContext.selectedDistrict}</p>
+          <p>선택된 동: {funnelContext.selectedDistrict}</p>
           <Button
             onClick={() => setCurrentStep("district-selection")}
             className="mt-4"
