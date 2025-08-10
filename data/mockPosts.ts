@@ -139,6 +139,7 @@ export const categoryTabs = [
   { id: "safety", label: "안전 수리", key: "안전 수리" as const },
   { id: "small_group", label: "소분 모임", key: "소분 모임" as const },
   { id: "hobby", label: "취미·기타", key: "취미·기타" as const },
+  { id: "general", label: "일반", key: "일반" as const },
 ];
 
 export const sortOptions = [

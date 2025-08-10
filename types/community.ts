@@ -13,7 +13,7 @@ export interface Post {
 export interface CategoryTab {
   id: string;
   label: string;
-  key: "전체" | "안전 수리" | "소분 모임" | "취미·기타";
+  key: "전체" | "안전 수리" | "소분 모임" | "취미·기타" | "일반";
 }
 
 export interface SortOption {
