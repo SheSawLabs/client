@@ -2,47 +2,116 @@
 
 import { Pen } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 
 interface FloatingActionButtonProps {
-  onClick?: () => void;
-  href?: string;
   className?: string;
-  "aria-label"?: string;
 }
 
-export function FloatingActionButton({
-  onClick,
-  href = "/community/groups/create",
-  className,
-  "aria-label": ariaLabel = "글쓰기",
-}: FloatingActionButtonProps) {
-  const router = useRouter();
+const menuItems = [
+  { label: "모임 개설", href: "/community/new-group" },
+  { label: "일반 게시글", href: "/community/new-post" },
+];
 
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    } else if (href) {
-      router.push(href);
+export function FloatingActionButton({ className }: FloatingActionButtonProps) {
+  const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // 외부 클릭 시 메뉴 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscapeKey);
     }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isMenuOpen]);
+
+  const handleButtonClick = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleMenuItemClick = (href: string) => {
+    setIsMenuOpen(false);
+    router.push(href);
   };
 
   return (
-    <button
-      onClick={handleClick}
-      className={cn(
-        "absolute bottom-20 right-4 z-30",
-        "flex items-center justify-center w-14 h-14",
-        "bg-[#2ECC71] hover:bg-[#27AE60] active:bg-[#229954]",
-        "text-white rounded-full shadow-lg hover:shadow-xl",
-        "transition-all duration-200 ease-out",
-        "transform hover:scale-105 active:scale-95",
-        "focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:ring-offset-2 focus:ring-offset-white",
-        className,
+    <>
+      {/* FAB 버튼 */}
+      <button
+        ref={buttonRef}
+        onClick={handleButtonClick}
+        className={cn(
+          "absolute bottom-20 right-4 z-30",
+          "flex items-center justify-center w-14 h-14",
+          "bg-gray-100 hover:bg-gray-200 active:bg-gray-300",
+          "text-gray-700 rounded-full shadow-lg hover:shadow-xl",
+          "transition-all duration-200 ease-out",
+          "transform hover:scale-105 active:scale-95",
+          "focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 focus:ring-offset-white",
+          className,
+        )}
+        aria-label="글쓰기"
+        aria-expanded={isMenuOpen}
+      >
+        <Pen size={20} className="stroke-2" />
+      </button>
+
+      {/* 팝오버 메뉴 */}
+      {isMenuOpen && (
+        <div
+          ref={menuRef}
+          className={cn(
+            "absolute bottom-36 right-4 z-40 rounded-2xl bg-[#F2F4F6] text-gray-800 shadow-md border border-gray-200",
+            "animate-in fade-in-0 zoom-in-95 duration-150 ease-out",
+          )}
+          role="menu"
+        >
+          {menuItems.map((item, index) => (
+            <button
+              key={item.href}
+              onClick={() => handleMenuItemClick(item.href)}
+              className={cn(
+                "block w-full text-right px-4 py-3 min-h-[44px]",
+                "text-sm font-normal text-[#374151]",
+                "hover:bg-white hover:font-medium focus:bg-white focus:font-medium",
+                "transition-all duration-200",
+                "focus:outline-none",
+                index === 0 ? "rounded-t-2xl" : "",
+                index === menuItems.length - 1 ? "rounded-b-2xl" : "",
+              )}
+              role="menuitem"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       )}
-      aria-label={ariaLabel}
-    >
-      <Pen size={20} className="stroke-2" />
-    </button>
+    </>
   );
 }
