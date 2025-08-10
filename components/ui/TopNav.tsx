@@ -30,7 +30,7 @@ const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
       <div
         ref={ref}
         className={cn(
-          "bg-white flex items-center justify-between p-2.5 w-full h-12",
+          "bg-white flex items-center justify-between p-4 w-full h-12",
           className,
         )}
       >
