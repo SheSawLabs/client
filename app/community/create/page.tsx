@@ -24,7 +24,7 @@ export default function CreatePage() {
   const [meetingDate, setMeetingDate] = useState("2025-08-01");
   const [meetingPlace, setMeetingPlace] = useState("신림동 하이마트");
   const [showLocationSearch, setShowLocationSearch] = useState(false);
-  const [maxMembers] = useState("12명");
+  const [maxMembers, setMaxMembers] = useState(12);
 
   const dateInputRef = useRef<HTMLInputElement>(null);
   const isGroup = type === "group";
@@ -198,7 +198,17 @@ export default function CreatePage() {
               <span className="ml-3 text-sm text-gray-500 flex-1">
                 최대 멤버 수
               </span>
-              <span className="text-sm text-gray-900">{maxMembers}</span>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  value={maxMembers}
+                  onChange={(e) => setMaxMembers(Number(e.target.value))}
+                  min={2}
+                  max={100}
+                  className="w-12 text-sm text-gray-900 text-right bg-transparent border-none outline-none focus:bg-gray-50 rounded px-1"
+                />
+                <span className="text-sm text-gray-500">명</span>
+              </div>
             </div>
           </div>
         )}
