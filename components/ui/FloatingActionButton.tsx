@@ -10,8 +10,8 @@ interface FloatingActionButtonProps {
 }
 
 const menuItems = [
-  { label: "모임 개설", href: "/community/new-group" },
-  { label: "일반 게시글", href: "/community/new-post" },
+  { label: "모임 개설", href: "/community/create?type=group" },
+  { label: "일반 게시글", href: "/community/create?type=post" },
 ];
 
 export function FloatingActionButton({ className }: FloatingActionButtonProps) {
