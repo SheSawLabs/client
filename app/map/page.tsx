@@ -16,6 +16,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/Sheet";
 import { HelpCircle } from "lucide-react";
+import { SafetyGuideDetail } from "@/components/ui/SafetyGuideDetail";
 
 interface DistrictFeature {
   type: "Feature";
@@ -358,49 +359,7 @@ export default function MapPage() {
                 <SheetHeader>
                   <SheetTitle>안전 등급 가이드</SheetTitle>
                 </SheetHeader>
-                <div className="mt-4 space-y-3">
-                  <p className="text-sm text-gray-600">
-                    동네 안전 등급은 다음과 같은 기준으로 분류됩니다:
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        A
-                      </div>
-                      <span className="text-sm">
-                        매우 좋음 - 매우 안전한 지역
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-lime-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        B
-                      </div>
-                      <span className="text-sm">좋음 - 비교적 안전한 지역</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        C
-                      </div>
-                      <span className="text-sm">양호 - 일반적인 안전 수준</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        D
-                      </div>
-                      <span className="text-sm">
-                        관심 필요 - 주의가 필요한 지역
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        E
-                      </div>
-                      <span className="text-sm">
-                        주의 필요 - 각별한 주의가 필요한 지역
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <SafetyGuideDetail />
               </SheetContent>
             </Sheet>
           </div>
