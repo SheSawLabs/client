@@ -6,7 +6,7 @@ import { TopNav } from "@/components/ui/TopNav";
 import { useDistrictJsonQuery, type GeoJSONData } from "@/app/queries/map";
 import { SafetyLevel } from "@/components/ui/SafetyLevel";
 import { GuideTag } from "@/components/ui/GuideTag";
-import { BottomSheet } from "@/components/ui/BottomSheet";
+import { useBottomSheet } from "@/hooks/useBottomSheet";
 import { DistrictSafetyDetail } from "@/components/ui/DistrictSafetyDetail";
 import {
   Sheet,
@@ -50,7 +50,7 @@ export default function MapPage() {
   const [currentStep, setCurrentStep] = useState<
     "gu-selection" | "dong-selection"
   >("gu-selection");
-  const [funnelContext, setFunnelContext] = useState<{
+  const [, setFunnelContext] = useState<{
     selectedDistrict?: string;
   }>({});
 
@@ -73,6 +73,9 @@ export default function MapPage() {
 
   // React Query hooks
   const districtQuery = useDistrictJsonQuery();
+
+  // BottomSheet hook
+  const { openBottomSheet } = useBottomSheet();
 
   // Process district data when available
   useEffect(() => {
@@ -241,8 +244,17 @@ export default function MapPage() {
   const handleNext = () => {
     if (selectedDistrict) {
       setFunnelContext({ selectedDistrict });
-      console.log("funnelContext:", funnelContext);
       setCurrentStep("dong-selection");
+
+      // Open bottom sheet with district safety details
+      openBottomSheet(
+        <DistrictSafetyDetail districtName="신림동" grade="E" />,
+        {
+          defaultHeight: "30%",
+          minHeight: "15%",
+          maxHeight: "90%",
+        },
+      );
     }
   };
 
@@ -383,10 +395,6 @@ export default function MapPage() {
           <div className="h-full bg-gray-100 flex items-center justify-center">
             <p className="text-gray-500">동 지도 구현 예정</p>
           </div>
-
-          <BottomSheet defaultHeight="30%" minHeight="15%" maxHeight="90%">
-            <DistrictSafetyDetail districtName="신림동" grade="E" />
-          </BottomSheet>
         </div>
       )}
     </div>
