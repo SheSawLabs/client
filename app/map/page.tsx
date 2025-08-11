@@ -4,6 +4,18 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { TopNav } from "@/components/ui/TopNav";
 import { useDistrictJsonQuery, type GeoJSONData } from "@/app/queries/map";
+import { SafetyLevel } from "@/components/ui/SafetyLevel";
+import { GuideTag } from "@/components/ui/GuideTag";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { DistrictSafetyDetail } from "@/components/ui/DistrictSafetyDetail";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/Sheet";
+import { HelpCircle } from "lucide-react";
 
 interface DistrictFeature {
   type: "Feature";
@@ -311,7 +323,10 @@ export default function MapPage() {
             )}
           </div>
 
-          <p className="text-center">안전을 확인하고 싶은 구를 선택해주세요.</p>
+          <p className="text-center mb-2">
+            안전을 확인하고 싶은 구를 선택해주세요.
+          </p>
+
           <div className="mb-4 py-4">
             <canvas
               ref={canvasRef}
@@ -321,6 +336,73 @@ export default function MapPage() {
               className="w-full border border-gray-300 rounded-lg cursor-pointer"
               style={{ maxWidth: "100%", height: "auto" }}
             />
+          </div>
+
+          {/* 안전등급 표시 */}
+          <div className="mb-2">
+            <SafetyLevel />
+          </div>
+
+          {/* 안전등급 가이드 */}
+          <div className="flex justify-center mb-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <div>
+                  <GuideTag
+                    icon={<HelpCircle className="w-3 h-3" />}
+                    text="안전 등급이란?"
+                  />
+                </div>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[50vh]">
+                <SheetHeader>
+                  <SheetTitle>안전 등급 가이드</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm text-gray-600">
+                    동네 안전 등급은 다음과 같은 기준으로 분류됩니다:
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        A
+                      </div>
+                      <span className="text-sm">
+                        매우 좋음 - 매우 안전한 지역
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-lime-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        B
+                      </div>
+                      <span className="text-sm">좋음 - 비교적 안전한 지역</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        C
+                      </div>
+                      <span className="text-sm">양호 - 일반적인 안전 수준</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        D
+                      </div>
+                      <span className="text-sm">
+                        관심 필요 - 주의가 필요한 지역
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        E
+                      </div>
+                      <span className="text-sm">
+                        주의 필요 - 각별한 주의가 필요한 지역
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
 
           <div className="flex justify-end">
@@ -337,15 +419,15 @@ export default function MapPage() {
       )}
 
       {currentStep === "dong-selection" && (
-        <div className="p-4">
-          <div className="mb-1 py-1 rounded-lg h-1 flex justify-center items-center">
-            {/* {selectedDong && (
-              <p className="font-semibold text-center">{selectedDong}</p>
-            )} */}
+        <div className="relative h-screen">
+          {/* 지도 영역 (구현될 예정) */}
+          <div className="h-full bg-gray-100 flex items-center justify-center">
+            <p className="text-gray-500">동 지도 구현 예정</p>
           </div>
-          <p className="text-center mb-4">
-            안전을 확인하고 싶은 동을 선택해주세요.
-          </p>
+
+          <BottomSheet defaultHeight="30%" minHeight="15%" maxHeight="90%">
+            <DistrictSafetyDetail districtName="신림동" grade="E" />
+          </BottomSheet>
         </div>
       )}
     </div>
