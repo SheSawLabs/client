@@ -29,6 +29,13 @@ interface ProcessedDistrict {
   center: { x: number; y: number };
 }
 
+interface ProcessedDong {
+  name: string;
+  coordinates: number[][];
+  bounds: { minX: number; maxX: number; minY: number; maxY: number };
+  center: { x: number; y: number };
+}
+
 export default function MapPage() {
   // 퍼널 상태 관리
   const [currentStep, setCurrentStep] = useState<
@@ -39,12 +46,24 @@ export default function MapPage() {
   }>({});
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dongCanvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [selectedDong, setSelectedDong] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [processedDistricts, setProcessedDistricts] = useState<
     ProcessedDistrict[]
   >([]);
+  const [processedDongs, setProcessedDongs] = useState<ProcessedDong[]>([]);
   const [canvasBounds, setCanvasBounds] = useState({
+    minX: 0,
+    maxX: 0,
+    minY: 0,
+    maxY: 0,
+    width: 800,
+    height: 600,
+    padding: 16,
+  });
+  const [dongCanvasBounds, setDongCanvasBounds] = useState({
     minX: 0,
     maxX: 0,
     minY: 0,
@@ -57,6 +76,12 @@ export default function MapPage() {
   useEffect(() => {
     loadDistrictData();
   }, []);
+
+  useEffect(() => {
+    if (currentStep === "dong-selection" && funnelContext.selectedDistrict) {
+      loadDongData(funnelContext.selectedDistrict);
+    }
+  }, [currentStep, funnelContext.selectedDistrict]);
 
   // 폴리곤의 중심점 계산
   const calculatePolygonCenter = (
@@ -166,6 +191,135 @@ export default function MapPage() {
     }
   };
 
+  // 동 데이터 로드
+  const loadDongData = async (selectedDistrict: string) => {
+    setIsLoading(true);
+    try {
+      // 서울시 동별 데이터를 가져옵니다
+      const response = await fetch(
+        "https://raw.githubusercontent.com/southkorea/seoul-maps/master/kostat/2013/json/seoul_submunicipalities_geo_simple.json",
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: GeoJSONData = await response.json();
+      processDongGeoJsonData(data, selectedDistrict);
+    } catch (error) {
+      console.error("동별 데이터 로드 실패:", error);
+      // 만약 API가 없다면 더미 데이터를 사용
+      createDummyDongData(selectedDistrict);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 동 GeoJSON 데이터 처리
+  const processDongGeoJsonData = (
+    data: GeoJSONData,
+    targetDistrict: string,
+  ) => {
+    const dongs: ProcessedDong[] = [];
+    let globalMinX = Infinity,
+      globalMaxX = -Infinity;
+    let globalMinY = Infinity,
+      globalMaxY = -Infinity;
+
+    // 선택된 구에 해당하는 동들만 필터링
+    const filteredFeatures = data.features.filter((feature) => {
+      const districtName =
+        feature.properties.name || feature.properties.name_eng;
+      return (
+        districtName?.includes(targetDistrict) ||
+        feature.properties.district === targetDistrict ||
+        feature.properties.gu === targetDistrict
+      );
+    });
+
+    // 전체 좌표 범위 계산
+    filteredFeatures.forEach((feature) => {
+      const coords = extractCoordinates(feature);
+      coords.forEach((coord) => {
+        globalMinX = Math.min(globalMinX, coord[0]);
+        globalMaxX = Math.max(globalMaxX, coord[0]);
+        globalMinY = Math.min(globalMinY, coord[1]);
+        globalMaxY = Math.max(globalMaxY, coord[1]);
+      });
+    });
+
+    // 각 동별 데이터 처리
+    filteredFeatures.forEach((feature) => {
+      const coords = extractCoordinates(feature);
+      const name = feature.properties.name || feature.properties.name_eng;
+      const center = calculatePolygonCenter(coords);
+
+      dongs.push({
+        name,
+        coordinates: coords,
+        bounds: {
+          minX: globalMinX,
+          maxX: globalMaxX,
+          minY: globalMinY,
+          maxY: globalMaxY,
+        },
+        center,
+      });
+    });
+
+    setDongCanvasBounds({
+      minX: globalMinX,
+      maxX: globalMaxX,
+      minY: globalMinY,
+      maxY: globalMaxY,
+      width: 800,
+      height: 600,
+      padding: 16,
+    });
+
+    setProcessedDongs(dongs);
+  };
+
+  // 더미 동 데이터 생성 (실제 API가 없는 경우)
+  const createDummyDongData = (selectedDistrict: string) => {
+    // 관악구 예시 동들
+    const dongNames =
+      selectedDistrict === "관악구"
+        ? ["신림동", "봉천동", "남현동", "청룡동", "대학동", "낙성대동"]
+        : ["동1", "동2", "동3", "동4", "동5"];
+
+    const dongs: ProcessedDong[] = dongNames.map((name, index) => {
+      // 간단한 사각형 폴리곤 생성
+      const baseX = 126.9 + (index % 3) * 0.01;
+      const baseY = 37.4 + Math.floor(index / 3) * 0.01;
+
+      return {
+        name,
+        coordinates: [
+          [baseX, baseY],
+          [baseX + 0.008, baseY],
+          [baseX + 0.008, baseY + 0.008],
+          [baseX, baseY + 0.008],
+          [baseX, baseY],
+        ],
+        bounds: { minX: 126.9, maxX: 127.0, minY: 37.4, maxY: 37.5 },
+        center: { x: baseX + 0.004, y: baseY + 0.004 },
+      };
+    });
+
+    setDongCanvasBounds({
+      minX: 126.9,
+      maxX: 127.0,
+      minY: 37.4,
+      maxY: 37.5,
+      width: 800,
+      height: 600,
+      padding: 16,
+    });
+
+    setProcessedDongs(dongs);
+  };
+
   // 좌표를 Canvas 좌표계로 변환 (패딩 적용)
   const transformToCanvas = (x: number, y: number): [number, number] => {
     const padding = canvasBounds.padding || 0;
@@ -180,6 +334,26 @@ export default function MapPage() {
       padding +
       drawableHeight -
       ((y - canvasBounds.minY) / (canvasBounds.maxY - canvasBounds.minY)) *
+        drawableHeight;
+    return [canvasX, canvasY];
+  };
+
+  // 동 캔버스용 좌표 변환
+  const transformToDongCanvas = (x: number, y: number): [number, number] => {
+    const padding = dongCanvasBounds.padding || 0;
+    const drawableWidth = dongCanvasBounds.width - padding * 2;
+    const drawableHeight = dongCanvasBounds.height - padding * 2;
+
+    const canvasX =
+      padding +
+      ((x - dongCanvasBounds.minX) /
+        (dongCanvasBounds.maxX - dongCanvasBounds.minX)) *
+        drawableWidth;
+    const canvasY =
+      padding +
+      drawableHeight -
+      ((y - dongCanvasBounds.minY) /
+        (dongCanvasBounds.maxY - dongCanvasBounds.minY)) *
         drawableHeight;
     return [canvasX, canvasY];
   };
@@ -236,6 +410,57 @@ export default function MapPage() {
     });
   };
 
+  // 동 캔버스에 폴리곤 그리기
+  const drawDongs = () => {
+    const canvas = dongCanvasRef.current;
+    if (!canvas || processedDongs.length === 0) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // 캔버스 초기화
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff"; // 흰색 배경
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 각 동별 폴리곤 그리기
+    processedDongs.forEach((dong) => {
+      ctx.beginPath();
+
+      dong.coordinates.forEach((coord, index) => {
+        const [canvasX, canvasY] = transformToDongCanvas(coord[0], coord[1]);
+
+        if (index === 0) {
+          ctx.moveTo(canvasX, canvasY);
+        } else {
+          ctx.lineTo(canvasX, canvasY);
+        }
+      });
+
+      ctx.closePath();
+
+      // 폴리곤 채우기 (흰색, 선택시 연한 파랑)
+      ctx.fillStyle = dong.name === selectedDong ? "#DAE6FD" : "#ffffff";
+      ctx.fill();
+
+      // 테두리 그리기 (검은색)
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // 동 이름 표시 (중앙에)
+      const [centerX, centerY] = transformToDongCanvas(
+        dong.center.x,
+        dong.center.y,
+      );
+      ctx.fillStyle = "#000000";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(dong.name, centerX, centerY);
+    });
+  };
+
   // Canvas 클릭 이벤트 처리
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -282,6 +507,54 @@ export default function MapPage() {
     }
   };
 
+  // 동 캔버스 클릭 이벤트 처리
+  const handleDongCanvasClick = (
+    event: React.MouseEvent<HTMLCanvasElement>,
+  ) => {
+    const canvas = dongCanvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    // Canvas의 실제 크기와 CSS 크기를 고려한 스케일 계산
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    // 스케일이 적용된 클릭 좌표
+    const clickX = (event.clientX - rect.left) * scaleX;
+    const clickY = (event.clientY - rect.top) * scaleY;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // 각 동 폴리곤 내부 클릭 확인
+    for (let i = processedDongs.length - 1; i >= 0; i--) {
+      const dong = processedDongs[i];
+      ctx.beginPath();
+
+      dong.coordinates.forEach((coord, index) => {
+        const [canvasX, canvasY] = transformToDongCanvas(coord[0], coord[1]);
+
+        if (index === 0) {
+          ctx.moveTo(canvasX, canvasY);
+        } else {
+          ctx.lineTo(canvasX, canvasY);
+        }
+      });
+
+      ctx.closePath();
+
+      if (ctx.isPointInPath(clickX, clickY)) {
+        setSelectedDong(dong.name);
+        console.log("선택된 동:", dong.name, "클릭 좌표:", {
+          clickX,
+          clickY,
+        });
+        break;
+      }
+    }
+  };
+
   // 다음 버튼 클릭 핸들러
   const handleNext = () => {
     if (selectedDistrict) {
@@ -296,6 +569,13 @@ export default function MapPage() {
       drawDistricts();
     }
   }, [processedDistricts, selectedDistrict]);
+
+  // processedDongs가 변경될 때마다 자동으로 그리기
+  useEffect(() => {
+    if (processedDongs.length > 0) {
+      drawDongs();
+    }
+  }, [processedDongs, selectedDong]);
 
   return (
     <div className="pb-20">
@@ -341,14 +621,65 @@ export default function MapPage() {
 
       {currentStep === "dong-selection" && (
         <div className="p-4">
-          <h1 className="text-2xl font-bold mb-4">동선택 페이지</h1>
-          <p>선택된 동: {funnelContext.selectedDistrict}</p>
-          <Button
-            onClick={() => setCurrentStep("district-selection")}
-            className="mt-4"
-          >
-            이전으로
-          </Button>
+          {isLoading && (
+            <div className="mb-4 px-4 py-2 bg-gray-100 rounded-lg">
+              <span className="text-gray-600">동별 데이터 로딩 중...</span>
+            </div>
+          )}
+
+          <div className="mb-1 py-1 rounded-lg h-1 flex justify-center items-center">
+            {selectedDong && (
+              <p className="font-semibold text-center">{selectedDong}</p>
+            )}
+          </div>
+
+          <div className="bg-white px-4 py-2 rounded-md mb-4 flex items-center justify-center gap-2">
+            <span className="text-gray-600 text-sm">서울시</span>
+            <span className="text-gray-400">&gt;</span>
+            <span className="text-gray-800 font-semibold">
+              {funnelContext.selectedDistrict}
+            </span>
+          </div>
+
+          <p className="text-center mb-4">
+            안전을 확인하고 싶은 동을 선택해주세요.
+          </p>
+
+          <div className="mb-4 py-4">
+            <canvas
+              ref={dongCanvasRef}
+              width={800}
+              height={600}
+              onClick={handleDongCanvasClick}
+              className="w-full border border-gray-300 rounded-lg cursor-pointer"
+              style={{ maxWidth: "100%", height: "auto" }}
+            />
+          </div>
+
+          <div className="flex justify-between">
+            <Button
+              onClick={() => setCurrentStep("district-selection")}
+              variant="outline"
+              className="px-6 py-2"
+            >
+              이전
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedDong) {
+                  console.log("최종 선택:", {
+                    district: funnelContext.selectedDistrict,
+                    dong: selectedDong,
+                  });
+                }
+              }}
+              disabled={!selectedDong}
+              size="wide"
+              className="px-6 py-2"
+            >
+              완료
+            </Button>
+          </div>
         </div>
       )}
     </div>
