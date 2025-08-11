@@ -1,7 +1,4 @@
-import {
-  SAFETY_LEVEL_COLORS,
-  type SafetyLevel,
-} from "@/constants/markerColors";
+import { SAFETY_LEVEL_COLORS, type SafetyLevel } from "@/constants";
 
 export const generateMarkerSVGByLevel = (level: SafetyLevel): string => {
   const fillColor = SAFETY_LEVEL_COLORS[level];

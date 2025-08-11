@@ -9,7 +9,7 @@ import type {
   LatNLng,
 } from "@/types/kakao";
 import { generateMarkerSVGByLevel } from "@/utils/markerUtils";
-import { SAFETY_LEVEL_BG_CLASSES } from "@/constants/markerColors";
+import { SAFETY_LEVEL_BG_CLASSES } from "@/constants";
 import type { AddressData } from "@/types/address";
 
 declare global {

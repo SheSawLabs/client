@@ -1,5 +1,5 @@
 import React from "react";
-import { MARKER_COLORS, type MarkerColorType } from "@/constants/markerColors";
+import { MARKER_COLORS, type MarkerColorType } from "@/constants";
 
 interface MarkerIconProps {
   color?: MarkerColorType;
