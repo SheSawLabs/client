@@ -73,7 +73,7 @@ export default function GroupsPage() {
 
   const handlePostClick = (post: Post) => {
     console.log("게시글 클릭:", post.title);
-    // TODO: 게시글 상세 페이지로 이동
+    router.push(`/community/post?id=${post.id}`);
   };
 
   const handleNotificationClick = () => {
