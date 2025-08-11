@@ -10,3 +10,4 @@ node_modules
 .claude
 .gitmessage
 .claudekakao-navigation-mcp/
+.vscode
