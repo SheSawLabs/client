@@ -95,9 +95,11 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     let globalMinY = Infinity,
       globalMaxY = -Infinity;
 
-    // 선택된 구에 해당하는 동들만 필터링
+    // 선택된 구에 해당하는 동들만 필터링 (서울특별시만)
     const filteredFeatures = features.filter(
-      (feature) => feature.properties.sggnm === districtName,
+      (feature) =>
+        feature.properties.sggnm === districtName &&
+        feature.properties.sidonm === "서울특별시",
     );
 
     // 전체 좌표 범위 계산
@@ -191,7 +193,9 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
   // Canvas에 폴리곤 그리기
   const drawDongs = () => {
     const canvas = canvasRef.current;
-    if (!canvas || processedDongs.length === 0) return;
+    if (!canvas || processedDongs.length === 0) {
+      return;
+    }
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
