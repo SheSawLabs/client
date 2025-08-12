@@ -8,6 +8,8 @@ export interface Post {
   excerpt: string;
   author: { name: string; avatarUrl?: string };
   stats: { views: number; comments: number; likes: number };
+  is_liked?: boolean;
+  date?: string; // 모임 날짜 정보 (ISO string format)
 }
 
 export interface CategoryTab {
@@ -27,4 +29,13 @@ export interface CommunityFilters {
   category: CategoryTab["key"];
   isInterestOnly: boolean;
   sortBy: SortOption["value"];
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  author?: {
+    name: string;
+  };
 }

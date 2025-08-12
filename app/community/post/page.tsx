@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
@@ -12,61 +12,121 @@ import {
   MapPin,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
-import { mockPosts } from "@/data/mockPosts";
-import { mockComments } from "@/data/mockComments";
+import {
+  usePostQuery,
+  useCommentsQuery,
+  useCreateCommentMutation,
+  useParticipantStatusQuery,
+  useToggleLikeMutation,
+  useLikeStatusQuery,
+} from "@/app/queries/community";
 
 export default function PostDetailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [post, setPost] = useState(null);
   const [commentInput, setCommentInput] = useState("");
   const [isParticipating, setIsParticipating] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
 
-  const [comments, setComments] = useState([]);
+  const postId = searchParams.get("id");
+  const { data: post, isLoading, error } = usePostQuery(postId || "");
+  const { data: participantStatus } = useParticipantStatusQuery(postId || "");
+  const { data: likeStatus, error: likeError } = useLikeStatusQuery(
+    postId || "",
+  );
 
-  useEffect(() => {
-    const id = searchParams.get("id");
-    const foundPost = mockPosts.find((p) => p.id === id);
-    if (foundPost) {
-      setPost({
-        ...foundPost,
-        content: foundPost.excerpt,
-        liked: false,
-      });
+  // 디버깅용 로그
+  if (likeError) {
+    console.error("Like status error:", likeError);
+  }
+  console.log("Current likeStatus:", likeStatus);
+  const toggleLikeMutation = useToggleLikeMutation();
 
-      // 더미 댓글 데이터 설정
-      setComments(mockComments);
-    }
-  }, [searchParams]);
+  // 일반 게시글이거나 작성자이거나 참가자인 경우에만 댓글 조회
+  const canViewComments =
+    !post ||
+    post.category === "일반" ||
+    participantStatus?.isAuthor ||
+    participantStatus?.isParticipant;
+
+  const { data: comments = [], isLoading: commentsLoading } = useCommentsQuery(
+    postId || "",
+    {
+      enabled: canViewComments,
+    },
+  );
+
+  const createCommentMutation = useCreateCommentMutation();
 
   const handleBack = () => {
     router.back();
   };
 
   const handleLikePost = () => {
-    if (!post) return;
-    setPost((prev) => ({
-      ...prev,
-      liked: !prev.liked,
-      stats: {
-        ...prev.stats,
-        likes: prev.liked ? prev.stats.likes - 1 : prev.stats.likes + 1,
+    if (!postId) return;
+    console.log("Attempting to like post:", postId);
+    toggleLikeMutation.mutate(postId, {
+      onSuccess: (data) => {
+        console.log("Like success:", data);
       },
-    }));
+      onError: (error) => {
+        console.error("Like error:", error);
+      },
+    });
   };
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
-    if (!commentInput.trim()) return;
-    setCommentInput("");
+    if (!commentInput.trim() || !postId) return;
+
+    createCommentMutation.mutate(
+      { postId, content: commentInput.trim() },
+      {
+        onSuccess: () => {
+          setCommentInput("");
+        },
+        onError: (error) => {
+          console.error("댓글 작성 실패:", error);
+          alert("댓글 작성에 실패했습니다. 다시 시도해주세요.");
+        },
+      },
+    );
   };
 
   const handleParticipationToggle = () => {
     setIsParticipating(!isParticipating);
   };
 
-  if (!post) {
+  // 날짜 포맷팅 함수 (예: "8월 15일")
+  const formatMeetingDate = (dateString?: string) => {
+    if (!dateString) return "날짜 미정";
+
+    try {
+      const date = new Date(dateString);
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}월 ${day}일`;
+    } catch {
+      return "날짜 미정";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white">
+        <header className="flex items-center justify-between h-14 px-4 border-b border-gray-200 bg-white">
+          <button onClick={handleBack} aria-label="뒤로가기">
+            <ChevronLeft size={20} className="text-gray-900" />
+          </button>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !post) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
         <header className="flex items-center justify-between h-14 px-4 border-b border-gray-200 bg-white">
@@ -118,7 +178,7 @@ export default function PostDetailPage() {
             </div>
             <div className="flex items-center gap-3">
               {/* 모집 인원 (일반 제외 모든 카테고리) */}
-              {post.participants && (
+              {post.participants && post.category !== "일반" && (
                 <div className="flex items-center gap-1">
                   <Users size={12} className="text-gray-500" />
                   <span className="text-xs text-gray-600">
@@ -141,7 +201,7 @@ export default function PostDetailPage() {
 
           {/* 본문 */}
           <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line mb-12">
-            {post.content}
+            {post.excerpt}
           </div>
 
           {/* 모임 정보 (일반 게시글이 아닌 경우) */}
@@ -149,13 +209,13 @@ export default function PostDetailPage() {
             <div className="mb-12 space-y-2">
               <div className="flex items-center gap-3">
                 <Calendar size={16} className="text-gray-500" />
-                <span className="text-sm text-gray-600">8월 15일 오후 7시</span>
+                <span className="text-sm text-gray-600">
+                  {formatMeetingDate(post.date)}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin size={16} className="text-gray-500" />
-                <span className="text-sm text-gray-600">
-                  {post.region} 근처
-                </span>
+                <span className="text-sm text-gray-600">{post.region}</span>
               </div>
             </div>
           )}
@@ -170,18 +230,22 @@ export default function PostDetailPage() {
                 </span>
               </div>
               <button
-                onClick={handleLikePost}
+                onClick={() => {
+                  console.log("Heart button clicked!");
+                  handleLikePost();
+                }}
                 className="flex items-center gap-1"
+                disabled={toggleLikeMutation.isPending}
               >
                 <Heart
                   size={16}
                   className={cn(
                     "text-gray-500",
-                    post.liked && "text-red-500 fill-red-500",
+                    likeStatus?.liked && "text-red-500 fill-red-500",
                   )}
                 />
                 <span className="text-sm text-gray-500">
-                  {post.stats.likes}
+                  {likeStatus?.like_count ?? post.stats.likes ?? 0}
                 </span>
               </button>
             </div>
@@ -203,170 +267,153 @@ export default function PostDetailPage() {
 
         {/* 댓글 섹션 */}
         <div className="px-8">
-          {/* 댓글 헤더 */}
-          <div className="flex items-center justify-between py-6">
-            <span className="text-sm font-medium text-gray-900">
-              댓글 {post.stats.comments}
-            </span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSortOrder("oldest")}
-                className={cn(
-                  "text-xs",
-                  sortOrder === "oldest"
-                    ? "text-blue-600 font-semibold"
-                    : "text-gray-500",
-                )}
-              >
-                {sortOrder === "oldest" && (
-                  <span className="inline-block w-1 h-1 bg-blue-600 rounded-full mr-1" />
-                )}
-                등록순
-              </button>
-              <button
-                onClick={() => setSortOrder("newest")}
-                className={cn(
-                  "text-xs",
-                  sortOrder === "newest"
-                    ? "text-blue-600 font-semibold"
-                    : "text-gray-500",
-                )}
-              >
-                {sortOrder === "newest" && (
-                  <span className="inline-block w-1 h-1 bg-blue-600 rounded-full mr-1" />
-                )}
-                최신순
-              </button>
-            </div>
-          </div>
+          {canViewComments ? (
+            <>
+              {/* 댓글 헤더 */}
+              <div className="flex items-center justify-between py-6">
+                <span className="text-sm font-medium text-gray-900">
+                  댓글 {comments.length}
+                </span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSortOrder("oldest")}
+                    className={cn(
+                      "text-xs",
+                      sortOrder === "oldest"
+                        ? "text-blue-600 font-semibold"
+                        : "text-gray-500",
+                    )}
+                  >
+                    {sortOrder === "oldest" && (
+                      <span className="inline-block w-1 h-1 bg-blue-600 rounded-full mr-1" />
+                    )}
+                    등록순
+                  </button>
+                  <button
+                    onClick={() => setSortOrder("newest")}
+                    className={cn(
+                      "text-xs",
+                      sortOrder === "newest"
+                        ? "text-blue-600 font-semibold"
+                        : "text-gray-500",
+                    )}
+                  >
+                    {sortOrder === "newest" && (
+                      <span className="inline-block w-1 h-1 bg-blue-600 rounded-full mr-1" />
+                    )}
+                    최신순
+                  </button>
+                </div>
+              </div>
 
-          {/* 댓글 리스트 */}
-          <div className="space-y-4">
-            {comments.length > 0 ? (
-              comments.map((comment) => (
-                <div key={comment.id} className="space-y-2">
-                  {/* 댓글 작성자 정보 */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-medium text-gray-600">
-                        {comment.author.nickname.charAt(0)}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-700">
-                        {comment.author.nickname}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {comment.createdAt} · {comment.author.location}
-                      </span>
-                    </div>
+              {/* 댓글 리스트 */}
+              <div className="space-y-4">
+                {commentsLoading ? (
+                  <div className="text-center py-8 text-gray-500">
+                    댓글을 불러오는 중...
                   </div>
-
-                  {/* 댓글 내용 */}
-                  <div className="text-sm text-gray-600 leading-relaxed pl-11">
-                    {comment.content}
-                  </div>
-
-                  {/* 댓글 메타 정보 */}
-                  <div className="flex items-center gap-4 pl-11">
-                    <button className="flex items-center gap-1">
-                      <Heart
-                        size={12}
-                        className={cn(
-                          "text-gray-500",
-                          comment.liked && "text-red-500 fill-red-500",
-                        )}
-                      />
-                      <span className="text-xs text-gray-500">
-                        {comment.likes}
-                      </span>
-                    </button>
-                    <button className="flex items-center gap-1">
-                      <MessageCircle size={12} className="text-gray-500" />
-                      <span className="text-xs text-gray-500">
-                        {comment.repliesCount}
-                      </span>
-                    </button>
-                  </div>
-
-                  {/* 대댓글 */}
-                  {comment.replies && comment.replies.length > 0 && (
-                    <div className="pl-11 mt-3">
-                      {comment.replies.map((reply) => (
-                        <div key={reply.id} className="space-y-2">
-                          {/* 대댓글 작성자 정보 */}
-                          <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center">
-                              <span className="text-xs font-medium text-gray-600">
-                                {reply.author.nickname.charAt(0)}
-                              </span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-700">
-                                {reply.author.nickname}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {reply.createdAt} · {reply.author.location}
-                              </span>
-                            </div>
+                ) : comments.length > 0 ? (
+                  [...comments]
+                    .sort((a, b) => {
+                      const dateA = new Date(a.created_at).getTime();
+                      const dateB = new Date(b.created_at).getTime();
+                      return sortOrder === "oldest"
+                        ? dateA - dateB
+                        : dateB - dateA;
+                    })
+                    .map((comment) => (
+                      <div key={comment.id} className="space-y-2">
+                        {/* 댓글 작성자 정보 */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-medium text-gray-600">
+                              익
+                            </span>
                           </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-gray-700">
+                              익명
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {(() => {
+                                const date = new Date(comment.created_at);
+                                const now = new Date();
+                                const diffInHours = Math.floor(
+                                  (now.getTime() - date.getTime()) /
+                                    (1000 * 60 * 60),
+                                );
 
-                          {/* 대댓글 내용 */}
-                          <div className="text-sm text-gray-600 leading-relaxed pl-10">
-                            {reply.content}
-                          </div>
+                                if (diffInHours < 1) return "방금 전";
+                                if (diffInHours < 24)
+                                  return `${diffInHours}시간 전`;
 
-                          {/* 대댓글 메타 정보 */}
-                          <div className="flex items-center gap-4 pl-10">
-                            <button className="flex items-center gap-1">
-                              <Heart
-                                size={10}
-                                className={cn(
-                                  "text-gray-500",
-                                  reply.liked && "text-red-500 fill-red-500",
-                                )}
-                              />
-                              <span className="text-xs text-gray-500">
-                                {reply.likes}
-                              </span>
-                            </button>
-                            <button className="flex items-center gap-1">
-                              <MessageCircle
-                                size={10}
-                                className="text-gray-500"
-                              />
-                              <span className="text-xs text-gray-500">
-                                {reply.repliesCount}
-                              </span>
-                            </button>
+                                const diffInDays = Math.floor(diffInHours / 24);
+                                if (diffInDays < 7) return `${diffInDays}일 전`;
+
+                                return date.toLocaleDateString();
+                              })()}
+                            </span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                댓글이 없습니다. 첫 댓글을 작성해보세요!
+
+                        {/* 댓글 내용 */}
+                        <div className="text-sm text-gray-600 leading-relaxed pl-11">
+                          {comment.content}
+                        </div>
+
+                        {/* 댓글 메타 정보 */}
+                        <div className="flex items-center gap-4 pl-11">
+                          <button className="flex items-center gap-1">
+                            <Heart size={12} className="text-gray-500" />
+                            <span className="text-xs text-gray-500">0</span>
+                          </button>
+                          <button className="flex items-center gap-1">
+                            <MessageCircle
+                              size={12}
+                              className="text-gray-500"
+                            />
+                            <span className="text-xs text-gray-500">0</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <div>댓글이 없습니다.</div>
+                    <div>첫 댓글을 작성해보세요!</div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <p className="text-sm text-gray-500">
+                모임에 참여하시면 댓글을 보실 수 있습니다
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 댓글 입력창 */}
-      <div className="px-8 py-6 flex-shrink-0">
-        <form onSubmit={handleSubmitComment}>
-          <input
-            type="text"
-            value={commentInput}
-            onChange={(e) => setCommentInput(e.target.value)}
-            placeholder="댓글 쓰기…"
-            className="w-full h-12 px-6 text-sm bg-gray-200 rounded-full border-none outline-none placeholder-gray-600 text-gray-800"
-          />
-        </form>
-      </div>
+      {canViewComments && (
+        <div className="px-8 py-6 flex-shrink-0">
+          <form onSubmit={handleSubmitComment}>
+            <input
+              type="text"
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              placeholder={
+                createCommentMutation.isPending
+                  ? "댓글 작성 중..."
+                  : "댓글 쓰기…"
+              }
+              disabled={createCommentMutation.isPending}
+              className="w-full h-12 px-6 text-sm bg-gray-200 rounded-full border-none outline-none placeholder-gray-600 text-gray-800 disabled:opacity-50"
+            />
+          </form>
+        </div>
+      )}
     </div>
   );
 }
