@@ -33,19 +33,25 @@ export default function MapPage() {
   const { openBottomSheet } = useBottomSheet();
 
   const handleNext = () => {
+    return currentStep === "gu-selection"
+      ? handleGuSelection()
+      : handleDongSelection();
+  };
+
+  const handleGuSelection = () => {
     if (selectedDistrict) {
       setFunnelContext({ selectedDistrict });
       setCurrentStep("dong-selection");
+    }
+  };
 
-      // Open bottom sheet with district safety details
-      openBottomSheet(
-        <DistrictSafetyDetail districtName="신림동" grade="E" />,
-        {
-          defaultHeight: "30%",
-          minHeight: "15%",
-          maxHeight: "70%",
-        },
-      );
+  const handleDongSelection = () => {
+    if (selectedDong) {
+      // Update funnel context with selected dong
+      setFunnelContext((prev) => ({
+        ...prev,
+        selectedDong,
+      }));
     }
   };
 
@@ -57,16 +63,30 @@ export default function MapPage() {
     openBottomSheet(
       <DistrictSafetyDetail districtName={dongName} grade="E" />,
       {
-        defaultHeight: "30%",
+        defaultHeight: "40%",
         minHeight: "15%",
         maxHeight: "70%",
       },
     );
   };
 
+  const onBackClick = () => {
+    if (currentStep === "dong-selection") {
+      setCurrentStep("gu-selection");
+      setSelectedDong(null);
+    } else {
+      // Navigate back to the previous page
+      window.history.back();
+    }
+  };
+
   return (
     <div className="pb-20">
-      <TopNav title="동네 안전" showBackButton={true} />
+      <TopNav
+        title="동네 안전"
+        showBackButton={true}
+        onBackClick={onBackClick}
+      />
       {currentStep === "gu-selection" && (
         <div className="p-4">
           <DistrictPolygons
@@ -120,6 +140,16 @@ export default function MapPage() {
               selectedDong={selectedDong}
               className="h-full"
             />
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleNext}
+              disabled={!selectedDong}
+              size="wide"
+              className="px-6 py-2"
+            >
+              다음
+            </Button>
           </div>
         </div>
       )}
