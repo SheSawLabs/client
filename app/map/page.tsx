@@ -8,6 +8,7 @@ import { SafetyLevel } from "@/components/ui/SafetyLevel";
 import { GuideTag } from "@/components/ui/GuideTag";
 import { useBottomSheet } from "@/hooks/useBottomSheet";
 import { DistrictSafetyDetail } from "@/components/ui/DistrictSafetyDetail";
+import { DongPolygons } from "@/components/ui/DongPolygons";
 import {
   Sheet,
   SheetContent,
@@ -56,7 +57,7 @@ export default function MapPage() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
-  // const [selectedDong, setSelectedDong] = useState<string | null>(null);
+  const [selectedDong, setSelectedDong] = useState<string | null>(null);
   const [processedDistricts, setProcessedDistricts] = useState<
     ProcessedDistrict[]
   >([]);
@@ -252,10 +253,25 @@ export default function MapPage() {
         {
           defaultHeight: "30%",
           minHeight: "15%",
-          maxHeight: "90%",
+          maxHeight: "70%",
         },
       );
     }
+  };
+
+  // 동 클릭 핸들러
+  const handleDongClick = (dongName: string) => {
+    setSelectedDong(dongName);
+
+    // Update bottom sheet with selected dong information
+    openBottomSheet(
+      <DistrictSafetyDetail districtName={dongName} grade="E" />,
+      {
+        defaultHeight: "30%",
+        minHeight: "15%",
+        maxHeight: "70%",
+      },
+    );
   };
 
   // Canvas 클릭 이벤트 처리
@@ -391,9 +407,14 @@ export default function MapPage() {
 
       {currentStep === "dong-selection" && (
         <div className="relative h-screen">
-          {/* 지도 영역 (구현될 예정) */}
-          <div className="h-full bg-gray-100 flex items-center justify-center">
-            <p className="text-gray-500">동 지도 구현 예정</p>
+          {/* 동 지도 영역 */}
+          <div className="h-full p-4">
+            <DongPolygons
+              districtName={selectedDistrict || ""}
+              onDongClick={handleDongClick}
+              selectedDong={selectedDong}
+              className="h-full"
+            />
           </div>
         </div>
       )}
