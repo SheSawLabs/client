@@ -6,15 +6,9 @@ import { TopNav } from "@/components/ui/TopNav";
 import { SafetyLevel } from "@/components/ui/SafetyLevel";
 import { GuideTag } from "@/components/ui/GuideTag";
 import { useBottomSheet } from "@/hooks/useBottomSheet";
+import { useModal } from "@/hooks/useModal";
 import { DistrictSafetyDetail } from "@/components/ui/DistrictSafetyDetail";
 import { DongPolygons } from "@/components/ui/DongPolygons";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/Sheet";
 import { HelpCircle } from "lucide-react";
 import { SafetyGuideDetail } from "@/components/ui/SafetyGuideDetail";
 import { DistrictPolygons } from "@/components/ui/DistrictPolygons";
@@ -31,6 +25,7 @@ export default function MapPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedDong, setSelectedDong] = useState<string | null>(null);
   const { openBottomSheet } = useBottomSheet();
+  const { openModal } = useModal();
 
   const handleNext = () => {
     return currentStep === "gu-selection"
@@ -99,22 +94,15 @@ export default function MapPage() {
           </div>
           {/* 안전등급 가이드 */}
           <div className="flex justify-center mb-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <div>
-                  <GuideTag
-                    icon={<HelpCircle className="w-3 h-3" />}
-                    text="안전 등급이란?"
-                  />
-                </div>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[50vh]">
-                <SheetHeader>
-                  <SheetTitle>안전 등급 가이드</SheetTitle>
-                </SheetHeader>
-                <SafetyGuideDetail />
-              </SheetContent>
-            </Sheet>
+            <div
+              onClick={() => openModal(<SafetyGuideDetail />)}
+              className="cursor-pointer"
+            >
+              <GuideTag
+                icon={<HelpCircle className="w-3 h-3" />}
+                text="안전 등급이란?"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">
