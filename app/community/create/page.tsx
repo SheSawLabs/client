@@ -5,12 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { X, Calendar, MapPin, Users } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { LocationSearchModal } from "@/components/ui/LocationSearchModal";
+import { useCreatePostMutation } from "@/app/queries/community";
 import type { KakaoPlace } from "@/types/kakao";
 
 const categories = [
-  { id: "safety", label: "안전 수리" },
-  { id: "small_group", label: "소분 모임", active: true },
-  { id: "hobby", label: "취미·기타" },
+  { id: "수리", label: "안전 수리" },
+  { id: "소분", label: "소분 모임", active: true },
+  { id: "취미", label: "취미·기타" },
 ];
 
 export default function CreatePage() {
@@ -19,7 +20,10 @@ export default function CreatePage() {
   const type = searchParams.get("type") || "group"; // "group" 또는 "post"
 
   const [title, setTitle] = useState("");
-  const [activeCategory, setActiveCategory] = useState("small_group");
+  // type이 post일 때는 "일반" 카테고리, group일 때는 "소분" 기본값
+  const [activeCategory, setActiveCategory] = useState(
+    type === "post" ? "일반" : "소분",
+  );
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("2025-08-01");
   const [meetingPlace, setMeetingPlace] = useState("신림동 하이마트");
@@ -28,27 +32,36 @@ export default function CreatePage() {
 
   const dateInputRef = useRef<HTMLInputElement>(null);
   const isGroup = type === "group";
+  const createPostMutation = useCreatePostMutation();
 
   const handleBack = () => {
     router.back();
   };
 
   const handleSubmit = () => {
-    if (isGroup) {
-      console.log("모임 생성:", {
-        title,
-        activeCategory,
-        description,
-        meetingDate,
-        meetingPlace,
-        maxMembers,
-      });
-    } else {
-      console.log("일반 게시글 생성:", {
-        title,
-        description,
-      });
+    if (!title.trim() || !description.trim()) {
+      alert("제목과 내용을 입력해주세요.");
+      return;
     }
+
+    const postData = {
+      title: title.trim(),
+      content: description.trim(),
+      category: isGroup ? activeCategory : "일반", // 일반 게시글은 무조건 "일반" 카테고리
+      location: isGroup ? meetingPlace : undefined,
+      date: isGroup ? meetingDate : undefined,
+      max_participants: isGroup ? maxMembers : undefined,
+    };
+
+    createPostMutation.mutate(postData, {
+      onSuccess: () => {
+        router.push("/community/groups");
+      },
+      onError: (error) => {
+        console.error("게시글 생성 실패:", error);
+        alert("게시글 생성에 실패했습니다. 다시 시도해주세요.");
+      },
+    });
   };
 
   const handleDateRowClick = () => {
@@ -247,9 +260,14 @@ export default function CreatePage() {
         <div className="pt-6">
           <button
             onClick={handleSubmit}
-            className="w-full h-12 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={createPostMutation.isPending}
+            className="w-full h-12 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isGroup ? "모임 만들기" : "게시글 작성하기"}
+            {createPostMutation.isPending
+              ? "생성 중..."
+              : isGroup
+                ? "모임 만들기"
+                : "게시글 작성하기"}
           </button>
         </div>
       </div>

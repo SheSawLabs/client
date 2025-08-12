@@ -45,13 +45,17 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1 text-sm text-gray-500">
           <span>{post.createdAgo}</span>
-          <span>·</span>
-          <span>{post.region}</span>
+          {post.category !== "일반" && (
+            <>
+              <span>·</span>
+              <span>{post.region}</span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
           {/* 모집 인원 (일반 제외 모든 카테고리) */}
-          {post.participants && (
+          {post.participants && post.category !== "일반" && (
             <div className="flex items-center gap-1">
               <Users size={12} className="text-gray-500" />
               <span className="text-xs text-gray-600">

@@ -6,18 +6,22 @@ import { CommunityHeader } from "@/components/ui/CommunityHeader";
 import { CommunityFilters } from "@/components/ui/CommunityFilters";
 import { PostCard } from "@/components/ui/PostCard";
 import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
-import { mockPosts } from "@/data/mockPosts";
-import { Post, CategoryTab, SortOption, PostState } from "@/types/community";
+import { usePostsQuery } from "@/app/queries/community";
+import { Post, CategoryTab, SortOption } from "@/types/community";
 
 export default function GroupsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [activeCategory, setActiveCategory] =
-    useState<CategoryTab["key"]>("소분 모임");
+    useState<CategoryTab["key"]>("전체");
   const [isInterestOnly, setIsInterestOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption["value"]>("등록순");
-  const [postState] = useState<PostState>("loaded");
+
+  // 서버에서 데이터 가져오기
+  const { data, isLoading, error } = usePostsQuery(
+    activeCategory === "전체" ? undefined : activeCategory,
+  );
 
   // URL 쿼리에서 정렬 상태 초기화
   useEffect(() => {
@@ -43,33 +47,37 @@ export default function GroupsPage() {
 
   // 필터링된 포스트 목록
   const filteredPosts = useMemo(() => {
-    let filtered = [...mockPosts];
+    if (!data?.posts) return [];
 
-    // 카테고리 필터링
-    if (activeCategory !== "전체") {
-      filtered = filtered.filter((post) => post.category === activeCategory);
-    }
+    let filtered = [...data.posts];
 
-    // 관심글 필터링 (임시로 좋아요 15개 이상으로 필터)
+    // 관심글 필터링 (사용자가 좋아요한 게시글)
     if (isInterestOnly) {
-      filtered = filtered.filter((post) => post.stats.likes >= 15);
+      filtered = filtered.filter((post) => post.is_liked);
     }
 
-    // 정렬
-    if (sortBy === "최신순") {
-      filtered = filtered.sort((a, b) => {
-        const getTimeValue = (timeStr: string) => {
-          if (timeStr.includes("시간전")) return parseInt(timeStr) / 24;
-          if (timeStr.includes("일전")) return parseInt(timeStr);
-          if (timeStr.includes("주전")) return parseInt(timeStr) * 7;
-          return 0;
-        };
-        return getTimeValue(a.createdAgo) - getTimeValue(b.createdAgo);
-      });
-    }
+    // 정렬 - 실제 생성 시간을 기준으로 정렬
+    filtered = filtered.sort((a, b) => {
+      // _createdAt 속성을 사용하여 정렬
+      const postA = a as Post & { _createdAt?: string };
+      const postB = b as Post & { _createdAt?: string };
+
+      if (!postA._createdAt || !postB._createdAt) return 0;
+
+      const timeA = new Date(postA._createdAt).getTime();
+      const timeB = new Date(postB._createdAt).getTime();
+
+      // 최신순: 최근 생성된 것이 먼저 (내림차순)
+      // 등록순: 먼저 생성된 것이 먼저 (오름차순)
+      if (sortBy === "최신순") {
+        return timeB - timeA;
+      } else {
+        return timeA - timeB;
+      }
+    });
 
     return filtered;
-  }, [activeCategory, isInterestOnly, sortBy]);
+  }, [data?.posts, isInterestOnly, sortBy]);
 
   const handlePostClick = (post: Post) => {
     console.log("게시글 클릭:", post.title);
@@ -81,10 +89,10 @@ export default function GroupsPage() {
     // TODO: 알림 페이지로 이동
   };
 
-  if (postState === "loading") {
+  if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
-        <CommunityHeader title="모임" />
+        <CommunityHeader title="커뮤니티" />
         <div className="flex-1 p-4">
           <div className="space-y-4">
             {[...Array(4)].map((_, i) => (
@@ -112,11 +120,30 @@ export default function GroupsPage() {
     );
   }
 
-  if (postState === "empty") {
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+        <CommunityHeader title="커뮤니티" />
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            데이터를 불러올 수 없습니다
+          </h3>
+          <p className="text-gray-500 mb-6">
+            서버 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data?.posts || data.posts.length === 0) {
     return (
       <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
         <CommunityHeader
-          title="모임"
+          title="커뮤니티"
           onNotificationClick={handleNotificationClick}
         />
         <CommunityFilters
@@ -127,19 +154,16 @@ export default function GroupsPage() {
           onInterestToggle={() => setIsInterestOnly(!isInterestOnly)}
           onSortChange={handleSortChange}
         />
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className="flex flex-col items-center p-8 text-center mt-32">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">📋</span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             아직 등록된 모임이 없어요
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500">
             우리 동네 첫 번째 모임을 만들어보세요!
           </p>
-          <button className="px-6 py-3 bg-[#2ECC71] text-white font-semibold rounded-full hover:bg-[#27AE60] transition-colors">
-            모임 개설하기
-          </button>
         </div>
         <FloatingActionButton />
       </div>
@@ -150,7 +174,7 @@ export default function GroupsPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* 헤더 */}
       <CommunityHeader
-        title="모임"
+        title="커뮤니티"
         onNotificationClick={handleNotificationClick}
       />
 
