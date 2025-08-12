@@ -275,7 +275,7 @@ export default function MapPage() {
   };
 
   // Canvas 클릭 이벤트 처리
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleDistrictClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -361,7 +361,7 @@ export default function MapPage() {
               ref={canvasRef}
               width={800}
               height={600}
-              onClick={handleCanvasClick}
+              onClick={handleDistrictClick}
               className="w-full border border-gray-300 rounded-lg cursor-pointer"
               style={{ maxWidth: "100%", height: "auto" }}
             />
