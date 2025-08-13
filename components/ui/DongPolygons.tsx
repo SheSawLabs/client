@@ -2,8 +2,10 @@
 
 import {
   useDistrictByDistrictNameQuery,
-  useStreetlightByDongNameQuery,
+  useHangjeongDongQuery,
 } from "@/app/queries/map";
+import { SAFETY_COLORS } from "@/constants";
+import { SafetyGrade } from "@/types/safety";
 import React, { useRef, useEffect, useState } from "react";
 
 interface DongFeature {
@@ -52,16 +54,14 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     padding: 16,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { data: districtData, isSuccess: districtIsSuccess } =
-    useDistrictByDistrictNameQuery(districtName || "");
 
-  const { data: streetlightData, isSuccess: streetlightIsSuccess } =
-    useStreetlightByDongNameQuery(selectedDong || "");
+  // 행정동 GeoJSON 데이터
+  const { data: hangjeongDongData } = useHangjeongDongQuery();
 
-  console.log("districtData", districtData);
-  console.log("districtIsSuccess", districtIsSuccess);
-  console.log("streetlightData", streetlightData);
-  console.log("streetlightIsSuccess", streetlightIsSuccess);
+  // 구별 안전 데이터
+  const { data: districtData } = useDistrictByDistrictNameQuery(
+    districtName || "",
+  );
 
   // 폴리곤의 중심점 계산
   const calculatePolygonCenter = (
@@ -99,6 +99,14 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
   const extractDongName = (admNm: string): string => {
     const parts = admNm.split(" ");
     return parts[parts.length - 1] || "";
+  };
+
+  // 동 이름으로 안전 등급 찾기
+  const getDongSafetyGrade = (dongName: string): string => {
+    if (!districtData?.data) return "C"; // 기본값
+
+    const dong = districtData.data.find((d) => d.dong === dongName);
+    return dong?.grade || "C";
   };
 
   // GeoJSON 데이터 처리
@@ -161,30 +169,19 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     setProcessedDongs(dongs);
   };
 
-  // 데이터 로드
+  // 데이터 로드 및 처리
   useEffect(() => {
-    const loadDongData = async () => {
+    if (hangjeongDongData && districtName) {
       setIsLoading(true);
       try {
-        const response = await fetch("/data/hangjeongdong_ver250401.geojson");
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        processGeoJsonData(data.features);
+        processGeoJsonData(hangjeongDongData.features);
       } catch (error) {
-        console.error("동별 데이터 로드 실패:", error);
+        console.error("동별 데이터 처리 실패:", error);
       } finally {
         setIsLoading(false);
       }
-    };
-
-    if (districtName) {
-      loadDongData();
     }
-  }, [districtName]);
+  }, [hangjeongDongData, districtName, districtData]);
 
   // 좌표를 Canvas 좌표계로 변환 (패딩 적용)
   const transformToCanvas = (x: number, y: number): [number, number] => {
@@ -235,9 +232,22 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
 
       ctx.closePath();
 
-      // 폴리곤 채우기 (흰색, 선택시 연한 파랑)
-      ctx.fillStyle = dong.dongName === selectedDong ? "#DAE6FD" : "#ffffff";
+      // 폴리곤 채우기 (안전 등급에 따른 색상)
+      const grade = getDongSafetyGrade(dong.dongName);
+      const safetyColor =
+        SAFETY_COLORS[grade as SafetyGrade] || SAFETY_COLORS.C;
+
+      if (dong.dongName === selectedDong) {
+        // 선택된 동은 더 진한 색상으로
+        ctx.fillStyle = safetyColor;
+        ctx.globalAlpha = 0.8;
+      } else {
+        // 일반 동은 연한 색상으로
+        ctx.fillStyle = safetyColor;
+        ctx.globalAlpha = 0.4;
+      }
       ctx.fill();
+      ctx.globalAlpha = 1.0; // 투명도 복구
 
       // 테두리 그리기 (검은색)
       ctx.strokeStyle = "#000000";
