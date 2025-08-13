@@ -6,28 +6,9 @@ import {
 } from "@/app/queries/map";
 import { SAFETY_COLORS } from "@/constants";
 import { SafetyGrade } from "@/types/safety";
+import { DongFeature, ProcessedDong, CanvasBounds } from "@/types/map";
+import { processGeoJsonFeatures, transformToCanvas } from "@/utils/map";
 import React, { useRef, useEffect, useState } from "react";
-
-interface DongFeature {
-  type: "Feature";
-  properties: {
-    adm_nm: string; // 행정구역명 (예: "서울특별시 종로구 사직동")
-    sggnm: string; // 시군구명 (예: "종로구")
-    [key: string]: unknown;
-  };
-  geometry: {
-    type: "MultiPolygon";
-    coordinates: number[][][][];
-  };
-}
-
-interface ProcessedDong {
-  name: string;
-  dongName: string; // 동 이름만 (예: "사직동")
-  coordinates: number[][];
-  bounds: { minX: number; maxX: number; minY: number; maxY: number };
-  center: { x: number; y: number };
-}
 
 interface DongPolygonsProps {
   districtName: string;
@@ -44,7 +25,7 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [processedDongs, setProcessedDongs] = useState<ProcessedDong[]>([]);
-  const [canvasBounds, setCanvasBounds] = useState({
+  const [canvasBounds, setCanvasBounds] = useState<CanvasBounds>({
     minX: 0,
     maxX: 0,
     minY: 0,
@@ -63,44 +44,6 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     districtName || "",
   );
 
-  // 폴리곤의 중심점 계산
-  const calculatePolygonCenter = (
-    coordinates: number[][],
-  ): { x: number; y: number } => {
-    let totalX = 0;
-    let totalY = 0;
-    const count = coordinates.length;
-
-    coordinates.forEach(([x, y]) => {
-      totalX += x;
-      totalY += y;
-    });
-
-    return {
-      x: totalX / count,
-      y: totalY / count,
-    };
-  };
-
-  // MultiPolygon에서 좌표 추출
-  const extractCoordinates = (feature: DongFeature): number[][] => {
-    const coords: number[][] = [];
-    const multiPolygonCoords = feature.geometry.coordinates;
-
-    // MultiPolygon의 첫 번째 Polygon의 외부 링 사용
-    if (multiPolygonCoords.length > 0 && multiPolygonCoords[0].length > 0) {
-      coords.push(...multiPolygonCoords[0][0]);
-    }
-
-    return coords;
-  };
-
-  // 동 이름 추출 (행정구역명에서 동 이름만)
-  const extractDongName = (admNm: string): string => {
-    const parts = admNm.split(" ");
-    return parts[parts.length - 1] || "";
-  };
-
   // 동 이름으로 안전 등급 찾기
   const getDongSafetyGrade = (dongName: string): string => {
     if (!districtData?.data) return "C"; // 기본값
@@ -111,59 +54,11 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
 
   // GeoJSON 데이터 처리
   const processGeoJsonData = (features: DongFeature[]) => {
-    const dongs: ProcessedDong[] = [];
-    let globalMinX = Infinity,
-      globalMaxX = -Infinity;
-    let globalMinY = Infinity,
-      globalMaxY = -Infinity;
-
-    // 선택된 구에 해당하는 동들만 필터링
-    const filteredFeatures = features.filter(
-      (feature) => feature.properties.sggnm === districtName,
+    const { dongs, canvasBounds: bounds } = processGeoJsonFeatures(
+      features,
+      districtName,
     );
-
-    // 전체 좌표 범위 계산
-    filteredFeatures.forEach((feature) => {
-      const coords = extractCoordinates(feature);
-      coords.forEach((coord) => {
-        globalMinX = Math.min(globalMinX, coord[0]);
-        globalMaxX = Math.max(globalMaxX, coord[0]);
-        globalMinY = Math.min(globalMinY, coord[1]);
-        globalMaxY = Math.max(globalMaxY, coord[1]);
-      });
-    });
-
-    // 각 동별 데이터 처리
-    filteredFeatures.forEach((feature) => {
-      const coords = extractCoordinates(feature);
-      const name = feature.properties.adm_nm;
-      const dongName = extractDongName(name);
-      const center = calculatePolygonCenter(coords);
-
-      dongs.push({
-        name,
-        dongName,
-        coordinates: coords,
-        bounds: {
-          minX: globalMinX,
-          maxX: globalMaxX,
-          minY: globalMinY,
-          maxY: globalMaxY,
-        },
-        center,
-      });
-    });
-
-    setCanvasBounds({
-      minX: globalMinX,
-      maxX: globalMaxX,
-      minY: globalMinY,
-      maxY: globalMaxY,
-      width: 800,
-      height: 600,
-      padding: 16,
-    });
-
+    setCanvasBounds(bounds);
     setProcessedDongs(dongs);
   };
 
@@ -172,7 +67,7 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     if (hangjeongDongData && districtName) {
       setIsLoading(true);
       try {
-        processGeoJsonData(hangjeongDongData.features);
+        processGeoJsonData(hangjeongDongData.features as DongFeature[]);
       } catch (error) {
         console.error("동별 데이터 처리 실패:", error);
       } finally {
@@ -180,24 +75,6 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
       }
     }
   }, [hangjeongDongData, districtName, districtData]);
-
-  // 좌표를 Canvas 좌표계로 변환 (패딩 적용)
-  const transformToCanvas = (x: number, y: number): [number, number] => {
-    const padding = canvasBounds.padding || 0;
-    const drawableWidth = canvasBounds.width - padding * 2;
-    const drawableHeight = canvasBounds.height - padding * 2;
-
-    const canvasX =
-      padding +
-      ((x - canvasBounds.minX) / (canvasBounds.maxX - canvasBounds.minX)) *
-        drawableWidth;
-    const canvasY =
-      padding +
-      drawableHeight -
-      ((y - canvasBounds.minY) / (canvasBounds.maxY - canvasBounds.minY)) *
-        drawableHeight;
-    return [canvasX, canvasY];
-  };
 
   // Canvas에 폴리곤 그리기
   const drawDongs = () => {
@@ -219,7 +96,11 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
       ctx.beginPath();
 
       dong.coordinates.forEach((coord, index) => {
-        const [canvasX, canvasY] = transformToCanvas(coord[0], coord[1]);
+        const [canvasX, canvasY] = transformToCanvas(
+          coord[0],
+          coord[1],
+          canvasBounds,
+        );
 
         if (index === 0) {
           ctx.moveTo(canvasX, canvasY);
@@ -256,6 +137,7 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
       const [centerX, centerY] = transformToCanvas(
         dong.center.x,
         dong.center.y,
+        canvasBounds,
       );
       ctx.fillStyle = "#000000";
       ctx.font = "14px Arial";
@@ -286,7 +168,11 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
       ctx.beginPath();
 
       dong.coordinates.forEach((coord, index) => {
-        const [canvasX, canvasY] = transformToCanvas(coord[0], coord[1]);
+        const [canvasX, canvasY] = transformToCanvas(
+          coord[0],
+          coord[1],
+          canvasBounds,
+        );
 
         if (index === 0) {
           ctx.moveTo(canvasX, canvasY);

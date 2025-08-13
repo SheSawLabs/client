@@ -1,4 +1,8 @@
-import { useDongGeoJSONDQuery } from "@/app/queries/map";
+import {
+  useDistrictByDistrictNameQuery,
+  useDongGeoJSONDQuery,
+} from "@/app/queries/map";
+import { SAFETY_COLORS } from "@/constants";
 import {
   CustomOverlayInterface,
   LatNLng,
@@ -6,20 +10,14 @@ import {
   MarkerInstance,
   PolygonInstance,
 } from "@/types/kakao";
+import { Dong, DongFeature } from "@/types/map";
+import {
+  findSelectedDongFeature,
+  extractCoordinates,
+  convertCoordsToKakaoLatLng,
+  calculateKakaoMapCenter,
+} from "@/utils/map";
 import { useEffect, useState } from "react";
-
-interface DongFeature {
-  type: "Feature";
-  properties: {
-    adm_nm: string; // 행정구역명 (예: "서울특별시 종로구 사직동")
-    sggnm: string; // 시군구명 (예: "종로구")
-    [key: string]: unknown;
-  };
-  geometry: {
-    type: "MultiPolygon";
-    coordinates: number[][][][];
-  };
-}
 
 const InteractiveMap = ({
   districtName,
@@ -30,8 +28,22 @@ const InteractiveMap = ({
 }) => {
   const [map, setMap] = useState<MapInstance | null>(null);
   const [polygons, setPolygons] = useState<PolygonInstance[]>([]);
+  const [dongInfo, setDongInfo] = useState<Dong | null>(null);
   const { data: dongGeoJSONData, isSuccess: dongGeoJSONIsSuccess } =
     useDongGeoJSONDQuery();
+
+  const { data: districtData, isSuccess: districtIsSuccess } =
+    useDistrictByDistrictNameQuery(districtName);
+
+  useEffect(() => {
+    if (!districtIsSuccess || !districtData) return;
+
+    const dongData = districtData.data?.find(
+      (dong) => dong.dong === selectedDong,
+    );
+
+    setDongInfo(dongData || null);
+  }, [districtData, selectedDong, districtIsSuccess]);
 
   console.log({ districtName, selectedDong });
 
@@ -76,25 +88,6 @@ const InteractiveMap = ({
     }
   };
 
-  // 동 이름 추출 (행정구역명에서 동 이름만)
-  const extractDongName = (admNm: string): string => {
-    const parts = admNm.split(" ");
-    return parts[parts.length - 1] || "";
-  };
-
-  // MultiPolygon에서 좌표 추출
-  const extractCoordinates = (feature: DongFeature): number[][] => {
-    const coords: number[][] = [];
-    const multiPolygonCoords = feature.geometry.coordinates;
-
-    // MultiPolygon의 첫 번째 Polygon의 외부 링 사용
-    if (multiPolygonCoords.length > 0 && multiPolygonCoords[0].length > 0) {
-      coords.push(...multiPolygonCoords[0][0]);
-    }
-
-    return coords;
-  };
-
   // 폴리곤 생성 및 지도에 표시
   const displayPolygons = () => {
     if (!map || !dongGeoJSONData || !selectedDong) return;
@@ -104,12 +97,11 @@ const InteractiveMap = ({
     const newPolygons: PolygonInstance[] = [];
 
     // 선택된 동과 매칭되는 데이터 찾기
-    const selectedFeature = dongGeoJSONData.features.find((feature) => {
-      const dongName = extractDongName(feature.properties.adm_nm);
-      return (
-        dongName === selectedDong && feature.properties.sggnm === districtName
-      );
-    });
+    const selectedFeature = findSelectedDongFeature(
+      dongGeoJSONData.features as DongFeature[],
+      selectedDong,
+      districtName,
+    );
 
     if (!selectedFeature) {
       console.warn(
@@ -126,18 +118,19 @@ const InteractiveMap = ({
     }
 
     // 좌표를 카카오맵 LatLng 객체로 변환
-    const paths: LatNLng[] = coords.map(
-      (coord: number[]) => new window.kakao.maps.LatLng(coord[1], coord[0]), // [경도, 위도] -> LatLng(위도, 경도)
-    );
+    const paths: LatNLng[] = convertCoordsToKakaoLatLng(coords);
 
+    const gradeColor = dongInfo?.grade
+      ? SAFETY_COLORS[dongInfo.grade]
+      : "#0f5fda";
     // 폴리곤 생성
     const polygon = new window.kakao.maps.Polygon({
       map: map,
       path: paths,
-      strokeColor: "#FF0000",
+      strokeColor: dongInfo?.grade ? SAFETY_COLORS[dongInfo.grade] : "#0f5fda",
       strokeOpacity: 0.8,
       strokeWeight: 2,
-      fillColor: "#FF0000",
+      fillColor: gradeColor,
       fillOpacity: 0.3,
     });
 
@@ -159,18 +152,7 @@ const InteractiveMap = ({
 
     // 폴리곤이 보이도록 지도 중심 및 레벨 조정
     if (paths.length > 0) {
-      // 좌표들의 중심점 계산
-      let totalLat = 0;
-      let totalLng = 0;
-      paths.forEach((path) => {
-        totalLat += path.getLat ? path.getLat() : path.lat;
-        totalLng += path.getLng ? path.getLng() : path.lng;
-      });
-
-      const centerLat = totalLat / paths.length;
-      const centerLng = totalLng / paths.length;
-      const center = new window.kakao.maps.LatLng(centerLat, centerLng);
-
+      const center = calculateKakaoMapCenter(paths);
       map.setCenter(center);
       map.setLevel(6); // 동 단위로 확대
     }
