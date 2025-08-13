@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/constants";
 import { useQuery } from "@tanstack/react-query";
 
 interface DistrictFeature {
@@ -57,5 +58,120 @@ export const useDongJsonQuery = (enabled: boolean = true) => {
     enabled,
     staleTime: 1000 * 60 * 30, // 30분간 캐시 유지
     gcTime: 1000 * 60 * 60, // 1시간간 가비지 컬렉션 방지
+  });
+};
+
+interface Dong {
+  dong_code: string;
+  district: string;
+  dong: string;
+  grade: string;
+  score: number;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  facilities: {
+    cctv: number;
+    streetlight: number;
+    police_station: number;
+    safety_house: number;
+    delivery_box: number;
+  };
+  risk_factors: {
+    sexual_offender: number;
+  };
+}
+
+interface District {
+  district: string;
+  data: Dong[];
+  count: number;
+}
+
+interface Streetlight {
+  id: number;
+  management_number: string;
+  district: string;
+  dong: string;
+  latitude: number;
+  longitude: number;
+}
+
+interface StreetlightData {
+  count: number;
+  district: string;
+  dong: string;
+  streetlights: Streetlight[];
+}
+
+export const useSafetyMapQuery = () => {
+  return useQuery({
+    queryKey: ["/safety/map"],
+    queryFn: async (): Promise<Dong[]> => {
+      const response = await fetch(`${API_BASE_URL}/api/safety/map`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+  });
+};
+
+export const useDistrictByDistrictNameQuery = (disctrictName: string) => {
+  return useQuery({
+    queryKey: ["/safety/district/:disctrictName", disctrictName],
+    queryFn: async (): Promise<District> => {
+      const url = encodeURI(
+        `${API_BASE_URL}/api/safety/district/${disctrictName}`,
+      );
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    enabled: !!disctrictName,
+  });
+};
+
+export const useStreetlightByDongNameQuery = (dongName: string) => {
+  return useQuery({
+    queryKey: ["/streetlight/dong/:dongName", dongName],
+    queryFn: async (): Promise<StreetlightData[]> => {
+      const url = encodeURI(`${API_BASE_URL}/api/streetlight/dong/${dongName}`);
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    enabled: !!dongName,
+  });
+};
+
+export const useStreetlightByDistrictNameQuery = (districtName: string) => {
+  return useQuery({
+    queryKey: ["/streetlight/district/:districtName", districtName],
+    queryFn: async (): Promise<StreetlightData[]> => {
+      const url = encodeURI(
+        `${API_BASE_URL}/api/streetlight/district/${districtName}`,
+      );
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    enabled: !!districtName,
   });
 };

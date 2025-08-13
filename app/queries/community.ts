@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Post, Comment } from "@/types/community";
-
-const API_BASE_URL = "http://localhost:3001";
+import { API_BASE_URL } from "@/constants";
 
 interface UserProfile {
   user: {
