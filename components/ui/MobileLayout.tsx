@@ -15,7 +15,11 @@ interface MobileLayoutProps {
 }
 
 // NavigationBar를 숨길 경로들
-const hideNavBarPaths = ["/community/create", "/community/post"];
+const hideNavBarPaths = [
+  "/community/create",
+  "/community/post",
+  "/community/notifications",
+];
 
 export function MobileLayout({ children, className }: MobileLayoutProps) {
   const pathname = usePathname();

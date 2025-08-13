@@ -85,8 +85,7 @@ export default function GroupsPage() {
   };
 
   const handleNotificationClick = () => {
-    console.log("알림 클릭");
-    // TODO: 알림 페이지로 이동
+    router.push("/community/notifications");
   };
 
   if (isLoading) {

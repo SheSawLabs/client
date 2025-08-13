@@ -35,7 +35,7 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
     switch (category) {
       case "안전":
       case "수리":
-        return "bg-[#E3F2FD] text-[#1976D2] border border-[#1976D2] hover:bg-[#BBDEFB]";
+        return "bg-[#F0F8E8] text-[#519913] border border-[#519913] hover:bg-[#E8F5E8]";
       case "소분":
         return "bg-[#F3E5F5] text-[#BC76CE] border border-[#BC76CE] hover:bg-[#E1BEE7]";
       case "취미":
