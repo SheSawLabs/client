@@ -28,6 +28,37 @@ export default function PostDetailPage() {
   const [isParticipating, setIsParticipating] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
 
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case "안전":
+      case "수리":
+        return "안전 수리";
+      case "소분":
+        return "소분 모임";
+      case "취미":
+        return "취미·기타";
+      case "일반":
+        return "일반";
+      default:
+        return category;
+    }
+  };
+
+  const getBadgeStyles = (category: string) => {
+    switch (category) {
+      case "안전":
+      case "수리":
+        return "bg-[#E3F2FD] text-[#1976D2] border border-[#1976D2] hover:bg-[#BBDEFB]";
+      case "소분":
+        return "bg-[#F3E5F5] text-[#BC76CE] border border-[#BC76CE] hover:bg-[#E1BEE7]";
+      case "취미":
+        return "bg-[#FFF3E0] text-[#FF7E00] border border-[#FF7E00] hover:bg-[#FFE0B2]";
+      case "일반":
+      default:
+        return "bg-[#F2F4F6] text-[#374151] border border-[#374151] hover:bg-[#E5E7EB]";
+    }
+  };
+
   const postId = searchParams.get("id");
   const { data: post, isLoading, error } = usePostQuery(postId || "");
   const { data: participantStatus } = useParticipantStatusQuery(postId || "");
@@ -188,9 +219,14 @@ export default function PostDetailPage() {
               )}
 
               {/* 카테고리 배지 */}
-              <div className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-lg">
-                {post.category}
-              </div>
+              <span
+                className={cn(
+                  "px-2 py-0.5 text-[11px] font-medium rounded-lg transition-colors duration-200",
+                  getBadgeStyles(post.category),
+                )}
+              >
+                {getCategoryLabel(post.category)}
+              </span>
             </div>
           </div>
 

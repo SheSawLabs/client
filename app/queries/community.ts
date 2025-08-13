@@ -3,6 +3,16 @@ import type { Post, Comment } from "@/types/community";
 
 const API_BASE_URL = "http://localhost:3001";
 
+interface UserProfile {
+  user: {
+    id: number;
+    kakao_id: string;
+    nickname: string;
+    profile_image: string | null;
+    created_at: string;
+  };
+}
+
 interface CreatePostData {
   title: string;
   content: string;
@@ -38,10 +48,49 @@ interface PostsResponse {
   filter: string | null;
 }
 
+// 사용자 정보 캐시 (간단한 메모리 캐시)
+const userCache = new Map<
+  number,
+  { nickname: string; profile_image: string | null }
+>();
+
+// 사용자 정보 조회 유틸리티 함수
+const fetchUserInfo = async (userId: number) => {
+  if (userCache.has(userId)) {
+    return userCache.get(userId)!;
+  }
+
+  try {
+    const headers: Record<string, string> = {};
+    const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+    if (tempToken && tempToken !== "your_temp_token_here") {
+      headers.Authorization = `Bearer ${tempToken}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      headers,
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      const userInfo = {
+        nickname: result.data.user.nickname,
+        profile_image: result.data.user.profile_image,
+      };
+      userCache.set(userId, userInfo);
+      return userInfo;
+    }
+  } catch (error) {
+    console.error("사용자 정보 조회 실패:", error);
+  }
+
+  return { nickname: "익명", profile_image: null };
+};
+
 // 서버 데이터를 클라이언트 타입으로 변환
-const transformServerPost = (
+const transformServerPost = async (
   serverPost: ServerPost,
-): Post & { _createdAt: string } => {
+): Promise<Post & { _createdAt: string }> => {
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -59,6 +108,11 @@ const transformServerPost = (
     return `${diffInWeeks}주 전`;
   };
 
+  // 작성자 정보 조회
+  const authorInfo = serverPost.author_id
+    ? await fetchUserInfo(serverPost.author_id)
+    : { nickname: "익명", profile_image: null };
+
   return {
     id: serverPost.id,
     region: serverPost.location,
@@ -71,7 +125,8 @@ const transformServerPost = (
     title: serverPost.title,
     excerpt: serverPost.content,
     author: {
-      name: "익명", // 서버에서 작성자 정보가 없어 임시
+      name: authorInfo.nickname,
+      avatarUrl: authorInfo.profile_image || undefined,
     },
     stats: {
       views: serverPost.views || 0,
@@ -125,7 +180,9 @@ export const usePostsQuery = (category?: string) => {
       }
 
       const serverResponse: PostsResponse = await response.json();
-      const transformedPosts = serverResponse.data.map(transformServerPost);
+      const transformedPosts = await Promise.all(
+        serverResponse.data.map(transformServerPost),
+      );
 
       return { posts: transformedPosts as Post[] };
     },
@@ -148,7 +205,7 @@ export const usePostQuery = (postId: string) => {
       // 서버에서 단일 게시글은 data 안에 들어있을 수 있음
       const serverPost = serverResponse.data || serverResponse;
 
-      return transformServerPost(serverPost);
+      return await transformServerPost(serverPost);
     },
     enabled: !!postId,
   });
@@ -422,6 +479,35 @@ export const useLikeStatusQuery = (postId: string) => {
     },
     enabled: !!postId,
     staleTime: 0, // 즉시 새로고침
+  });
+};
+
+// 사용자 프로필 조회
+export const useUserProfileQuery = (userId?: number) => {
+  return useQuery({
+    queryKey: ["userProfile", userId],
+    queryFn: async (): Promise<UserProfile> => {
+      const headers: Record<string, string> = {};
+
+      // 임시 토큰이 있으면 Authorization 헤더에 추가
+      const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+      if (tempToken && tempToken !== "your_temp_token_here") {
+        headers.Authorization = `Bearer ${tempToken}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result.data;
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 10, // 10분간 캐시 유지
   });
 };
 

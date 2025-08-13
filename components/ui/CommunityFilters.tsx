@@ -67,10 +67,10 @@ export function CommunityFilters({
                 key={tab.id}
                 onClick={() => onCategoryChange(tab.key)}
                 className={cn(
-                  "flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                  "flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                   activeCategory === tab.key
-                    ? "bg-[#0f5fda]/10 text-[#0f5fda] font-semibold"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+                    ? "bg-blue-50 text-blue-600 font-semibold"
+                    : "bg-white text-gray-600 hover:text-gray-900",
                 )}
                 aria-label={`${tab.label} 카테고리 선택`}
               >

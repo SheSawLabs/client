@@ -69,8 +69,8 @@ export function FloatingActionButton({ className }: FloatingActionButtonProps) {
         className={cn(
           "absolute bottom-20 right-4 z-30",
           "flex items-center justify-center w-14 h-14",
-          "bg-gray-100 hover:bg-gray-200 active:bg-gray-300",
-          "text-gray-700 rounded-full shadow-lg hover:shadow-xl",
+          "bg-[#0F5FDA1A] hover:bg-[#EEF4FF] active:bg-[#EEF4FF]",
+          "text-[#0F5FDA] rounded-full shadow-lg hover:shadow-xl",
           "transition-all duration-200 ease-out",
           "transform hover:scale-105 active:scale-95",
           "focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 focus:ring-offset-white",
@@ -87,7 +87,7 @@ export function FloatingActionButton({ className }: FloatingActionButtonProps) {
         <div
           ref={menuRef}
           className={cn(
-            "absolute bottom-36 right-4 z-40 rounded-2xl bg-[#F2F4F6] text-gray-800 shadow-md border border-gray-200",
+            "absolute bottom-36 right-4 z-40 rounded-xl bg-white text-[#0F5FDA] shadow-md border border-gray-200",
             "animate-in fade-in-0 zoom-in-95 duration-150 ease-out",
           )}
           role="menu"
@@ -97,13 +97,13 @@ export function FloatingActionButton({ className }: FloatingActionButtonProps) {
               key={item.href}
               onClick={() => handleMenuItemClick(item.href)}
               className={cn(
-                "block w-full text-right px-4 py-3 min-h-[44px]",
-                "text-sm font-normal text-[#374151]",
-                "hover:bg-white hover:font-medium focus:bg-white focus:font-medium",
+                "block w-full text-left px-4 py-3 min-h-[44px]",
+                "text-sm font-normal text-[#0F5FDA]",
+                "hover:bg-[#EEF4FF] hover:font-medium focus:bg-[#EEF4FF] focus:font-medium",
                 "transition-all duration-200",
                 "focus:outline-none",
-                index === 0 ? "rounded-t-2xl" : "",
-                index === menuItems.length - 1 ? "rounded-b-2xl" : "",
+                index === 0 ? "rounded-t-xl" : "",
+                index === menuItems.length - 1 ? "rounded-b-xl" : "",
               )}
               role="menuitem"
             >
