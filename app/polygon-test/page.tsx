@@ -2,25 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import type { MapInstance, KakakoMap, LatNLng } from "@/types/kakao";
-
-declare global {
-  interface Window {
-    kakao: {
-      maps: KakakoMap;
-    };
-  }
-}
-
-interface PolygonInstance {
-  setMap: (map: MapInstance | null) => void;
-  setPaths: (paths: LatNLng[][]) => void;
-  setStrokeColor: (color: string) => void;
-  setStrokeOpacity: (opacity: number) => void;
-  setStrokeWeight: (weight: number) => void;
-  setFillColor: (color: string) => void;
-  setFillOpacity: (opacity: number) => void;
-}
+import type {
+  MapInstance,
+  PolygonInstance,
+  LatNLng,
+  MarkerInstance,
+  CustomOverlayInterface,
+} from "@/types/kakao";
 
 interface GeoJSONFeature {
   type: string;
@@ -132,10 +120,17 @@ export default function PolygonTestPage() {
           newPolygons.push(polygon);
 
           // 폴리곤 클릭 이벤트
-          window.kakao.maps.event.addListener(polygon, "click", () => {
-            console.log("클릭된 구역:", feature.properties.adm_nm);
-            alert(`클릭된 구역: ${feature.properties.adm_nm}`);
-          });
+          window.kakao?.maps.event.addListener(
+            polygon as unknown as
+              | MapInstance
+              | MarkerInstance
+              | CustomOverlayInterface,
+            "click",
+            () => {
+              console.log("클릭된 구역:", feature.properties.adm_nm);
+              alert(`클릭된 구역: ${feature.properties.adm_nm}`);
+            },
+          );
         });
       }
     });
@@ -162,9 +157,7 @@ export default function PolygonTestPage() {
         <Button onClick={displayPolygons} disabled={!geoJsonData || !map}>
           폴리곤 표시하기
         </Button>
-        <Button onClick={clearPolygons} variant="outline">
-          폴리곤 제거
-        </Button>
+        <Button onClick={clearPolygons}>폴리곤 제거</Button>
       </div>
 
       {/* 데이터 정보 */}

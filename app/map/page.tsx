@@ -12,6 +12,7 @@ import { DongPolygons } from "@/components/ui/DongPolygons";
 import { HelpCircle } from "lucide-react";
 import { SafetyGuideDetail } from "@/components/ui/SafetyGuideDetail";
 import { DistrictPolygons } from "@/components/ui/DistrictPolygons";
+import { InteractiveMap } from "@/components/ui/InteractiveMap";
 
 export default function MapPage() {
   // 퍼널 상태 관리
@@ -70,6 +71,8 @@ export default function MapPage() {
     if (currentStep === "dong-selection") {
       setCurrentStep("gu-selection");
       setSelectedDong(null);
+    } else if (currentStep === "interactive-map") {
+      setCurrentStep("dong-selection");
     } else {
       // Navigate back to the previous page
       window.history.back();
@@ -146,7 +149,12 @@ export default function MapPage() {
       )}
 
       {currentStep === "interactive-map" && (
-        <div className="relative h-screen">다음 화면 지도</div>
+        <div className="relative h-screen">
+          <InteractiveMap
+            districtName={selectedDistrict || ""}
+            selectedDong={selectedDong}
+          />
+        </div>
       )}
     </div>
   );
