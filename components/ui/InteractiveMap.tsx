@@ -14,6 +14,8 @@ import {
   convertCoordsToKakaoLatLng,
   calculateKakaoMapCenter,
 } from "@/utils/map";
+import { FacilitiesFilters } from "./FacilitiesFilters";
+import { FacilityType } from "@/hooks/useFacilityFilters";
 import { useEffect, useState } from "react";
 
 const InteractiveMap = ({
@@ -25,6 +27,7 @@ const InteractiveMap = ({
 }) => {
   const [map, setMap] = useState<MapInstance | null>(null);
   const [polygons, setPolygons] = useState<PolygonInstance[]>([]);
+  const [activeFilters, setActiveFilters] = useState<FacilityType[]>([]);
 
   const { data: dongGeoJSONData, isSuccess: dongGeoJSONIsSuccess } =
     useDongGeoJSONDQuery();
@@ -150,13 +153,26 @@ const InteractiveMap = ({
     setPolygons([]);
   };
 
+  // 필터 변경 핸들러
+  const handleFilterChange = (filters: FacilityType[]) => {
+    setActiveFilters(filters);
+
+    console.log("activeFilters", activeFilters);
+    // TODO: 실제 필터링 로직 구현 (지도에 마커 표시/숨김 등)
+  };
+
   return (
-    <div className="relative">
-      <div
-        id="polygon-map"
-        className="w-full border border-gray-300 rounded-lg"
-        style={{ height: "600px" }}
-      />
+    <div className="relative h-full">
+      {/* 상단 고정 필터 태그 */}
+      <div className="absolute top-0 left-0 right-0 z-10">
+        <FacilitiesFilters
+          dongInfo={dongInfo}
+          onFilterChange={handleFilterChange}
+        />
+      </div>
+
+      {/* 지도 컨테이너 */}
+      <div id="polygon-map" className="w-full h-full" />
     </div>
   );
 };

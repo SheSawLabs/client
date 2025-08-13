@@ -68,3 +68,12 @@ export const API_BASE_URL = "http://localhost:3001";
 export const COLORS = {
   PRIMARY: "#0f5fda", // blue-500
 };
+
+export const FACILITIES_LABELS = {
+  cctv: "CCTV",
+  streetlight: "가로등",
+  police_station: "경찰서",
+  safety_house: "안심지킴이집",
+  delivery_box: "안심택배함",
+  sexual_offender: "성범죄자",
+};
