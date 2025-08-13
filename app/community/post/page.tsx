@@ -48,7 +48,7 @@ export default function PostDetailPage() {
     switch (category) {
       case "안전":
       case "수리":
-        return "bg-[#E3F2FD] text-[#1976D2] border border-[#1976D2] hover:bg-[#BBDEFB]";
+        return "bg-[#F0F8E8] text-[#519913] border border-[#519913] hover:bg-[#E8F5E8]";
       case "소분":
         return "bg-[#F3E5F5] text-[#BC76CE] border border-[#BC76CE] hover:bg-[#E1BEE7]";
       case "취미":
@@ -175,7 +175,7 @@ export default function PostDetailPage() {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* 상단 헤더 */}
-      <header className="flex items-center justify-between h-14 px-8 bg-white">
+      <header className="flex items-center justify-between h-14 px-6 bg-white">
         <button
           onClick={handleBack}
           className="flex items-center justify-center"
@@ -189,7 +189,7 @@ export default function PostDetailPage() {
       {/* 메인 컨텐츠 */}
       <div className="flex-1 overflow-y-auto">
         {/* 게시글 정보 영역 */}
-        <div className="px-8 pt-4">
+        <div className="px-6 pt-4">
           {/* 작성자 정보 행 */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export default function PostDetailPage() {
         <div className="border-t-4 border-gray-200 mt-6"></div>
 
         {/* 댓글 섹션 */}
-        <div className="px-8">
+        <div className="px-6">
           {canViewComments ? (
             <>
               {/* 댓글 헤더 */}
@@ -433,7 +433,7 @@ export default function PostDetailPage() {
 
       {/* 댓글 입력창 */}
       {canViewComments && (
-        <div className="px-8 py-6 flex-shrink-0">
+        <div className="px-6 py-6 flex-shrink-0">
           <form onSubmit={handleSubmitComment}>
             <input
               type="text"

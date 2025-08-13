@@ -90,9 +90,9 @@ export default function CreatePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="h-screen bg-white flex flex-col">
       {/* 헤더 */}
-      <header className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
+      <header className="flex items-center justify-between h-14 px-4 border-b border-gray-200 flex-shrink-0">
         <button
           onClick={handleBack}
           className="flex items-center justify-center w-5 h-5"
@@ -107,7 +107,7 @@ export default function CreatePage() {
       </header>
 
       {/* 폼 컨텐츠 */}
-      <div className="flex-1 px-6 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 max-w-[420px] mx-auto w-full">
         {/* 제목/모임명 */}
         <div className="space-y-2">
           <label
@@ -256,21 +256,21 @@ export default function CreatePage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* 버튼 */}
-        <div className="pt-6">
-          <button
-            onClick={handleSubmit}
-            disabled={createPostMutation.isPending}
-            className="w-full h-12 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {createPostMutation.isPending
-              ? "생성 중..."
-              : isGroup
-                ? "모임 만들기"
-                : "게시글 작성하기"}
-          </button>
-        </div>
+      {/* 버튼 - 하단 고정 */}
+      <div className="bg-white p-6 flex-shrink-0 max-w-[420px] mx-auto w-full">
+        <button
+          onClick={handleSubmit}
+          disabled={createPostMutation.isPending}
+          className="w-full h-12 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {createPostMutation.isPending
+            ? "생성 중..."
+            : isGroup
+              ? "모임 만들기"
+              : "게시글 작성하기"}
+        </button>
       </div>
 
       {/* 장소 검색 모달 */}
