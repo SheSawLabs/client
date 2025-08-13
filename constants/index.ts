@@ -64,3 +64,7 @@ export const SAFETY_COLORS = {
 } as const;
 
 export const API_BASE_URL = "http://localhost:3001";
+
+export const COLORS = {
+  PRIMARY: "#0f5fda", // blue-500
+};

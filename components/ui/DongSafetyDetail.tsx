@@ -1,21 +1,28 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import { SAFETY_LABELS, SAFETY_COLORS } from "@/constants";
-import { SafetyGrade } from "@/types/safety";
-import { SafetyQuote } from "./SafetyQuote";
+import { SAFETY_LABELS, SAFETY_COLORS, COLORS } from "@/constants";
 
-interface DistrictSafetyDetailProps {
-  districtName: string;
-  grade: SafetyGrade;
+import { SafetyQuote } from "./SafetyQuote";
+import { Dong } from "@/types/map";
+
+interface DongSafetyDetailProps {
+  dongInfo: Dong | null;
   className?: string;
 }
 
-export const DistrictSafetyDetail: React.FC<DistrictSafetyDetailProps> = ({
-  districtName,
-  grade,
+export const DongSafetyDetail: React.FC<DongSafetyDetailProps> = ({
+  dongInfo,
   className = "",
 }) => {
-  const safetyInfo = SAFETY_LABELS[grade];
+  const gradeColor = dongInfo?.grade
+    ? SAFETY_COLORS[dongInfo.grade]
+    : COLORS.PRIMARY;
+  const safetyInfo = dongInfo?.grade
+    ? SAFETY_LABELS[dongInfo.grade]
+    : {
+        LABEL: "",
+        DESCRIPTION: "",
+      };
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -24,7 +31,7 @@ export const DistrictSafetyDetail: React.FC<DistrictSafetyDetailProps> = ({
         <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-full">
           <MapPin className="w-3 h-3 text-blue-600" />
           <span className="text-xs font-medium text-blue-800">
-            {districtName}
+            {dongInfo?.dong}
           </span>
         </div>
       </div>
@@ -36,9 +43,9 @@ export const DistrictSafetyDetail: React.FC<DistrictSafetyDetailProps> = ({
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
-            style={{ backgroundColor: SAFETY_COLORS[grade] }}
+            style={{ backgroundColor: gradeColor }}
           >
-            {grade}
+            {dongInfo?.grade}
           </div>
           <div>
             <div className="font-medium text-gray-900">{safetyInfo.LABEL}</div>
