@@ -17,11 +17,11 @@ export const Badge: React.FC<BadgeProps> = ({
   className = "",
 }) => {
   const baseStyles =
-    "inline-flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm";
+    "inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer";
 
   const activeStyles = isActive
-    ? `border border-[${COLORS.PRIMARY}] text-[${COLORS.PRIMARY}] bg-blue-50`
-    : "border border-transparent text-gray-600 bg-white hover:bg-gray-50";
+    ? "text-white shadow-md"
+    : "text-gray-700 bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white/90";
 
   return (
     <div
@@ -30,9 +30,8 @@ export const Badge: React.FC<BadgeProps> = ({
       style={
         isActive
           ? {
-              borderColor: COLORS.PRIMARY,
-              color: COLORS.PRIMARY,
-              backgroundColor: `${COLORS.PRIMARY}15`, // 15는 약 8% 투명도
+              backgroundColor: COLORS.PRIMARY,
+              color: "white",
             }
           : {}
       }
