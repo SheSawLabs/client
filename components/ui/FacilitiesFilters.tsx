@@ -22,12 +22,23 @@ export const FacilitiesFilters: React.FC<FacilitiesFiltersProps> = ({
   const { toggleFilter, isFilterActive, getActiveFilters } =
     useFacilityFilters();
 
+  // 필터 변경 시 콜백 실행을 위한 ref
+  const prevActiveFiltersRef = useRef<string>("");
+
   // 필터 변경 시 콜백 실행
   useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange(getActiveFilters());
+    const currentFilters = getActiveFilters();
+    const currentFiltersString = JSON.stringify(currentFilters.sort());
+
+    // 이전 필터와 다를 때만 콜백 실행
+    if (
+      currentFiltersString !== prevActiveFiltersRef.current &&
+      onFilterChange
+    ) {
+      prevActiveFiltersRef.current = currentFiltersString;
+      onFilterChange(currentFilters);
     }
-  }, [getActiveFilters(), onFilterChange]);
+  });
 
   // 스크롤 상태 업데이트
   const updateScrollButtons = () => {

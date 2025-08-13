@@ -156,7 +156,6 @@ const InteractiveMap = ({
   // 필터 변경 핸들러
   const handleFilterChange = (filters: FacilityType[]) => {
     setActiveFilters(filters);
-
     console.log("activeFilters", activeFilters);
     // TODO: 실제 필터링 로직 구현 (지도에 마커 표시/숨김 등)
   };
