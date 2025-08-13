@@ -16,7 +16,7 @@ import { DistrictPolygons } from "@/components/ui/DistrictPolygons";
 export default function MapPage() {
   // 퍼널 상태 관리
   const [currentStep, setCurrentStep] = useState<
-    "gu-selection" | "dong-selection"
+    "gu-selection" | "dong-selection" | "interactive-map"
   >("gu-selection");
   const [, setFunnelContext] = useState<{
     selectedDistrict?: string;
@@ -53,8 +53,9 @@ export default function MapPage() {
   // 동 클릭 핸들러
   const handleDongClick = (dongName: string) => {
     setSelectedDong(dongName);
+    setFunnelContext((prev) => ({ ...prev, dongName }));
+    setCurrentStep("interactive-map");
 
-    // Update bottom sheet with selected dong information
     openBottomSheet(
       <DistrictSafetyDetail districtName={dongName} grade="E" />,
       {
@@ -129,17 +130,23 @@ export default function MapPage() {
               className="h-full"
             />
           </div>
-          <div className="flex justify-end">
-            <Button
-              onClick={handleNext}
-              disabled={!selectedDong}
-              size="wide"
-              className="px-6 py-2"
-            >
-              다음
-            </Button>
-          </div>
+          {selectedDong && (
+            <div className="flex justify-end">
+              <Button
+                onClick={handleNext}
+                disabled={!selectedDong}
+                size="wide"
+                className="px-6 py-2"
+              >
+                {`${selectedDong} 보러가기`}
+              </Button>
+            </div>
+          )}
         </div>
+      )}
+
+      {currentStep === "interactive-map" && (
+        <div className="relative h-screen">다음 화면 지도</div>
       )}
     </div>
   );

@@ -14,15 +14,35 @@ interface DistrictFeature {
   };
 }
 
+interface HangjeongDongFeature {
+  type: "Feature";
+  properties: {
+    adm_nm: string; // 행정구역명 (예: "서울특별시 종로구 사직동")
+    sggnm: string; // 시군구명 (예: "종로구")
+    sidonm: string; // 시도명 (예: "서울특별시")
+    [key: string]: unknown;
+  };
+  geometry: {
+    type: "MultiPolygon";
+    coordinates: number[][][][];
+  };
+}
+
 export interface GeoJSONData {
   type: "FeatureCollection";
   features: DistrictFeature[];
+}
+
+export interface HangjeongDongGeoJSONData {
+  type: "FeatureCollection";
+  features: HangjeongDongFeature[];
 }
 
 const DISTRICT_JSON_URL =
   "https://raw.githubusercontent.com/southkorea/seoul-maps/master/kostat/2013/json/seoul_municipalities_geo_simple.json";
 const DONG_JSON_URL =
   "https://raw.githubusercontent.com/southkorea/seoul-maps/master/kostat/2013/json/seoul_submunicipalities_geo_simple.json";
+const HANGJEONG_DONG_JSON_URL = "/data/hangjeongdong_ver250401.geojson";
 
 // 서울시 구별 데이터를 가져오는 쿼리
 export const useDistrictJsonQuery = () => {
@@ -56,6 +76,24 @@ export const useDongJsonQuery = (enabled: boolean = true) => {
       return response.json();
     },
     enabled,
+    staleTime: 1000 * 60 * 30, // 30분간 캐시 유지
+    gcTime: 1000 * 60 * 60, // 1시간간 가비지 컬렉션 방지
+  });
+};
+
+// 행정동 GeoJSON 데이터를 가져오는 쿼리
+export const useHangjeongDongQuery = () => {
+  return useQuery({
+    queryKey: ["hangjeong-dong"],
+    queryFn: async (): Promise<HangjeongDongGeoJSONData> => {
+      const response = await fetch(HANGJEONG_DONG_JSON_URL);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
     staleTime: 1000 * 60 * 30, // 30분간 캐시 유지
     gcTime: 1000 * 60 * 60, // 1시간간 가비지 컬렉션 방지
   });
