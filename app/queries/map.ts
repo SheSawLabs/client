@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/constants";
+import { District, Dong, StreetlightData } from "@/types/map";
 import { useQuery } from "@tanstack/react-query";
 
 interface DistrictFeature {
@@ -85,50 +86,6 @@ export const useDongGeoJSONDQuery = () => {
   });
 };
 
-interface Dong {
-  dong_code: string;
-  district: string;
-  dong: string;
-  grade: string;
-  score: number;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  facilities: {
-    cctv: number;
-    streetlight: number;
-    police_station: number;
-    safety_house: number;
-    delivery_box: number;
-  };
-  risk_factors: {
-    sexual_offender: number;
-  };
-}
-
-interface District {
-  district: string;
-  data: Dong[];
-  count: number;
-}
-
-interface Streetlight {
-  id: number;
-  management_number: string;
-  district: string;
-  dong: string;
-  latitude: number;
-  longitude: number;
-}
-
-interface StreetlightData {
-  count: number;
-  district: string;
-  dong: string;
-  streetlights: Streetlight[];
-}
-
 export const useSafetyMapQuery = () => {
   return useQuery({
     queryKey: ["/safety/map"],
@@ -161,6 +118,24 @@ export const useDistrictByDistrictNameQuery = (disctrictName: string) => {
       return response.json();
     },
     enabled: !!disctrictName,
+  });
+};
+
+export const useDongByDongNameQuery = (dongName: string) => {
+  return useQuery({
+    queryKey: ["/safety/district/:dongName", dongName],
+    queryFn: async (): Promise<Dong> => {
+      const url = encodeURI(`${API_BASE_URL}/api/safety/district/${dongName}`);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    enabled: !!dongName,
   });
 };
 
