@@ -2,7 +2,7 @@
 
 import {
   useDistrictByDistrictNameQuery,
-  useHangjeongDongQuery,
+  useDongGeoJSONDQuery,
 } from "@/app/queries/map";
 import { SAFETY_COLORS } from "@/constants";
 import { SafetyGrade } from "@/types/safety";
@@ -56,7 +56,7 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   // 행정동 GeoJSON 데이터
-  const { data: hangjeongDongData } = useHangjeongDongQuery();
+  const { data: hangjeongDongData } = useDongGeoJSONDQuery();
 
   // 구별 안전 데이터
   const { data: districtData } = useDistrictByDistrictNameQuery(
@@ -117,11 +117,9 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     let globalMinY = Infinity,
       globalMaxY = -Infinity;
 
-    // 선택된 구에 해당하는 동들만 필터링 (서울특별시만)
+    // 선택된 구에 해당하는 동들만 필터링
     const filteredFeatures = features.filter(
-      (feature) =>
-        feature.properties.sggnm === districtName &&
-        feature.properties.sidonm === "서울특별시",
+      (feature) => feature.properties.sggnm === districtName,
     );
 
     // 전체 좌표 범위 계산

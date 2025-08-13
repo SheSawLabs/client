@@ -1,8 +1,47 @@
+declare global {
+  interface Window {
+    kakao: {
+      maps: KakakoMap;
+    };
+  }
+}
+
 export interface LatNLng {
   lat: number;
   lng: number;
   getLat?: () => number;
   getLng?: () => number;
+}
+
+export interface PolygonInstance {
+  setMap: (map: MapInstance | null) => void;
+  setPaths: (paths: LatNLng[] | string[]) => void;
+  getPaths: () => LatNLng[] | string[];
+  setStrokeColor: (color: string) => void;
+  setStrokeOpacity: (opacity: number) => void;
+  setStrokeWeight: (weight: number) => void;
+  setFillColor: (color: string) => void;
+  setFillOpacity: (opacity: number) => void;
+  setZIndex: (zIndex: number) => void;
+  getBounds: () => {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
+  getCenter: () => LatNLng;
+  setCenter: (center: LatNLng) => void;
+  setDraggable: (draggable: boolean) => void;
+  setClickable: (clickable: boolean) => void;
+  setVisible: (visible: boolean) => void;
+  setMapTypeId: (mapTypeId: string) => void;
+  setPosition: (position: LatNLng) => void;
+  setPositionByCoords: (coords: LatNLng) => void;
+  setPositionByLatLng: (lat: number, lng: number) => void;
+  setPositionByLatLngObject: (latLng: LatNLng) => void;
+  setPositionByLatLngString: (latLng: string) => void;
+  setPositionByLatLngArray: (latLng: [number, number]) => void;
+  setPositionByLatLngObjectArray: (latLng: LatNLng[]) => void;
 }
 
 export interface MapInstance {
@@ -155,7 +194,7 @@ export interface KakakoMap {
   }) => CustomOverlayInterface;
   Polygon: new (options: {
     map?: MapInstance | null;
-    paths: LatNLng[];
+    path: LatNLng[];
     strokeColor?: string;
     strokeOpacity?: number;
     strokeWeight?: number;
