@@ -86,24 +86,22 @@ export const FacilitiesFilters: React.FC<FacilitiesFiltersProps> = ({
   };
 
   return (
-    <div
-      className={`w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100 ${className}`}
-    >
+    <div className={`w-full ${className}`}>
       <div className="relative">
         {/* 좌측 그라디언트 오버레이 */}
         {canScrollLeft && (
-          <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white/95 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-transparent via-black/10 to-transparent z-10 pointer-events-none" />
         )}
 
         {/* 우측 그라디언트 오버레이 */}
         {canScrollRight && (
-          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white/95 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-transparent via-black/10 to-transparent z-10 pointer-events-none" />
         )}
 
         {/* 스크롤 가능한 태그 컨테이너 */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-3 px-4 py-3 overflow-x-auto scrollbar-hide"
+          className="flex gap-3 px-4 py-4 overflow-x-auto scrollbar-hide"
           style={{
             scrollBehavior: "smooth",
             WebkitOverflowScrolling: "touch",

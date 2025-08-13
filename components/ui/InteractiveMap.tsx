@@ -162,16 +162,18 @@ const InteractiveMap = ({
 
   return (
     <div className="relative h-full">
-      {/* 상단 고정 필터 태그 */}
-      <div className="absolute top-0 left-0 right-0 z-10">
-        <FacilitiesFilters
-          dongInfo={dongInfo}
-          onFilterChange={handleFilterChange}
-        />
-      </div>
-
       {/* 지도 컨테이너 */}
       <div id="polygon-map" className="w-full h-full" />
+
+      {/* 상단 플로팅 필터 태그 */}
+      <div className="absolute top-4 left-0 right-0 z-10 pointer-events-none">
+        <div className="pointer-events-auto">
+          <FacilitiesFilters
+            dongInfo={dongInfo}
+            onFilterChange={handleFilterChange}
+          />
+        </div>
+      </div>
     </div>
   );
 };
