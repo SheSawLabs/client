@@ -62,3 +62,5 @@ export const SAFETY_COLORS = {
   D: "#CBBC15",
   E: "#F48661",
 } as const;
+
+export const API_BASE_URL = "http://localhost:3001";

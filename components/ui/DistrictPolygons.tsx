@@ -43,14 +43,14 @@ const DistrictPolygons = ({
     padding: 16,
   });
 
-  const districtQuery = useDistrictJsonQuery();
+  const { data: districtJsonData } = useDistrictJsonQuery();
 
   // Process district data when available
   useEffect(() => {
-    if (districtQuery.data) {
-      processGeoJsonData(districtQuery.data);
+    if (districtJsonData) {
+      processGeoJsonData(districtJsonData);
     }
-  }, [districtQuery.data]);
+  }, [districtJsonData]);
 
   // 폴리곤의 중심점 계산
   const calculatePolygonCenter = (

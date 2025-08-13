@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useDistrictByDistrictNameQuery,
+  useStreetlightByDongNameQuery,
+} from "@/app/queries/map";
 import React, { useRef, useEffect, useState } from "react";
 
 interface DongFeature {
@@ -48,6 +52,16 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
     padding: 16,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const { data: districtData, isSuccess: districtIsSuccess } =
+    useDistrictByDistrictNameQuery(districtName || "");
+
+  const { data: streetlightData, isSuccess: streetlightIsSuccess } =
+    useStreetlightByDongNameQuery(selectedDong || "");
+
+  console.log("districtData", districtData);
+  console.log("districtIsSuccess", districtIsSuccess);
+  console.log("streetlightData", streetlightData);
+  console.log("streetlightIsSuccess", streetlightIsSuccess);
 
   // 폴리곤의 중심점 계산
   const calculatePolygonCenter = (
