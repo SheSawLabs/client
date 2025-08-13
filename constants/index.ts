@@ -56,9 +56,9 @@ export const SAFETY_LABELS = {
 
 // 안전등급별 색상
 export const SAFETY_COLORS = {
-  A: "#4CAF50", // 초록
-  B: "#8BC34A", // 연한 초록
-  C: "#FFC107", // 노랑
-  D: "#FF9800", // 주황
-  E: "#F44336", // 빨강
+  A: "#00C5BE",
+  B: "#1CCF63",
+  C: "#89BE00",
+  D: "#CBBC15",
+  E: "#F48661",
 } as const;
