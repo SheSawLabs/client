@@ -1,8 +1,5 @@
-import {
-  useDistrictByDistrictNameQuery,
-  useDongGeoJSONDQuery,
-} from "@/app/queries/map";
-import { SAFETY_COLORS } from "@/constants";
+import { useDongGeoJSONDQuery } from "@/app/queries/map";
+import { COLORS, SAFETY_COLORS } from "@/constants";
 import {
   CustomOverlayInterface,
   LatNLng,
@@ -21,31 +18,16 @@ import { useEffect, useState } from "react";
 
 const InteractiveMap = ({
   districtName,
-  selectedDong,
+  dongInfo,
 }: {
   districtName: string;
-  selectedDong: string | null;
+  dongInfo: Dong | null;
 }) => {
   const [map, setMap] = useState<MapInstance | null>(null);
   const [polygons, setPolygons] = useState<PolygonInstance[]>([]);
-  const [dongInfo, setDongInfo] = useState<Dong | null>(null);
+
   const { data: dongGeoJSONData, isSuccess: dongGeoJSONIsSuccess } =
     useDongGeoJSONDQuery();
-
-  const { data: districtData, isSuccess: districtIsSuccess } =
-    useDistrictByDistrictNameQuery(districtName);
-
-  useEffect(() => {
-    if (!districtIsSuccess || !districtData) return;
-
-    const dongData = districtData.data?.find(
-      (dong) => dong.dong === selectedDong,
-    );
-
-    setDongInfo(dongData || null);
-  }, [districtData, selectedDong, districtIsSuccess]);
-
-  console.log({ districtName, selectedDong });
 
   useEffect(() => {
     window.kakao.maps.load(() => {
@@ -63,7 +45,7 @@ const InteractiveMap = ({
     }
 
     displayPolygons();
-  }, [map, dongGeoJSONIsSuccess, dongGeoJSONData, selectedDong, districtName]);
+  }, [map, dongGeoJSONIsSuccess, dongGeoJSONData, dongInfo, districtName]);
 
   // 카카오맵 초기화
   const initializeMap = () => {
@@ -90,7 +72,7 @@ const InteractiveMap = ({
 
   // 폴리곤 생성 및 지도에 표시
   const displayPolygons = () => {
-    if (!map || !dongGeoJSONData || !selectedDong) return;
+    if (!map || !dongGeoJSONData || !dongInfo) return;
 
     // 기존 폴리곤 제거
     clearPolygons();
@@ -99,13 +81,13 @@ const InteractiveMap = ({
     // 선택된 동과 매칭되는 데이터 찾기
     const selectedFeature = findSelectedDongFeature(
       dongGeoJSONData.features as DongFeature[],
-      selectedDong,
+      dongInfo.dong,
       districtName,
     );
 
     if (!selectedFeature) {
       console.warn(
-        `선택된 동 '${selectedDong}'에 해당하는 데이터를 찾을 수 없습니다.`,
+        `선택된 동 '${dongInfo.dong}'에 해당하는 데이터를 찾을 수 없습니다.`,
       );
       return;
     }
@@ -127,7 +109,9 @@ const InteractiveMap = ({
     const polygon = new window.kakao.maps.Polygon({
       map: map,
       path: paths,
-      strokeColor: dongInfo?.grade ? SAFETY_COLORS[dongInfo.grade] : "#0f5fda",
+      strokeColor: dongInfo?.grade
+        ? SAFETY_COLORS[dongInfo.grade]
+        : COLORS.PRIMARY,
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: gradeColor,
@@ -158,7 +142,6 @@ const InteractiveMap = ({
     }
 
     setPolygons(newPolygons);
-    console.log(`${selectedDong} 폴리곤 생성 완료`);
   };
 
   // 폴리곤 제거

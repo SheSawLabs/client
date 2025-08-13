@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { TopNav } from "@/components/ui/TopNav";
 import { SafetyLevel } from "@/components/ui/SafetyLevel";
 import { GuideTag } from "@/components/ui/GuideTag";
 import { useBottomSheet } from "@/hooks/useBottomSheet";
 import { useModal } from "@/hooks/useModal";
-import { DistrictSafetyDetail } from "@/components/ui/DistrictSafetyDetail";
+import { DongSafetyDetail } from "@/components/ui/DongSafetyDetail";
 import { DongPolygons } from "@/components/ui/DongPolygons";
 import { HelpCircle } from "lucide-react";
 import { SafetyGuideDetail } from "@/components/ui/SafetyGuideDetail";
 import { DistrictPolygons } from "@/components/ui/DistrictPolygons";
 import { InteractiveMap } from "@/components/ui/InteractiveMap";
+import { useDistrictByDistrictNameQuery } from "../queries/map";
+import { Dong } from "@/types/map";
 
 export default function MapPage() {
   // 퍼널 상태 관리
@@ -25,8 +27,21 @@ export default function MapPage() {
 
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedDong, setSelectedDong] = useState<string | null>(null);
+  const [dongInfo, setDongInfo] = useState<Dong | null>(null);
   const { openBottomSheet } = useBottomSheet();
   const { openModal } = useModal();
+  const { data: districtData, isSuccess: districtIsSuccess } =
+    useDistrictByDistrictNameQuery(selectedDistrict || "");
+
+  useEffect(() => {
+    if (!districtIsSuccess || !districtData) return;
+
+    const dongData = districtData.data?.find(
+      (dong) => dong.dong === selectedDong,
+    );
+
+    setDongInfo(dongData || null);
+  }, [districtData, selectedDong, districtIsSuccess]);
 
   const handleNext = () => {
     return currentStep === "gu-selection"
@@ -52,19 +67,10 @@ export default function MapPage() {
   };
 
   // 동 클릭 핸들러
-  const handleDongClick = (dongName: string) => {
-    setSelectedDong(dongName);
-    setFunnelContext((prev) => ({ ...prev, dongName }));
+  const handleDongClick = (selectedDong: string) => {
+    setSelectedDong(selectedDong);
+    setFunnelContext((prev) => ({ ...prev, selectedDong }));
     setCurrentStep("interactive-map");
-
-    openBottomSheet(
-      <DistrictSafetyDetail districtName={dongName} grade="E" />,
-      {
-        defaultHeight: "40%",
-        minHeight: "15%",
-        maxHeight: "70%",
-      },
-    );
   };
 
   const onBackClick = () => {
@@ -78,6 +84,16 @@ export default function MapPage() {
       window.history.back();
     }
   };
+
+  useEffect(() => {
+    if (currentStep === "interactive-map" && dongInfo) {
+      openBottomSheet(<DongSafetyDetail dongInfo={dongInfo} />, {
+        defaultHeight: "40%",
+        minHeight: "15%",
+        maxHeight: "70%",
+      });
+    }
+  }, [currentStep, dongInfo]);
 
   return (
     <div className="pb-20">
@@ -152,7 +168,7 @@ export default function MapPage() {
         <div className="relative h-screen">
           <InteractiveMap
             districtName={selectedDistrict || ""}
-            selectedDong={selectedDong}
+            dongInfo={dongInfo}
           />
         </div>
       )}
