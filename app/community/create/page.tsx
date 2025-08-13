@@ -9,7 +9,7 @@ import { useCreatePostMutation } from "@/app/queries/community";
 import type { KakaoPlace } from "@/types/kakao";
 
 const categories = [
-  { id: "수리", label: "안전 수리" },
+  { id: "안전", label: "안전 수리" },
   { id: "소분", label: "소분 모임", active: true },
   { id: "취미", label: "취미·기타" },
 ];
@@ -24,6 +24,7 @@ export default function CreatePage() {
   const [activeCategory, setActiveCategory] = useState(
     type === "post" ? "일반" : "소분",
   );
+
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("2025-08-01");
   const [meetingPlace, setMeetingPlace] = useState("신림동 하이마트");
@@ -106,7 +107,7 @@ export default function CreatePage() {
       </header>
 
       {/* 폼 컨텐츠 */}
-      <div className="flex-1 px-4 py-6 space-y-6">
+      <div className="flex-1 px-6 py-6 space-y-6">
         {/* 제목/모임명 */}
         <div className="space-y-2">
           <label
@@ -145,10 +146,10 @@ export default function CreatePage() {
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
                   className={cn(
-                    "flex-1 px-4 py-2 text-sm rounded-lg transition-colors duration-100",
+                    "flex-1 px-4 py-2 text-sm rounded-full transition-colors duration-100 border-2",
                     activeCategory === category.id
-                      ? "bg-gray-600 text-white"
-                      : "bg-gray-100 text-gray-700",
+                      ? "bg-[#EEF4FF] text-[#0F5FDA] border-[#0F5FDA]"
+                      : "bg-[#F9FAFB] text-[#9CA3AF] border-[#E5E7EB]",
                   )}
                 >
                   {category.label}

@@ -91,12 +91,15 @@ export default function GroupsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      <div className="flex flex-col min-h-screen bg-white">
         <CommunityHeader title="커뮤니티" />
-        <div className="flex-1 p-4">
+        <div className="flex-1 px-6 py-4">
           <div className="space-y-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+              <div
+                key={i}
+                className="bg-[#F8F8F8] rounded-lg shadow-sm p-4 animate-pulse"
+              >
                 <div className="flex justify-between mb-3">
                   <div className="h-4 bg-gray-200 rounded w-24"></div>
                   <div className="h-6 bg-gray-200 rounded w-16"></div>
@@ -122,7 +125,7 @@ export default function GroupsPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      <div className="flex flex-col min-h-screen bg-white">
         <CommunityHeader title="커뮤니티" />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
@@ -141,7 +144,7 @@ export default function GroupsPage() {
 
   if (!data?.posts || data.posts.length === 0) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      <div className="flex flex-col min-h-screen bg-white">
         <CommunityHeader
           title="커뮤니티"
           onNotificationClick={handleNotificationClick}
@@ -154,7 +157,7 @@ export default function GroupsPage() {
           onInterestToggle={() => setIsInterestOnly(!isInterestOnly)}
           onSortChange={handleSortChange}
         />
-        <div className="flex flex-col items-center p-8 text-center mt-32">
+        <div className="flex flex-col items-center px-8 py-8 text-center mt-32">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">📋</span>
           </div>
@@ -171,7 +174,7 @@ export default function GroupsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-white">
       {/* 헤더 */}
       <CommunityHeader
         title="커뮤니티"
@@ -190,7 +193,7 @@ export default function GroupsPage() {
 
       {/* 피드 */}
       <div id="main-content" className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-4 pb-24">
+        <div className="px-6 py-4 space-y-4 pb-24">
           {filteredPosts.map((post) => (
             <PostCard key={post.id} post={post} onClick={handlePostClick} />
           ))}

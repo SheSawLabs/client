@@ -15,8 +15,35 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
     onClick?.(post);
   };
 
-  const getBadgeStyles = () => {
-    return "bg-[#F2F4F6] text-[#374151] hover:bg-[#E5E7EB]";
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case "안전":
+      case "수리":
+        return "안전 수리";
+      case "소분":
+        return "소분 모임";
+      case "취미":
+        return "취미·기타";
+      case "일반":
+        return "일반";
+      default:
+        return category;
+    }
+  };
+
+  const getBadgeStyles = (category: string) => {
+    switch (category) {
+      case "안전":
+      case "수리":
+        return "bg-[#E3F2FD] text-[#1976D2] border border-[#1976D2] hover:bg-[#BBDEFB]";
+      case "소분":
+        return "bg-[#F3E5F5] text-[#BC76CE] border border-[#BC76CE] hover:bg-[#E1BEE7]";
+      case "취미":
+        return "bg-[#FFF3E0] text-[#FF7E00] border border-[#FF7E00] hover:bg-[#FFE0B2]";
+      case "일반":
+      default:
+        return "bg-[#F2F4F6] text-[#374151] border border-[#374151] hover:bg-[#E5E7EB]";
+    }
   };
 
   const getAuthorInitial = (name: string) => {
@@ -26,7 +53,7 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
   return (
     <article
       className={cn(
-        "bg-white rounded-2xl shadow-sm border border-gray-100 p-4 cursor-pointer transition-all duration-200",
+        "bg-[#F8F8F8] rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer transition-all duration-200",
         "hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]",
         className,
       )}
@@ -43,7 +70,7 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
     >
       {/* 상단 메타 라인 */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-1 text-sm text-gray-500">
+        <div className="flex items-center gap-1 text-xs text-gray-500">
           <span>{post.createdAgo}</span>
           {post.category !== "일반" && (
             <>
@@ -58,7 +85,7 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
           {post.participants && post.category !== "일반" && (
             <div className="flex items-center gap-1">
               <Users size={12} className="text-gray-500" />
-              <span className="text-xs text-gray-600">
+              <span className="text-[11px] text-gray-600">
                 {post.participants.current}/{post.participants.max}
               </span>
             </div>
@@ -67,11 +94,11 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
           {/* 카테고리 배지 */}
           <span
             className={cn(
-              "px-3 py-1 text-xs font-medium rounded-lg transition-colors duration-200",
-              getBadgeStyles(),
+              "px-2 py-0.5 text-[11px] font-medium rounded-lg transition-colors duration-200",
+              getBadgeStyles(post.category),
             )}
           >
-            {post.category}
+            {getCategoryLabel(post.category)}
           </span>
         </div>
       </div>
@@ -90,8 +117,8 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
       <div className="flex items-center justify-between">
         {/* 작성자 */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">by</span>
-          <div className="flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full text-xs font-medium text-gray-600">
+          <span className="text-xs text-gray-500">by</span>
+          <div className="flex items-center justify-center w-5 h-5 bg-gray-100 rounded-full text-[10px] font-medium text-gray-600">
             {post.author.avatarUrl ? (
               <img
                 src={post.author.avatarUrl}
@@ -102,22 +129,28 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
               getAuthorInitial(post.author.name)
             )}
           </div>
-          <span className="text-sm text-gray-500">{post.author.name}</span>
+          <span className="text-xs text-gray-500">{post.author.name}</span>
         </div>
 
         {/* 지표 아이콘 */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <Eye size={14} className="text-gray-400" />
-            <span className="text-xs text-gray-500">{post.stats.views}</span>
+            <Eye size={12} className="text-gray-400" />
+            <span className="text-[11px] text-gray-500">
+              {post.stats.views}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <MessageCircle size={14} className="text-gray-400" />
-            <span className="text-xs text-gray-500">{post.stats.comments}</span>
+            <MessageCircle size={12} className="text-gray-400" />
+            <span className="text-[11px] text-gray-500">
+              {post.stats.comments}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <Heart size={14} className="text-gray-400" />
-            <span className="text-xs text-gray-500">{post.stats.likes}</span>
+            <Heart size={12} className="text-gray-400" />
+            <span className="text-[11px] text-gray-500">
+              {post.stats.likes}
+            </span>
           </div>
         </div>
       </div>
