@@ -85,13 +85,17 @@ export default function MapPage() {
     }
   };
 
+  const openDongDetailBottomSheet = () => {
+    openBottomSheet(<DongSafetyDetail dongInfo={dongInfo} />, {
+      defaultHeight: "40%",
+      minHeight: "15%",
+      maxHeight: "70%",
+    });
+  };
+
   useEffect(() => {
     if (currentStep === "interactive-map" && dongInfo) {
-      openBottomSheet(<DongSafetyDetail dongInfo={dongInfo} />, {
-        defaultHeight: "40%",
-        minHeight: "15%",
-        maxHeight: "70%",
-      });
+      openDongDetailBottomSheet();
     }
   }, [currentStep, dongInfo]);
 
@@ -169,6 +173,7 @@ export default function MapPage() {
           <InteractiveMap
             districtName={selectedDistrict || ""}
             dongInfo={dongInfo}
+            openDongDetailBottomSheet={openDongDetailBottomSheet}
           />
         </div>
       )}
