@@ -15,6 +15,10 @@
 - queryKey는 배열 형태로 작성하며, 첫 번째 요소는 엔드포인트, 두 번째 요소는 필요한 파라미터를 포함합니다.
   - 예시: 엔드포인트가 '/api/safety/district/:disctrictName' 일때, `['/safety/district/:disctrictName', disctrictName]` 으로 작성.
 - query 함수는 queries 디렉토리에 작성합니다.
+- query 함수의 명칭은 useXXXQuery 형태로 작성합니다.
+- query 함수를 사용시, data, isSuccess, isLoading 등의 값을 구조분해 할당하여 사용합니다.
+- 구조분해시 해당쿼리의 이름을 덧붙여 다음과 같이 명칭을 변경하여 사용합니다.
+  - 예시: `const { data: districtData, isSuccess: isDistrictSuccess, isLoading: isDistrictLoading } = useDistrictQuery(districtName);`
 
 ## 커밋 메시지 컨벤션
 
