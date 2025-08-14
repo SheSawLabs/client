@@ -7,6 +7,7 @@ interface ReviewListProps {
   sortOrder: SortOrder;
   maxDisplay?: number;
   onLike: (reviewId: string) => void;
+  isError?: boolean;
   className?: string;
 }
 
@@ -15,8 +16,18 @@ export const ReviewList: React.FC<ReviewListProps> = ({
   sortOrder,
   maxDisplay = 4,
   onLike,
+  isError = false,
   className = "",
 }) => {
+  // 에러 상태일 때 에러 메시지 표시
+  if (isError) {
+    return (
+      <div className={`text-center py-8 ${className}`}>
+        <p className="text-gray-500">리뷰를 불러올 수 없습니다.</p>
+      </div>
+    );
+  }
+
   // 정렬 기준에 따라 리뷰 정렬
   const sortedReviews = [...reviews].sort((a, b) => {
     const dateA = new Date(a.createdAt).getTime();
