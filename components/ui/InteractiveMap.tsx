@@ -21,9 +21,11 @@ import { useEffect, useState } from "react";
 const InteractiveMap = ({
   districtName,
   dongInfo,
+  openDongDetailBottomSheet,
 }: {
   districtName: string;
   dongInfo: Dong | null;
+  openDongDetailBottomSheet: () => void;
 }) => {
   const [map, setMap] = useState<MapInstance | null>(null);
   const [polygons, setPolygons] = useState<PolygonInstance[]>([]);
@@ -131,10 +133,7 @@ const InteractiveMap = ({
         | MarkerInstance
         | CustomOverlayInterface,
       "click",
-      () => {
-        console.log("클릭된 구역:", selectedFeature.properties.adm_nm);
-        alert(`클릭된 구역: ${selectedFeature.properties.adm_nm}`);
-      },
+      () => openDongDetailBottomSheet(),
     );
 
     // 폴리곤이 보이도록 지도 중심 및 레벨 조정

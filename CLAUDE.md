@@ -9,6 +9,13 @@
 - API 호출 시, 항상 React-Query를 사용합니다.
 - 모달, 바텀시트, 버튼 기능 구현 요청시 기존에 만들어진 컴포넌트를 재활용합니다.
 
+## React-Query 컨벤션
+
+- queryKey는 해당 API의 엔드포인트를 기반으로 작성합니다.
+- queryKey는 배열 형태로 작성하며, 첫 번째 요소는 엔드포인트, 두 번째 요소는 필요한 파라미터를 포함합니다.
+  - 예시: 엔드포인트가 '/api/safety/district/:disctrictName' 일때, `['/safety/district/:disctrictName', disctrictName]` 으로 작성.
+- query 함수는 queries 디렉토리에 작성합니다.
+
 ## 커밋 메시지 컨벤션
 
 커밋 메시지 작성 시 다음 형식을 사용해주세요:
