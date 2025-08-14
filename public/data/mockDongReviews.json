@@ -1,0 +1,171 @@
+[
+  {
+    "dongName": "신림동",
+    "rating": 3.8,
+    "totalCount": 35,
+    "topKeywords": [
+      { "keyword": "쌩기 많음", "count": 24 },
+      { "keyword": "응급 시비", "count": 10 },
+      { "keyword": "야들음", "count": 2 }
+    ],
+    "reviews": [
+      {
+        "id": "review-1",
+        "user": {
+          "id": "user-1",
+          "name": "도윤",
+          "profileImage": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "늦은 시간에도 많은 사람들이 다녀서 안전한 느낌이 들어요. 하지만 밤에는 좀 조심해서 다니는 게 좋을 것 같아요. 특히 골목길은 피하고 큰 도로로 다니시길 추천해요.",
+        "keywords": [
+          { "keyword": "쌩기 많음", "count": 1 },
+          { "keyword": "안전한 느낌", "count": 1 },
+          { "keyword": "밤 조심", "count": 1 }
+        ],
+        "likeCount": 6,
+        "isLiked": false,
+        "createdAt": "2025-08-10T15:30:00Z",
+        "dongName": "신림동"
+      },
+      {
+        "id": "review-2",
+        "user": {
+          "id": "user-2",
+          "name": "서연",
+          "profileImage": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "대학가라서 그런지 경찰 순찰도 자주 보이고 CCTV도 많아서 비교적 안전해요. 다만 주말 밤에는 술 취한 사람들이 좀 있어서 주의가 필요해요.",
+        "keywords": [
+          { "keyword": "경찰 순찰", "count": 1 },
+          { "keyword": "CCTV 많음", "count": 1 },
+          { "keyword": "주말 주의", "count": 1 }
+        ],
+        "likeCount": 8,
+        "isLiked": true,
+        "createdAt": "2025-08-08T20:15:00Z",
+        "dongName": "신림동"
+      },
+      {
+        "id": "review-3",
+        "user": {
+          "id": "user-3",
+          "name": "민준",
+          "profileImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "신대방삼거리 쪽은 밤에도 사람이 많아서 괜찮은데, 조용한 주택가 쪽은 가로등이 어두워서 무서워요. 혼자 다니기엔 좀 걱정돼요.",
+        "keywords": [
+          { "keyword": "가로등 어두움", "count": 1 },
+          { "keyword": "주택가 조심", "count": 1 },
+          { "keyword": "혼자 걱정", "count": 1 }
+        ],
+        "likeCount": 4,
+        "isLiked": false,
+        "createdAt": "2025-08-07T14:22:00Z",
+        "dongName": "신림동"
+      },
+      {
+        "id": "review-4",
+        "user": {
+          "id": "user-4",
+          "name": "지우",
+          "profileImage": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "지하철역 근처는 정말 안전해요! 24시간 편의점도 많고 사람들도 계속 지나다녀서 든든합니다. 다만 골목 안쪽은 피하는 게 좋아요.",
+        "keywords": [
+          { "keyword": "지하철역 안전", "count": 1 },
+          { "keyword": "편의점 많음", "count": 1 },
+          { "keyword": "골목 피하기", "count": 1 }
+        ],
+        "likeCount": 12,
+        "isLiked": true,
+        "createdAt": "2025-08-05T09:45:00Z",
+        "dongName": "신림동"
+      },
+      {
+        "id": "review-5",
+        "user": {
+          "id": "user-5",
+          "name": "예은",
+          "profileImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "여성 혼자 다니기에는 조금 신경이 쓰여요. 특히 늦은 시간에는 더욱 조심해야 할 것 같아요. 그래도 메인 도로는 괜찮은 편이에요.",
+        "keywords": [
+          { "keyword": "여성 혼자", "count": 1 },
+          { "keyword": "늦은 시간", "count": 1 },
+          { "keyword": "메인 도로", "count": 1 }
+        ],
+        "likeCount": 7,
+        "isLiked": false,
+        "createdAt": "2025-08-03T18:10:00Z",
+        "dongName": "신림동"
+      },
+      {
+        "id": "review-6",
+        "user": {
+          "id": "user-6",
+          "name": "현우",
+          "profileImage": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "대학생들이 많아서 활기찬 동네예요. 치안도 나쁘지 않고 응급상황 시 도움을 요청할 곳도 많아서 안심이 돼요. 전반적으로 만족해요!",
+        "keywords": [
+          { "keyword": "대학생 많음", "count": 1 },
+          { "keyword": "활기찬 동네", "count": 1 },
+          { "keyword": "응급 도움", "count": 1 },
+          { "keyword": "전반적 만족", "count": 1 }
+        ],
+        "likeCount": 15,
+        "isLiked": true,
+        "createdAt": "2025-08-01T12:30:00Z",
+        "dongName": "신림동"
+      }
+    ]
+  },
+  {
+    "dongName": "사직동",
+    "rating": 4.2,
+    "totalCount": 28,
+    "topKeywords": [
+      { "keyword": "조용하고 안전", "count": 18 },
+      { "keyword": "가로등 밝음", "count": 12 },
+      { "keyword": "CCTV 완비", "count": 8 }
+    ],
+    "reviews": [
+      {
+        "id": "review-7",
+        "user": {
+          "id": "user-7",
+          "name": "수민",
+          "profileImage": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "경복궁 근처라 그런지 정말 안전하고 조용해요. 관광객들도 많이 지나다니고 경찰 순찰도 자주 보여서 안심이 됩니다.",
+        "keywords": [
+          { "keyword": "경복궁 근처", "count": 1 },
+          { "keyword": "조용하고 안전", "count": 1 },
+          { "keyword": "관광객", "count": 1 }
+        ],
+        "likeCount": 9,
+        "isLiked": false,
+        "createdAt": "2025-08-09T16:20:00Z",
+        "dongName": "사직동"
+      },
+      {
+        "id": "review-8",
+        "user": {
+          "id": "user-8",
+          "name": "태현",
+          "profileImage": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=40&h=40&fit=crop&crop=face"
+        },
+        "content": "한적하고 평화로운 동네예요. 가로등도 잘 되어 있고 CCTV도 많아서 밤에도 비교적 안전하게 다닐 수 있어요.",
+        "keywords": [
+          { "keyword": "한적 평화", "count": 1 },
+          { "keyword": "가로등 밝음", "count": 1 },
+          { "keyword": "CCTV 완비", "count": 1 }
+        ],
+        "likeCount": 11,
+        "isLiked": true,
+        "createdAt": "2025-08-06T11:40:00Z",
+        "dongName": "사직동"
+      }
+    ]
+  }
+]

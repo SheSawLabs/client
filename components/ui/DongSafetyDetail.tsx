@@ -3,7 +3,9 @@ import { MapPin } from "lucide-react";
 import { SAFETY_LABELS, SAFETY_COLORS, COLORS } from "@/constants";
 
 import { SafetyQuote } from "./SafetyQuote";
+import { ReviewSummary } from "./ReviewSummary";
 import { Dong } from "@/types/map";
+import { useMockDongReview } from "@/hooks/useMockDongReview";
 
 interface DongSafetyDetailProps {
   dongInfo: Dong | null;
@@ -14,6 +16,8 @@ export const DongSafetyDetail: React.FC<DongSafetyDetailProps> = ({
   dongInfo,
   className = "",
 }) => {
+  // Mock 데이터 사용
+  const mockDongReview = useMockDongReview(dongInfo?.dong || "");
   const gradeColor = dongInfo?.grade
     ? SAFETY_COLORS[dongInfo.grade]
     : COLORS.PRIMARY;
@@ -60,6 +64,13 @@ export const DongSafetyDetail: React.FC<DongSafetyDetailProps> = ({
       <SafetyQuote
         message="지도에 표시된 빨간 원은 유흥업소가 밀집된 지역이에요. 야간에는 주변 환경에 유의하며 이동해 주세요."
         className="mt-4"
+      />
+
+      {/* 동네 안전 리뷰 */}
+      <ReviewSummary
+        dongReview={mockDongReview}
+        dongName={dongInfo?.dong || ""}
+        className="mt-6"
       />
     </div>
   );
