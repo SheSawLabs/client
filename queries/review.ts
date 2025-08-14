@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseReviewListByLocationQueryParams {
   districtName?: string;
@@ -13,21 +13,31 @@ interface Review {
   rating: number;
   totalScore: number;
   grade: string;
-  created_at: Date;
+  created_at: string;
 }
 
-interface ReviewListResponse {
-  reviews: Review[];
+interface Pagination {
+  hasNext: boolean;
+  nextCursor?: string;
+  totalCount: number;
+}
+
+interface ReviewListApiResponse {
+  success: boolean;
+  data: {
+    reviews: Review[];
+    pagination: Pagination;
+  };
 }
 
 export const useReviewListByLocationQuery = ({
   districtName,
   dongName,
-  limit = 20, // 기본값 설정
+  limit = 20,
 }: UseReviewListByLocationQueryParams) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["reviewList", districtName, dongName],
-    queryFn: async (): Promise<ReviewListResponse> => {
+    queryFn: async ({ pageParam }): Promise<ReviewListApiResponse> => {
       // districtName이 없으면 호출하지 않음
       if (!districtName) {
         throw new Error("districtName은 필수입니다");
@@ -42,10 +52,14 @@ export const useReviewListByLocationQuery = ({
       // URL 인코딩
       const encodedLocation = encodeURIComponent(location);
 
+      // 쿼리 파라미터 구성
+      let url = `/api/reviews?location=${encodedLocation}&limit=${limit}`;
+      if (pageParam) {
+        url += `&cursor=${pageParam}`;
+      }
+
       // TODO: 실제 API 엔드포인트로 교체 필요
-      const response = await fetch(
-        `/api/reviews/list?location=${encodedLocation}&limit=${limit}`,
-      );
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error("리뷰 데이터를 불러오는데 실패했습니다");
@@ -53,6 +67,12 @@ export const useReviewListByLocationQuery = ({
 
       return response.json();
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.pagination.hasNext
+        ? lastPage.data.pagination.nextCursor
+        : undefined;
+    },
+    initialPageParam: undefined as string | undefined,
     enabled: !!districtName, // districtName이 있을 때만 쿼리 실행
   });
 };
