@@ -138,9 +138,24 @@ const InteractiveMap = ({
 
     // 폴리곤이 보이도록 지도 중심 및 레벨 조정
     if (paths.length > 0) {
-      const center = calculateKakaoMapCenter(paths);
-      map.setCenter(center);
-      map.setLevel(6); // 동 단위로 확대
+      const originalCenter = calculateKakaoMapCenter(paths);
+
+      // 화면의 20% 아래로 내려가도록 y 좌표 조정
+      map.setLevel(6); // 먼저 레벨 설정
+      map.setCenter(originalCenter); // 임시로 원래 중심 설정
+
+      // 지도 레벨 설정 후 경계 계산하여 오프셋 적용
+      const bounds = map.getBounds();
+      const latRange =
+        bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
+      const latOffset = latRange * 0.2; // 화면의 20% 아래로 이동
+
+      const adjustedCenter = new window.kakao.maps.LatLng(
+        originalCenter.getLat() - latOffset,
+        originalCenter.getLng(),
+      );
+
+      map.setCenter(adjustedCenter);
     }
 
     setPolygons(newPolygons);
