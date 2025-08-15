@@ -70,6 +70,7 @@ export const COLORS = {
   GRAY_100: "#F9FAFB",
   GRAY_200: "#E5E7EB",
   GRAY_400: "#9CA3AF",
+  GRAY_600: "#4B5563",
   GRAY_800: "#1F2937",
   GRAY_900: "#111827",
   RED_500: "#EF4444",

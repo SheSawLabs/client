@@ -1,3 +1,5 @@
+import { ApiResponse } from "./common";
+
 export interface Policy {
   id: string;
   title: string;
@@ -16,8 +18,6 @@ export interface Policy {
   updated_at: string;
 }
 
-export interface PolicyListResponse {
-  success: boolean;
-  data: Policy[];
+export type PolicyListResponse = ApiResponse<Policy[]> & {
   filter: null;
-}
+};

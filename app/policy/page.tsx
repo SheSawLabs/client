@@ -73,7 +73,7 @@ export default function PolicyHome() {
   };
 
   const handleViewAllPolicies = () => {
-    router.push("/policy?category=all");
+    router.push("/policy/list?category=all");
   };
 
   if (isLoading) {

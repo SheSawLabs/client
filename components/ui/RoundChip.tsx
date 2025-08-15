@@ -6,6 +6,7 @@ interface RoundChipProps {
   borderColor: string;
   textColor?: string;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 export const RoundChip: React.FC<RoundChipProps> = ({
@@ -14,6 +15,7 @@ export const RoundChip: React.FC<RoundChipProps> = ({
   borderColor,
   textColor = "#FFFFFF",
   className = "",
+  icon,
 }) => {
   return (
     <div
@@ -24,6 +26,7 @@ export const RoundChip: React.FC<RoundChipProps> = ({
         color: textColor,
       }}
     >
+      {icon && <span className="mr-1.5">{icon}</span>}
       {label}
     </div>
   );
