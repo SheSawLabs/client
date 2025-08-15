@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Upload,
@@ -10,9 +11,37 @@ import {
   Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { startSettlement } from "@/app/queries/settlement";
+
+// 토스페이먼츠 SDK 확인
+const getTossPayments = () => {
+  if (
+    typeof window !== "undefined" &&
+    (window as unknown as { TossPayments?: unknown }).TossPayments
+  ) {
+    return (window as unknown as { TossPayments: unknown }).TossPayments;
+  }
+  throw new Error("토스페이먼츠 SDK가 로드되지 않았습니다.");
+};
 
 export default function SettlementReceivePage() {
+  const searchParams = useSearchParams();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [settlementId, setSettlementId] = useState<string>("");
+  const [amount, setAmount] = useState<number>(0);
+
+  useEffect(() => {
+    const id = searchParams.get("id");
+    const amountParam = searchParams.get("amount");
+
+    if (id) {
+      setSettlementId(id);
+    }
+    if (amountParam) {
+      setAmount(parseInt(amountParam, 10));
+    }
+  }, [searchParams]);
   const handleImageUpload = () => {
     // 이미지 업로드 로직
     const input = document.createElement("input");
@@ -42,12 +71,88 @@ export default function SettlementReceivePage() {
     setShowConfirmModal(true);
   };
 
-  const handleSend = () => {
-    // 정산 보내기 로직
-    console.log("정산 보내기 완료");
-    setShowConfirmModal(false);
-    // 완료 후 이전 페이지로 이동
-    window.history.back();
+  const handleSend = async () => {
+    try {
+      setIsProcessing(true);
+
+      if (!settlementId) {
+        throw new Error("정산 ID가 없습니다.");
+      }
+
+      console.log("정산 시작...", { settlementId, amount });
+
+      // 1. 정산 시작 API 호출
+      console.log("정산 시작 API 호출 중...", settlementId);
+
+      const settlementData = await startSettlement(settlementId);
+      console.log("정산 시작 API 응답:", settlementData);
+
+      if (!settlementData.success) {
+        throw new Error("정산 시작 API 호출 실패");
+      }
+
+      // 2. 토스페이먼츠 결제 위젯 실행
+      console.log("토스페이먼츠 SDK 확인 중...");
+      const TossPayments = getTossPayments();
+      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+
+      console.log("클라이언트 키:", clientKey);
+      console.log("TossPayments:", TossPayments);
+
+      if (!clientKey) {
+        throw new Error("토스페이먼츠 클라이언트 키가 설정되지 않았습니다.");
+      }
+
+      const tossPayments = TossPayments(clientKey);
+
+      // 현재 도메인 기반으로 콜백 URL 생성
+      const baseUrl = window.location.origin;
+      const successUrl = `${baseUrl}/community/settlement/success`;
+      const failUrl = `${baseUrl}/community/settlement/fail`;
+
+      console.log("결제 요청 데이터:", {
+        amount: settlementData.data.amount,
+        orderId: settlementData.data.orderId,
+        orderName: settlementData.data.orderName,
+        successUrl,
+        failUrl,
+      });
+
+      // 가상계좌로 결제 (앱 호출 없이 웹에서 직접 처리)
+      console.log("가상계좌 결제 요청 시작...");
+
+      // 모달 먼저 닫기
+      setShowConfirmModal(false);
+
+      // 가상계좌 결제 요청 (orderId는 서버에서 받은 것을 그대로 사용)
+      tossPayments.requestPayment("가상계좌", {
+        amount: settlementData.data.amount,
+        orderId: settlementData.data.orderId,
+        orderName: settlementData.data.orderName,
+        successUrl,
+        failUrl,
+        customerEmail: "test@example.com",
+        customerName: "테스트사용자",
+        customerMobilePhone: "01012345678",
+        validHours: 24, // 가상계좌 유효시간 24시간
+        cashReceipt: {
+          type: "소득공제",
+        },
+      });
+
+      console.log("가상계좌 결제 요청 완료");
+    } catch (error) {
+      console.error("정산 처리 오류 상세:", error);
+      console.error(
+        "오류 스택:",
+        error instanceof Error ? error.stack : "스택 없음",
+      );
+      alert(
+        `정산 처리 중 오류가 발생했습니다: ${error instanceof Error ? error.message : "알 수 없는 오류"}`,
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleCancel = () => {
@@ -86,8 +191,10 @@ export default function SettlementReceivePage() {
 
           {/* 금액 정보 */}
           <div className="text-center mb-6">
-            <p className="text-sm text-[#6B7280] mb-3">도윤 님께 보낼 금액</p>
-            <p className="text-2xl font-extrabold text-[#111827]">3,000 원</p>
+            <p className="text-sm text-[#6B7280] mb-3">보낼 금액</p>
+            <p className="text-2xl font-extrabold text-[#111827]">
+              {amount > 0 ? amount.toLocaleString() : "0"} 원
+            </p>
           </div>
 
           {/* 그룹 정보 */}
@@ -144,7 +251,7 @@ export default function SettlementReceivePage() {
             {/* 모달 내용 */}
             <div className="text-center mb-6">
               <p className="text-lg font-semibold text-[#111827]">
-                도윤 님께 3,000원 보낼까요?
+                {amount > 0 ? amount.toLocaleString() : "0"}원 보낼까요?
               </p>
             </div>
 
@@ -158,9 +265,10 @@ export default function SettlementReceivePage() {
               </Button>
               <Button
                 onClick={handleSend}
-                className="flex-1 h-12 bg-[#0f5fda] text-white font-semibold rounded-[12px] hover:bg-[#0f5fda]/90"
+                disabled={isProcessing}
+                className="flex-1 h-12 bg-[#0f5fda] text-white font-semibold rounded-[12px] hover:bg-[#0f5fda]/90 disabled:opacity-50"
               >
-                보내기
+                {isProcessing ? "처리 중..." : "보내기"}
               </Button>
             </div>
           </div>

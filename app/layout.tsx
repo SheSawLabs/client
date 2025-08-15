@@ -25,6 +25,10 @@ export default function RootLayout({
           src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_API_KEY}&libraries=services,clusterer&autoload=false`}
           strategy="beforeInteractive"
         />
+        <Script
+          src="https://js.tosspayments.com/v1/payment"
+          strategy="beforeInteractive"
+        />
         <QueryProvider>
           {isPlayground ? (
             <div className="min-h-screen bg-gray-50">{children}</div>
