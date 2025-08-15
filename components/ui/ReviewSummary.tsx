@@ -3,13 +3,14 @@ import { useRouter } from "next/navigation";
 import { SortOrder, Review } from "@/types/review";
 import { COLORS } from "@/constants";
 import { Rating } from "./Rating";
-
+import { ReviewForm } from "./ReviewForm";
 import { ButtonWithArrow } from "./ButtonWithArrow";
 import { FilterTag } from "./FilterTag";
 import { ReviewList } from "./ReviewList";
 import { Button } from "./Button";
 import { Edit } from "lucide-react";
 import { useReviewListByLocationQuery } from "@/queries/review";
+import { useModal } from "@/hooks/useModal";
 
 interface ReviewSummaryProps {
   districtName?: string;
@@ -24,6 +25,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
 }) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const router = useRouter();
+  const { openModal } = useModal();
 
   const {
     data: reviewListData,
@@ -40,7 +42,16 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
   };
 
   const handleWriteReview = () => {
-    console.log("모달 오픈");
+    openModal(
+      <ReviewForm
+        dongName={dongName}
+        districtName={districtName}
+        onClose={() => {}}
+        onSuccess={() => {
+          // 리뷰 등록 성공 시 자동으로 쿼리가 invalidate됩니다
+        }}
+      />,
+    );
   };
 
   const handleLike = (reviewId: string) => {
