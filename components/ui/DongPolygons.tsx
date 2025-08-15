@@ -140,7 +140,7 @@ export const DongPolygons: React.FC<DongPolygonsProps> = ({
         canvasBounds,
       );
       ctx.fillStyle = "#000000";
-      ctx.font = "14px Arial";
+      ctx.font = "20px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(dong.dongName, centerX, centerY);

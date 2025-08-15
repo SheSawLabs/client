@@ -203,7 +203,7 @@ const DistrictPolygons = ({
         district.center.y,
       );
       ctx.fillStyle = "#000000";
-      ctx.font = "18px Arial";
+      ctx.font = "20px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(district.name, centerX, centerY);
