@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "@/constants";
 import { Review } from "@/types/review";
+import { ApiResponse } from "@/types/common";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseReviewListByLocationQueryParams {
@@ -8,19 +9,18 @@ interface UseReviewListByLocationQueryParams {
   limit?: number;
 }
 
-interface Pagination {
+interface ReviewListPagination {
   hasNext: boolean;
   nextCursor?: string;
   totalCount: number;
 }
 
-interface ReviewListApiResponse {
-  success: boolean;
-  data: {
-    reviews: Review[];
-    pagination: Pagination;
-  };
+interface ReviewListData {
+  reviews: Review[];
+  pagination: ReviewListPagination;
 }
+
+type ReviewListApiResponse = ApiResponse<ReviewListData>;
 
 export const useReviewListByLocationQuery = ({
   districtName,
@@ -57,7 +57,8 @@ export const useReviewListByLocationQuery = ({
         throw new Error("리뷰 데이터를 불러오는데 실패했습니다");
       }
 
-      return response.json();
+      const result: ReviewListApiResponse = await response.json();
+      return result;
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.pagination?.hasNext
