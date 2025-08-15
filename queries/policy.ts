@@ -9,11 +9,14 @@ export interface PolicyWithStatus extends Policy {
   isEnded: boolean;
 }
 
-export const usePolicyListQuery = () => {
+export const usePolicyListQuery = (category?: string) => {
   return useQuery({
-    queryKey: ["policies"],
+    queryKey: ["policies", category],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/policies`);
+      const url = category
+        ? `${API_BASE_URL}/api/policies?category=${encodeURIComponent(category)}`
+        : `${API_BASE_URL}/api/policies`;
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error("정책 데이터를 불러오는데 실패했습니다");
@@ -21,9 +24,9 @@ export const usePolicyListQuery = () => {
 
       return response.json();
     },
-    select: (data: PolicyListResponse) => {
+    select: (data: PolicyListResponse): PolicyWithStatus[] => {
       if (!data?.data || !Array.isArray(data.data)) {
-        return data;
+        return [];
       }
 
       // 각 정책에 dDay와 isEnded 정보 추가
@@ -55,10 +58,7 @@ export const usePolicyListQuery = () => {
         return a.dDay - b.dDay;
       });
 
-      return {
-        ...data,
-        data: sortedPolicies,
-      };
+      return sortedPolicies;
     },
   });
 };

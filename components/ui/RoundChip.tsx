@@ -19,11 +19,12 @@ export const RoundChip: React.FC<RoundChipProps> = ({
 }) => {
   return (
     <div
-      className={`inline-flex items-center px-3 py-1 rounded-full border text-sm font-medium ${className}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full border font-medium ${className}`}
       style={{
         backgroundColor,
         borderColor,
         color: textColor,
+        fontSize: "0.81rem", // text-sm의 90% (0.875rem * 0.9)
       }}
     >
       {icon && <span className="mr-1.5">{icon}</span>}
