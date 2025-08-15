@@ -1,4 +1,5 @@
 import React from "react";
+import { User } from "lucide-react";
 import { Review } from "@/types/review";
 import { ReviewKeywordTag } from "./ReviewKeywordTag";
 import { LikeButton } from "./LikeButton";
@@ -81,11 +82,9 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     >
       {/* 사용자 정보 */}
       <div className="flex items-center gap-3">
-        <img
-          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-          alt="익명 사용자"
-          className="w-10 h-10 rounded-full object-cover"
-        />
+        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+          <User className="w-5 h-5 text-gray-500" />
+        </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="font-medium text-gray-900">익명</span>

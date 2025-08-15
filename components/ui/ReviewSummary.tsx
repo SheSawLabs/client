@@ -25,7 +25,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
 }) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const router = useRouter();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   const {
     data: reviewListData,
@@ -46,10 +46,8 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
       <ReviewForm
         dongName={dongName}
         districtName={districtName}
-        onClose={() => {}}
-        onSuccess={() => {
-          // 리뷰 등록 성공 시 자동으로 쿼리가 invalidate됩니다
-        }}
+        onClose={closeModal}
+        onSuccess={closeModal}
       />,
     );
   };

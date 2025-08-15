@@ -16,7 +16,7 @@ interface SelectedKeyword {
   keyword: string;
 }
 
-interface Props {
+interface ReviewFormProps {
   dongName: string;
   districtName?: string;
   onClose: () => void;
@@ -24,7 +24,7 @@ interface Props {
   className?: string;
 }
 
-export const ReviewForm: React.FC<Props> = ({
+export const ReviewForm: React.FC<ReviewFormProps> = ({
   dongName,
   districtName,
   onClose,
