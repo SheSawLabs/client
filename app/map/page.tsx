@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TopNav } from "@/components/ui/TopNav";
 import { SafetyLevel } from "@/components/ui/SafetyLevel";
@@ -17,21 +18,55 @@ import { useDistrictByDistrictNameQuery } from "../queries/map";
 import { Dong } from "@/types/map";
 
 export default function MapPage() {
-  // 퍼널 상태 관리
-  const [currentStep, setCurrentStep] = useState<
-    "gu-selection" | "dong-selection" | "interactive-map"
-  >("gu-selection");
-  const [, setFunnelContext] = useState<{
-    selectedDistrict?: string;
-  }>({});
-
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
-  const [selectedDong, setSelectedDong] = useState<string | null>(null);
-  const [dongInfo, setDongInfo] = useState<Dong | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { openBottomSheet } = useBottomSheet();
   const { openModal } = useModal();
+
+  // URL 파라미터에서 상태 읽기
+  const selectedDistrict = searchParams.get("district");
+  const selectedDong = searchParams.get("dong");
+  const step = searchParams.get("step") as
+    | "gu-selection"
+    | "dong-selection"
+    | "interactive-map"
+    | null;
+
+  // currentStep 결정 로직
+  const getCurrentStep = ():
+    | "gu-selection"
+    | "dong-selection"
+    | "interactive-map" => {
+    if (step) return step;
+    if (selectedDistrict && selectedDong) return "interactive-map";
+    if (selectedDistrict) return "dong-selection";
+    return "gu-selection";
+  };
+
+  const currentStep = getCurrentStep();
+  const [dongInfo, setDongInfo] = useState<Dong | null>(null);
+
   const { data: districtData, isSuccess: districtIsSuccess } =
     useDistrictByDistrictNameQuery(selectedDistrict || "");
+
+  // URL 업데이트 헬퍼 함수
+  const updateUrl = (params: {
+    district?: string | null;
+    dong?: string | null;
+    step?: string;
+  }) => {
+    const newParams = new URLSearchParams(searchParams.toString());
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+
+    router.push(`/map?${newParams.toString()}`, { scroll: false });
+  };
 
   useEffect(() => {
     if (!districtIsSuccess || !districtData) return;
@@ -51,34 +86,31 @@ export default function MapPage() {
 
   const handleGuSelection = () => {
     if (selectedDistrict) {
-      setFunnelContext({ selectedDistrict });
-      setCurrentStep("dong-selection");
+      updateUrl({ step: "dong-selection" });
     }
   };
 
   const handleDongSelection = () => {
     if (selectedDong) {
-      // Update funnel context with selected dong
-      setFunnelContext((prev) => ({
-        ...prev,
-        selectedDong,
-      }));
+      updateUrl({ step: "interactive-map" });
     }
   };
 
+  // 구 선택 핸들러
+  const handleDistrictSelect = (district: string | null) => {
+    updateUrl({ district, dong: null, step: "gu-selection" });
+  };
+
   // 동 클릭 핸들러
-  const handleDongClick = (selectedDong: string) => {
-    setSelectedDong(selectedDong);
-    setFunnelContext((prev) => ({ ...prev, selectedDong }));
-    setCurrentStep("interactive-map");
+  const handleDongClick = (dong: string) => {
+    updateUrl({ dong, step: "interactive-map" });
   };
 
   const onBackClick = () => {
     if (currentStep === "dong-selection") {
-      setCurrentStep("gu-selection");
-      setSelectedDong(null);
+      updateUrl({ dong: null, step: "gu-selection" });
     } else if (currentStep === "interactive-map") {
-      setCurrentStep("dong-selection");
+      updateUrl({ dong: null, step: "dong-selection" });
     } else {
       // Navigate back to the previous page
       window.history.back();
@@ -110,7 +142,7 @@ export default function MapPage() {
         <div className="p-4">
           <DistrictPolygons
             selectedDistrict={selectedDistrict}
-            setSelectedDistrict={setSelectedDistrict}
+            setSelectedDistrict={handleDistrictSelect}
           />
           {/* 안전등급 표시 */}
           <div className="mb-2">
