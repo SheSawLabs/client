@@ -4,6 +4,7 @@ import { Typography } from "./Typography";
 import { ReviewKeywordSlider } from "./ReviewKeywordSlider";
 import { ReviewParagraph } from "./ReviewParagraph";
 import { Button } from "./Button";
+import { Rating } from "./Rating";
 import { COLORS } from "@/constants";
 import {
   useReviewKeywordsQuery,
@@ -34,6 +35,7 @@ export const ReviewForm: React.FC<Props> = ({
     [],
   );
   const [reviewText, setReviewText] = useState("");
+  const [rating, setRating] = useState<number>(4); // 기본값 4점
 
   const { data: keywordsData, isLoading: keywordsLoading } =
     useReviewKeywordsQuery();
@@ -62,10 +64,16 @@ export const ReviewForm: React.FC<Props> = ({
     [],
   );
 
+  // 별점 변경 핸들러
+  const handleRatingChange = useCallback((newRating: number) => {
+    setRating(newRating);
+  }, []);
+
   // 폼 초기화
   const handleReset = useCallback(() => {
     setSelectedKeywords([]);
     setReviewText("");
+    setRating(4);
   }, []);
 
   // 리뷰 등록
@@ -81,7 +89,7 @@ export const ReviewForm: React.FC<Props> = ({
       await submitMutation.mutateAsync({
         reviewText,
         selectedKeywords,
-        rating: 4, // 기본값 - 추후 사용자 입력으로 변경 가능
+        rating,
         location,
         timeOfDay: "밤", // 기본값 - 추후 사용자 입력으로 변경 가능
       });
@@ -95,6 +103,7 @@ export const ReviewForm: React.FC<Props> = ({
   }, [
     selectedKeywords,
     reviewText,
+    rating,
     dongName,
     districtName,
     submitMutation,
@@ -129,6 +138,22 @@ export const ReviewForm: React.FC<Props> = ({
         <Typography variant="label">
           동네에 해당하는 키워드를 골라주세요. (1~5개)
         </Typography>
+      </div>
+
+      {/* 별점 입력 */}
+      <div className="space-y-3">
+        <Typography variant="label">
+          이 동네의 안전도를 별점으로 평가해주세요.
+        </Typography>
+        <div className="flex items-center justify-start py-4">
+          <Rating
+            rating={rating}
+            isEditable={true}
+            onRatingChange={handleRatingChange}
+            showNumber={true}
+            className="justify-center"
+          />
+        </div>
       </div>
 
       {/* 키워드 슬라이더 */}
