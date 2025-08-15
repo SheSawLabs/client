@@ -22,25 +22,35 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
 }) => {
   // PolicyWithStatus 타입인지 확인
   const isEnded = "isEnded" in policy ? policy.isEnded : false;
-  const dDay = "dDay" in policy ? policy.dDay : null;
+  const dDay = "dDay" in policy ? policy.dDay : 0;
 
+  const primaryBackgroundColor = hexToRgba(COLORS.PRIMARY, 0.2);
   const redBackgroundColor = hexToRgba(COLORS.RED_500, 0.2);
   const grayBackgroundColor = hexToRgba(COLORS.GRAY_400, 0.2);
 
+  const isUpcoming = dDay && dDay <= 5;
   // 종료된 정책의 스타일
   const cardOpacity = isEnded ? "opacity-60" : "";
-  const chipColor = isEnded ? COLORS.GRAY_400 : COLORS.RED_500;
-  const chipBgColor = isEnded ? grayBackgroundColor : redBackgroundColor;
+  const chipColor = isUpcoming
+    ? COLORS.RED_500
+    : isEnded
+      ? COLORS.GRAY_400
+      : COLORS.PRIMARY;
+  const chipBgColor = isUpcoming
+    ? redBackgroundColor
+    : isEnded
+      ? grayBackgroundColor
+      : primaryBackgroundColor;
 
   return (
     <div
-      className={`p-4 border rounded-lg space-y-3 bg-white min-w-[280px] max-w-[280px] ${cardOpacity} ${className}`}
+      className={`p-4 border rounded-lg space-y-3 bg-white min-w-[280px] max-w-full ${cardOpacity} ${className}`}
       style={{ borderColor: COLORS.GRAY_200 }}
     >
       {/* 상단 행: D-Day와 하트 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {dDay !== null && (
+          {dDay && (
             <RoundChip
               label={isEnded ? "마감" : `D-${Math.abs(dDay)}`}
               backgroundColor={chipBgColor}

@@ -22,12 +22,19 @@ export default function PolicyListPage() {
     categoryParam || "all",
   );
 
+  const categoryMap = {
+    all: undefined,
+    housing: "주거",
+    women: "여성",
+    etc: "기타",
+  };
+
   const {
     data: policiesData = [],
     isSuccess: policiesIsSuccess,
-    isLoading,
-    error,
-  } = usePolicyListQuery();
+    isLoading: policiesIsLoading,
+    isError: policiesIsError,
+  } = usePolicyListQuery(categoryMap[activeCategory]);
 
   const handleCategoryChange = (category: PolicyCategory) => {
     setActiveCategory(category);
@@ -60,11 +67,11 @@ export default function PolicyListPage() {
     </svg>
   );
 
-  if (isLoading) {
+  if (policiesIsLoading) {
     return (
       <div className="min-h-screen bg-white">
         <TopNav title="정책 정보" />
-        <div className="px-8 pt-6">
+        <div className="px-7 pt-6">
           <div className="flex justify-center items-center h-64">
             <div className="text-gray-500">로딩 중...</div>
           </div>
@@ -73,11 +80,11 @@ export default function PolicyListPage() {
     );
   }
 
-  if (error) {
+  if (policiesIsError) {
     return (
       <div className="min-h-screen bg-white">
         <TopNav title="정책 정보" />
-        <div className="px-8 pt-6">
+        <div className="px-7 pt-6">
           <div className="flex justify-center items-center h-64">
             <div className="text-red-500">정책을 불러오는데 실패했습니다.</div>
           </div>
@@ -90,7 +97,7 @@ export default function PolicyListPage() {
     <div className="min-h-screen bg-white">
       <TopNav title="정책 정보" />
 
-      <div className="px-8 pt-6">
+      <div className="px-7 pt-6">
         {/* 카테고리 탭 */}
         <PolicyTab
           activeCategory={activeCategory}
@@ -98,31 +105,31 @@ export default function PolicyListPage() {
           className="mb-6"
         />
 
-        {/* 관심 정책, 맞춤 정책 칩들 */}
-        <div className="flex gap-3 mb-6">
-          <RoundChip
-            label="관심 정책"
-            backgroundColor={hexToRgba(COLORS.GRAY_600, 0.1)}
-            borderColor={COLORS.GRAY_600}
-            textColor={COLORS.GRAY_600}
-            icon={<HeartIcon />}
-          />
-          <RoundChip
-            label="맞춤 정책"
-            backgroundColor={hexToRgba(COLORS.GRAY_600, 0.1)}
-            borderColor={COLORS.GRAY_600}
-            textColor={COLORS.GRAY_600}
-            icon={<PersonIcon />}
-          />
+        {/* 관심 정책, 맞춤 정책 칩들과 FilterTags */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-3">
+            <RoundChip
+              label="관심 정책"
+              backgroundColor={hexToRgba(COLORS.GRAY_600, 0.1)}
+              borderColor={COLORS.GRAY_600}
+              textColor={COLORS.GRAY_600}
+              icon={<HeartIcon />}
+            />
+            <RoundChip
+              label="맞춤 정책"
+              backgroundColor={hexToRgba(COLORS.GRAY_600, 0.1)}
+              borderColor={COLORS.GRAY_600}
+              textColor={COLORS.GRAY_600}
+              icon={<PersonIcon />}
+            />
+          </div>
+          <FilterTags sortOrder={sortOrder} setSortOrder={setSortOrder} />
         </div>
-        <FilterTags sortOrder={sortOrder} setSortOrder={setSortOrder} />
 
         {/* 정책 리스트 */}
         <div className="space-y-4 pb-8">
-          {policiesIsSuccess &&
-          Array.isArray(policiesData) &&
-          policiesData.length > 0 ? (
-            policiesData?.map((policy: Policy) => (
+          {policiesIsSuccess && policiesData.length > 0 ? (
+            policiesData.map((policy: Policy) => (
               <PolicyCard key={policy.id} policy={policy} />
             ))
           ) : (

@@ -84,7 +84,7 @@ export default function PolicyHome() {
           onBackClick={handleBackClick}
           onNotificationClick={handleNotificationClick}
         />
-        <div className="flex items-center justify-center py-20 px-8">
+        <div className="flex items-center justify-center py-20 px-7">
           <p style={{ color: COLORS.GRAY_400 }}>정책 정보를 불러오는 중...</p>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function PolicyHome() {
           onBackClick={handleBackClick}
           onNotificationClick={handleNotificationClick}
         />
-        <div className="flex items-center justify-center py-20 px-8">
+        <div className="flex items-center justify-center py-20 px-7">
           <p style={{ color: COLORS.GRAY_400 }}>
             {isError
               ? "정책 정보를 불러올 수 없습니다."
@@ -122,13 +122,13 @@ export default function PolicyHome() {
       <div className="space-y-6 pb-20">
         {/* PolicyUpcomingBanner */}
         {upcomingPolicy && (
-          <div className="px-8 pt-4">
+          <div className="px-7 pt-4">
             <PolicyUpcomingBanner policy={upcomingPolicy} />
           </div>
         )}
 
         {/* 사용자 인사말 */}
-        <div className="px-8">
+        <div className="px-7">
           <h2
             className="text-lg font-semibold"
             style={{ color: COLORS.GRAY_900 }}
@@ -145,7 +145,7 @@ export default function PolicyHome() {
         />
 
         {/* 전체 정책 보러가기 버튼 */}
-        <div className="px-8">
+        <div className="px-7">
           <ButtonWithArrow onClick={handleViewAllPolicies}>
             전체 정책 보러가기
           </ButtonWithArrow>
