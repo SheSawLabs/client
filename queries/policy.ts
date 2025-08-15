@@ -12,7 +12,7 @@ export interface PolicyWithStatus extends Policy {
 export const usePolicyListQuery = () => {
   return useQuery({
     queryKey: ["policies"],
-    queryFn: async (): Promise<PolicyListResponse> => {
+    queryFn: async () => {
       const response = await fetch(`${API_BASE_URL}/api/policies`);
 
       if (!response.ok) {

@@ -5,12 +5,13 @@ import { COLORS } from "@/constants";
 import { Rating } from "./Rating";
 import { ReviewForm } from "./ReviewForm";
 import { ButtonWithArrow } from "./ButtonWithArrow";
-import { FilterTag } from "./FilterTag";
+
 import { ReviewList } from "./ReviewList";
 import { Button } from "./Button";
 import { Edit } from "lucide-react";
 import { useReviewListByLocationQuery } from "@/queries/review";
 import { useModal } from "@/hooks/useModal";
+import { FilterTags } from "./FilterTags";
 
 interface ReviewSummaryProps {
   districtName?: string;
@@ -140,19 +141,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
       </ButtonWithArrow>
 
       {/* 필터 버튼 */}
-      <div className="flex gap-2">
-        <FilterTag
-          label="최신순"
-          isActive={sortOrder === "recent"}
-          onClick={() => setSortOrder("recent")}
-        />
-        <FilterTag
-          label="등록순"
-          isActive={sortOrder === "oldest"}
-          onClick={() => setSortOrder("oldest")}
-        />
-      </div>
-
+      <FilterTags sortOrder={sortOrder} setSortOrder={setSortOrder} />
       {/* 리뷰 목록 */}
       <ReviewList
         reviews={reviews}
