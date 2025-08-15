@@ -18,7 +18,12 @@ interface NavigationBarProps {
 const navigationItems: NavigationItem[] = [
   { id: "home", label: "홈", icon: "/icons/home.svg", href: "/" },
   { id: "map", label: "동네 안전", icon: "/icons/map.svg", href: "/map" },
-  { id: "info", label: "정책 정보", icon: "/icons/paper.svg", href: "/info" },
+  {
+    id: "policy",
+    label: "정책 정보",
+    icon: "/icons/paper.svg",
+    href: "/policy",
+  },
   {
     id: "community",
     label: "커뮤니티",
