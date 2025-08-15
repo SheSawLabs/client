@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { SortOrder, Review } from "@/types/review";
+import { SortOrder } from "@/types/review";
 import { COLORS } from "@/constants";
 import { Rating } from "./Rating";
 import { ReviewForm } from "./ReviewForm";
@@ -59,28 +59,12 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
     // TODO: 실제 좋아요 API 호출
   };
 
-  // API 데이터를 기존 구조로 변환
-  const convertedReviews: Review[] = useMemo(() => {
+  // API 데이터를 그대로 사용 (ReviewCard에서 변환 처리)
+  const reviews = useMemo(() => {
     if (!reviewListData?.pages) return [];
 
-    return reviewListData.pages.flatMap((page) =>
-      page.data.reviews.map((review) => ({
-        id: review.id,
-        content: review.reviewText, // reviewText -> content 변환
-        user: {
-          id: review.id, // 임시로 같은 ID 사용
-          name: "익명", // API에서 제공하지 않으므로 기본값
-          profileImage:
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face", // 기본 이미지
-        },
-        keywords: [], // API에서 제공하지 않으므로 빈 배열
-        likeCount: 0, // API에서 제공하지 않으므로 0
-        isLiked: false, // API에서 제공하지 않으므로 false
-        createdAt: review.created_at, // created_at -> createdAt 변환
-        dongName: dongName,
-      })),
-    );
-  }, [reviewListData, dongName]);
+    return reviewListData.pages.flatMap((page) => page.data.reviews);
+  }, [reviewListData]);
 
   // 평점 계산
   const averageRating = useMemo(() => {
@@ -106,7 +90,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
   }
 
   // 에러 상태 또는 데이터 없음
-  if (reviewListIsError || !convertedReviews.length) {
+  if (reviewListIsError || !reviews.length) {
     return (
       <div className={`space-y-4 ${className}`}>
         <h3 className="text-lg font-semibold text-gray-900">동네 안전 리뷰</h3>
@@ -173,7 +157,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
 
       {/* 리뷰 목록 */}
       <ReviewList
-        reviews={convertedReviews}
+        reviews={reviews}
         sortOrder={sortOrder}
         maxDisplay={4}
         onLike={handleLike}

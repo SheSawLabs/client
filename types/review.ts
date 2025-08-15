@@ -9,7 +9,7 @@ export interface ReviewUser {
   profileImage: string;
 }
 
-export interface Review {
+export interface LegacyReview {
   id: string;
   user: ReviewUser;
   content: string;
@@ -20,11 +20,39 @@ export interface Review {
   dongName: string;
 }
 
+// API로부터 받는 실제 리뷰 데이터 타입
+export interface Review {
+  id: string;
+  user_id: string | null;
+  reviewText: string;
+  location: string;
+  timeOfDay: string;
+  rating: number;
+  selectedKeywords: Array<{
+    keyword: string;
+    category: string;
+  }>;
+  recommendedKeywords: ReviewKeyword[];
+  scoreResult: {
+    totalScore: number;
+    safetyLevel: string;
+    categoryScores: Record<string, number>;
+    recommendations: string[];
+  };
+  contextAnalysis: {
+    emotionalSummary: string;
+    situationSummary: string;
+  };
+  analysisMethod: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DongReview {
   rating: number;
   totalCount: number;
   topKeywords: ReviewKeyword[];
-  reviews: Review[];
+  reviews: LegacyReview[];
 }
 
 export type SortOrder = "recent" | "oldest";

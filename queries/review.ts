@@ -1,20 +1,11 @@
 import { API_BASE_URL } from "@/constants";
+import { Review } from "@/types/review";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseReviewListByLocationQueryParams {
   districtName?: string;
   dongName?: string;
   limit?: number;
-}
-
-interface Review {
-  id: string;
-  reviewText: string;
-  location: string;
-  rating: number;
-  totalScore: number;
-  grade: string;
-  created_at: string;
 }
 
 interface Pagination {
