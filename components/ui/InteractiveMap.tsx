@@ -35,7 +35,7 @@ const InteractiveMap = ({
     useDongGeoJSONDQuery();
 
   useEffect(() => {
-    window.kakao.maps.load(() => {
+    window.kakao?.maps.load(() => {
       initializeMap();
     });
 
