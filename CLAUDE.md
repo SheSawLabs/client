@@ -75,6 +75,36 @@ import { Button } from "@/components/ui/button"; // 소문자
 import { card } from "@/components/ui/card"; // 소문자
 ```
 
+### 인터페이스 네이밍 규칙
+
+- Props 인터페이스는 컴포넌트명 + "Props" 형태로 명명
+- 다른 인터페이스는 불필요한 접두사를 붙이지 않음
+
+```typescript
+// ✅ 올바른 사용법
+interface ReviewSummaryProps {
+  dongName: string;
+  className?: string;
+}
+
+interface Review {
+  id: string;
+  content: string;
+}
+
+// ❌ 잘못된 사용법
+interface Props {
+  // 컴포넌트별 구분이 어려움
+  dongName: string;
+}
+
+interface ApiReview {
+  // 불필요한 접두사
+  id: string;
+  content: string;
+}
+```
+
 ### 설치된 컴포넌트 목록
 
 - `Button` - 다양한 버튼 스타일과 크기
