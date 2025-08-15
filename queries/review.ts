@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/constants";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseReviewListByLocationQueryParams {
@@ -53,7 +54,7 @@ export const useReviewListByLocationQuery = ({
       const encodedLocation = encodeURIComponent(location);
 
       // 쿼리 파라미터 구성
-      let url = `/api/reviews?location=${encodedLocation}&limit=${limit}`;
+      let url = `${API_BASE_URL}/api/review/list?location=${encodedLocation}&limit=${limit}`;
       if (pageParam) {
         url += `&cursor=${pageParam}`;
       }
@@ -68,7 +69,7 @@ export const useReviewListByLocationQuery = ({
       return response.json();
     },
     getNextPageParam: (lastPage) => {
-      return lastPage.data.pagination.hasNext
+      return lastPage.data.pagination?.hasNext
         ? lastPage.data.pagination.nextCursor
         : undefined;
     },
