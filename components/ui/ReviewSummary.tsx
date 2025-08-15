@@ -1,31 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { DongReview, SortOrder } from "@/types/review";
+import { SortOrder, Review } from "@/types/review";
 import { COLORS } from "@/constants";
 import { Rating } from "./Rating";
-import { LineGraph } from "./LineGraph";
+
 import { ButtonWithArrow } from "./ButtonWithArrow";
 import { FilterTag } from "./FilterTag";
 import { ReviewList } from "./ReviewList";
 import { Button } from "./Button";
 import { Edit } from "lucide-react";
+import { useReviewListByLocationQuery } from "@/queries/review";
 
 interface ReviewSummaryProps {
-  dongReview: DongReview | null;
+  districtName?: string;
   dongName: string;
   className?: string;
 }
 
 export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
-  dongReview,
+  districtName,
   dongName,
   className = "",
 }) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const router = useRouter();
 
+  const {
+    data: reviewListData,
+    isError: reviewListIsError,
+    isLoading: reviewListIsLoading,
+  } = useReviewListByLocationQuery({
+    districtName,
+    dongName,
+  });
+
   const handleViewAllReviews = () => {
-    router.push(`/reviews?location=${encodeURIComponent(dongName)}`);
+    const location = districtName ? `${districtName} ${dongName}` : dongName;
+    router.push(`/reviews?location=${encodeURIComponent(location)}`);
   };
 
   const handleWriteReview = () => {
@@ -37,12 +48,63 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
     // TODO: 실제 좋아요 API 호출
   };
 
-  if (!dongReview) {
+  // API 데이터를 기존 구조로 변환
+  const convertedReviews: Review[] = useMemo(() => {
+    if (!reviewListData?.pages) return [];
+
+    return reviewListData.pages.flatMap((page) =>
+      page.data.reviews.map((review) => ({
+        id: review.id,
+        content: review.reviewText, // reviewText -> content 변환
+        user: {
+          id: review.id, // 임시로 같은 ID 사용
+          name: "익명", // API에서 제공하지 않으므로 기본값
+          profileImage:
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face", // 기본 이미지
+        },
+        keywords: [], // API에서 제공하지 않으므로 빈 배열
+        likeCount: 0, // API에서 제공하지 않으므로 0
+        isLiked: false, // API에서 제공하지 않으므로 false
+        createdAt: review.created_at, // created_at -> createdAt 변환
+        dongName: dongName,
+      })),
+    );
+  }, [reviewListData, dongName]);
+
+  // 평점 계산
+  const averageRating = useMemo(() => {
+    if (!reviewListData?.pages) return 0;
+    const allRatings = reviewListData.pages.flatMap((page) =>
+      page.data.reviews.map((review) => review.rating),
+    );
+    return allRatings.length > 0
+      ? allRatings.reduce((sum, rating) => sum + rating, 0) / allRatings.length
+      : 0;
+  }, [reviewListData]);
+
+  // 로딩 상태
+  if (reviewListIsLoading) {
     return (
       <div className={`space-y-4 ${className}`}>
         <h3 className="text-lg font-semibold text-gray-900">동네 안전 리뷰</h3>
         <div className="text-center py-8 text-gray-500">
-          <p>아직 등록된 리뷰가 없습니다.</p>
+          <p>리뷰를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 에러 상태 또는 데이터 없음
+  if (reviewListIsError || !convertedReviews.length) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <h3 className="text-lg font-semibold text-gray-900">동네 안전 리뷰</h3>
+        <div className="text-center py-8 text-gray-500">
+          <p>
+            {reviewListIsError
+              ? "리뷰를 불러올 수 없습니다."
+              : "아직 등록된 리뷰가 없습니다."}
+          </p>
           <p className="mt-2" style={{ color: COLORS.PRIMARY }}>
             {dongName}에 대한 인상을 리뷰해주세요!
           </p>
@@ -65,10 +127,10 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
       <h3 className="text-lg font-semibold text-gray-900">동네 안전 리뷰</h3>
 
       {/* 평점 */}
-      <Rating rating={dongReview.rating} />
+      <Rating rating={averageRating} />
 
-      {/* 키워드 그래프 */}
-      <div className="flex flex-col gap-4">
+      {/* 키워드 그래프 (API 연결 필요) */}
+      {/* <div className="flex flex-col gap-4">
         {dongReview.topKeywords.slice(0, 3).map((keyword, index) => (
           <LineGraph
             key={index}
@@ -77,7 +139,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
             totalCount={dongReview.totalCount}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* 전체 리뷰 보러가기 */}
       <ButtonWithArrow onClick={handleViewAllReviews}>
@@ -100,10 +162,11 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
 
       {/* 리뷰 목록 */}
       <ReviewList
-        reviews={dongReview.reviews}
+        reviews={convertedReviews}
         sortOrder={sortOrder}
         maxDisplay={4}
         onLike={handleLike}
+        reviewListIsError={reviewListIsError}
       />
 
       {/* 리뷰 등록 섹션 */}

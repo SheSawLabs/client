@@ -5,7 +5,6 @@ import { SAFETY_LABELS, SAFETY_COLORS, COLORS } from "@/constants";
 import { SafetyQuote } from "./SafetyQuote";
 import { ReviewSummary } from "./ReviewSummary";
 import { Dong } from "@/types/map";
-import { useMockDongReview } from "@/hooks/useMockDongReview";
 
 interface DongSafetyDetailProps {
   dongInfo: Dong | null;
@@ -16,8 +15,6 @@ export const DongSafetyDetail: React.FC<DongSafetyDetailProps> = ({
   dongInfo,
   className = "",
 }) => {
-  // Mock 데이터 사용
-  const mockDongReview = useMockDongReview(dongInfo?.dong || "");
   const gradeColor = dongInfo?.grade
     ? SAFETY_COLORS[dongInfo.grade]
     : COLORS.PRIMARY;
@@ -68,7 +65,7 @@ export const DongSafetyDetail: React.FC<DongSafetyDetailProps> = ({
 
       {/* 동네 안전 리뷰 */}
       <ReviewSummary
-        dongReview={mockDongReview}
+        districtName={dongInfo?.district}
         dongName={dongInfo?.dong || ""}
         className="mt-6"
       />
