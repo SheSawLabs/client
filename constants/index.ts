@@ -71,6 +71,8 @@ export const COLORS = {
   GRAY_200: "#E5E7EB",
   GRAY_400: "#9CA3AF",
   GRAY_800: "#1F2937",
+  GRAY_900: "#111827",
+  RED_500: "#EF4444",
 };
 
 export const FACILITIES_LABELS = {
