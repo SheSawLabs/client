@@ -1,4 +1,5 @@
 import { cn } from "@/utils/cn";
+import { COLORS } from "@/constants";
 
 interface TypographyProps {
   variant?:
@@ -12,7 +13,8 @@ interface TypographyProps {
     | "lead"
     | "large"
     | "small"
-    | "muted";
+    | "muted"
+    | "label";
   className?: string;
   children: React.ReactNode;
 }
@@ -24,7 +26,7 @@ export function Typography({
   ...props
 }: TypographyProps) {
   const variants = {
-    h1: "text-2xl font-bold tracking-tight text-gray-900 leading-tight",
+    h1: "font-bold leading-tight",
     h2: "text-xl font-semibold tracking-tight text-gray-900 leading-tight",
     h3: "text-lg font-semibold tracking-tight text-gray-900 leading-tight",
     h4: "text-base font-semibold tracking-tight text-gray-900 leading-tight",
@@ -35,6 +37,21 @@ export function Typography({
     large: "text-lg font-medium text-gray-900",
     small: "text-sm font-medium leading-tight text-gray-600",
     muted: "text-sm text-gray-500 leading-tight",
+    label: "text-xs font-normal",
+  };
+
+  const variantStyles = {
+    h1: {
+      fontSize: "32px",
+      lineHeight: "36px",
+      color: COLORS.GRAY_800,
+      fontFamily: "Min Sans, -apple-system, BlinkMacSystemFont, sans-serif",
+    },
+    label: {
+      fontSize: "12px",
+      lineHeight: "140%",
+      color: COLORS.GRAY_800,
+    },
   };
 
   const Component =
@@ -42,12 +59,20 @@ export function Typography({
       ? "blockquote"
       : variant === "list"
         ? "ul"
-        : variant.startsWith("h")
-          ? (variant as keyof JSX.IntrinsicElements)
-          : "p";
+        : variant === "label"
+          ? "label"
+          : variant.startsWith("h")
+            ? (variant as keyof JSX.IntrinsicElements)
+            : "p";
+
+  const inlineStyle = variantStyles[variant as keyof typeof variantStyles];
 
   return (
-    <Component className={cn(variants[variant], className)} {...props}>
+    <Component
+      className={cn(variants[variant], className)}
+      style={inlineStyle}
+      {...props}
+    >
       {children}
     </Component>
   );

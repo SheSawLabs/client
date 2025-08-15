@@ -67,6 +67,10 @@ export const API_BASE_URL = "http://localhost:3001";
 
 export const COLORS = {
   PRIMARY: "#0f5fda", // blue-500
+  GRAY_100: "#F9FAFB",
+  GRAY_200: "#E5E7EB",
+  GRAY_400: "#9CA3AF",
+  GRAY_800: "#1F2937",
 };
 
 export const FACILITIES_LABELS = {
