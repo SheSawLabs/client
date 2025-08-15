@@ -9,7 +9,7 @@ const FilterTags = ({
   setSortOrder: (order: SortOrder) => void;
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-3">
       <FilterTag
         label="최신순"
         isActive={sortOrder === "recent"}

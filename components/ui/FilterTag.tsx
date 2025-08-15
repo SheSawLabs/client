@@ -17,7 +17,7 @@ export const FilterTag: React.FC<FilterTagProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-full transition-colors ${className}`}
+      className={`flex items-center gap-1 py-1 text-sm font-medium rounded-full transition-colors ${className}`}
       style={{
         backgroundColor: "transparent",
         color: COLORS.PRIMARY,
@@ -26,7 +26,7 @@ export const FilterTag: React.FC<FilterTagProps> = ({
     >
       {isActive && (
         <div
-          className="w-2 h-2 rounded-full"
+          className="w-1 h-1 rounded-full"
           style={{ backgroundColor: COLORS.PRIMARY }}
         />
       )}
