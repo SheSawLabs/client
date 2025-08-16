@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TopNav } from "@/components/ui/TopNav";
 import { PolicyUpcomingBanner } from "@/components/ui/PolicyUpcomingBanner";
-import { PolicyCardSlider } from "@/components/ui/PolicyCardSlider";
+import { PolicyCardSwiper } from "@/components/ui/PolicyCardSwiper";
 import { ButtonWithArrow } from "@/components/ui/ButtonWithArrow";
 import { usePolicyListQuery, PolicyWithStatus } from "@/queries/policy";
 import { COLORS } from "@/constants";
@@ -141,8 +141,8 @@ export default function PolicyHome() {
           </h2>
         </div>
 
-        {/* PolicyCardSlider */}
-        <PolicyCardSlider
+        {/* PolicyCardSwiper */}
+        <PolicyCardSwiper
           policies={validPolicies}
           onHeartClick={handleHeartClick}
           likedPolicies={likedPolicies}

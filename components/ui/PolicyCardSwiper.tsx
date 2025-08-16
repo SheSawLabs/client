@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Policy } from "@/types/policy";
 import { PolicyCard } from "./PolicyCard";
 
-interface PolicyCardSliderProps {
+interface PolicyCardSwiperProps {
   policies: Policy[];
   onHeartClick?: (policyId: string) => void;
   likedPolicies?: Set<string>;
@@ -10,7 +10,7 @@ interface PolicyCardSliderProps {
   onPolicyClick?: (policyId: string) => void;
 }
 
-export const PolicyCardSlider: React.FC<PolicyCardSliderProps> = ({
+export const PolicyCardSwiper: React.FC<PolicyCardSwiperProps> = ({
   policies,
   onHeartClick,
   likedPolicies = new Set(),
