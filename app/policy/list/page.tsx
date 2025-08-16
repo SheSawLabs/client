@@ -47,6 +47,10 @@ export default function PolicyListPage() {
     router.push(`/policy/list?${params.toString()}`);
   };
 
+  const handlePolicyClick = (policyId: string) => {
+    router.push(`/policy/${policyId}`);
+  };
+
   // 하트 아이콘 SVG
   const HeartIcon = () => (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -130,7 +134,11 @@ export default function PolicyListPage() {
         <div className="space-y-4 pb-8">
           {policiesIsSuccess && policiesData.length > 0 ? (
             policiesData.map((policy: Policy) => (
-              <PolicyCard key={policy.id} policy={policy} />
+              <PolicyCard
+                key={policy.id}
+                policy={policy}
+                onClick={handlePolicyClick}
+              />
             ))
           ) : (
             <div className="flex justify-center items-center h-64">

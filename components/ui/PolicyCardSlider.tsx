@@ -7,6 +7,7 @@ interface PolicyCardSliderProps {
   onHeartClick?: (policyId: string) => void;
   likedPolicies?: Set<string>;
   className?: string;
+  onPolicyClick?: (policyId: string) => void;
 }
 
 export const PolicyCardSlider: React.FC<PolicyCardSliderProps> = ({
@@ -14,6 +15,7 @@ export const PolicyCardSlider: React.FC<PolicyCardSliderProps> = ({
   onHeartClick,
   likedPolicies = new Set(),
   className = "",
+  onPolicyClick,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +42,7 @@ export const PolicyCardSlider: React.FC<PolicyCardSliderProps> = ({
               policy={policy}
               onHeartClick={onHeartClick}
               isLiked={likedPolicies.has(policy.id)}
+              onClick={onPolicyClick}
             />
           </div>
         ))}

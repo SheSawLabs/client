@@ -76,6 +76,10 @@ export default function PolicyHome() {
     router.push("/policy/list?category=all");
   };
 
+  const handlePolicyClick = (policyId: string) => {
+    router.push(`/policy/${policyId}`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
@@ -142,6 +146,7 @@ export default function PolicyHome() {
           policies={validPolicies}
           onHeartClick={handleHeartClick}
           likedPolicies={likedPolicies}
+          onPolicyClick={handlePolicyClick}
         />
 
         {/* 전체 정책 보러가기 버튼 */}

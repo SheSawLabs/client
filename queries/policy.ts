@@ -62,3 +62,31 @@ export const usePolicyListQuery = (category?: string) => {
     },
   });
 };
+
+// 단일 정책 상세 조회
+export const usePolicyDetailQuery = (policyId: string) => {
+  return useQuery({
+    queryKey: ["policy", policyId],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/policies/${policyId}`);
+
+      if (!response.ok) {
+        throw new Error("정책 상세 정보를 불러오는데 실패했습니다");
+      }
+
+      return response.json();
+    },
+    select: (data: { success: boolean; data: Policy }): PolicyWithStatus => {
+      const policy = data.data;
+      const dDay = calculateDDay(policy.application_period);
+      const isEnded = dDay !== null && dDay < 0;
+
+      return {
+        ...policy,
+        dDay,
+        isEnded,
+      };
+    },
+    enabled: !!policyId,
+  });
+};
