@@ -150,15 +150,14 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
         </div>
 
         {/* 신청하러 가기 버튼 */}
-        <div className="fixed bottom-8 left-7 right-7">
-          <Button
-            onClick={handleApplyClick}
-            className="w-full py-4 text-base font-medium"
-            disabled={!policy.link}
-          >
-            신청하러 가기
-          </Button>
-        </div>
+
+        <Button
+          onClick={handleApplyClick}
+          className="w-full py-4 text-base font-medium"
+          disabled={!policy.link}
+        >
+          신청하러 가기
+        </Button>
       </div>
     </div>
   );
