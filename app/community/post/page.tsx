@@ -295,7 +295,7 @@ export default function PostDetailPage() {
                     <button
                       onClick={() =>
                         router.push(
-                          `/community/settlement-request?title=${encodeURIComponent(post.title)}`,
+                          `/community/settlement-request?title=${encodeURIComponent(post.title)}&postId=${postId}`,
                         )
                       }
                       className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50"

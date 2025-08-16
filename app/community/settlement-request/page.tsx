@@ -12,32 +12,50 @@ import {
   Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useParticipantsQuery } from "@/app/queries/community";
+import { useCreateSettlementMutation } from "@/app/queries/settlement";
 
 interface Neighbor {
   id: string;
   name: string;
   amount: number;
+  user_id: number;
 }
 
 export default function SettlementRequestPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // URL에서 게시글 제목 가져오기 (fallback으로 기본값 사용)
+  // URL에서 게시글 제목과 모임 ID 가져오기
   const groupTitle = searchParams.get("title") || "렛츠고 소분모임";
+  const postId = searchParams.get("postId") || "";
 
   const [totalAmount, setTotalAmount] = useState(9000);
-  const [neighbors, setNeighbors] = useState<Neighbor[]>([
-    { id: "1", name: "헤몽", amount: 0 },
-    { id: "2", name: "또리", amount: 0 },
-    { id: "3", name: "나나", amount: 0 },
-  ]);
+  const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
+
+  // 모임 참여자 목록 조회
+  const { data: participants = [], isLoading: participantsLoading } =
+    useParticipantsQuery(postId);
+
+  // 정산 요청 생성
+  const createSettlementMutation = useCreateSettlementMutation();
   const [isEditingAmount, setIsEditingAmount] = useState(false);
   const [editingNeighborId, setEditingNeighborId] = useState<string | null>(
     null,
   );
   const [tempAmount, setTempAmount] = useState("");
   const skipTotalAmountEffect = useRef(false);
+
+  // API에서 가져온 참여자 데이터를 neighbors로 설정
+  useEffect(() => {
+    if (participants.length > 0) {
+      const participantNeighbors = participants.map((participant) => ({
+        ...participant,
+        amount: Math.floor(totalAmount / participants.length),
+      }));
+      setNeighbors(participantNeighbors);
+    }
+  }, [participants, totalAmount]);
 
   // 총 금액이 변경될 때 개별 금액을 균등 분할 (이웃 수정으로 인한 변경이 아닐 때만)
   useEffect(() => {
@@ -136,8 +154,69 @@ export default function SettlementRequestPage() {
   };
 
   const handleSubmitRequest = () => {
-    // TODO: 정산 요청 API 호출
-    console.log("정산 요청하기");
+    if (!postId || neighbors.length === 0) {
+      alert("참여자가 없거나 모임 정보가 없습니다.");
+      return;
+    }
+
+    // 금액 합계 검증
+    const participantAmountSum = neighbors.reduce(
+      (sum, neighbor) => sum + neighbor.amount,
+      0,
+    );
+    if (participantAmountSum !== totalAmount) {
+      alert(
+        `참여자 금액 합계(${participantAmountSum.toLocaleString()}원)와 총 금액(${totalAmount.toLocaleString()}원)이 일치하지 않습니다.`,
+      );
+      return;
+    }
+
+    // 모든 참여자가 양수 금액을 가지는지 검증
+    const hasInvalidAmount = neighbors.some((neighbor) => neighbor.amount <= 0);
+    if (hasInvalidAmount) {
+      alert("모든 참여자의 금액은 0원보다 커야 합니다.");
+      return;
+    }
+
+    // API 요청 데이터 구성
+    const settlementData = {
+      post_id: postId,
+      total_amount: totalAmount,
+      participants: neighbors.map((neighbor) => ({
+        user_id: neighbor.user_id,
+        amount: neighbor.amount,
+      })),
+    };
+
+    console.log("정산 요청 데이터:", settlementData);
+    console.log("neighbors 상태:", neighbors);
+    console.log("participants 원본:", participants);
+
+    // 추가 검증
+    console.log("각 참여자별 상세 정보:");
+    neighbors.forEach((neighbor, index) => {
+      console.log(`${index + 1}. ${neighbor.name}:`, {
+        id: neighbor.id,
+        user_id: neighbor.user_id,
+        amount: neighbor.amount,
+        user_id_type: typeof neighbor.user_id,
+        amount_type: typeof neighbor.amount,
+        is_user_id_valid: neighbor.user_id && neighbor.user_id > 0,
+        is_amount_valid: neighbor.amount && neighbor.amount > 0,
+      });
+    });
+
+    createSettlementMutation.mutate(settlementData, {
+      onSuccess: (response) => {
+        console.log("정산 요청 성공:", response);
+        alert("정산 요청이 성공적으로 생성되었습니다!");
+        router.back(); // 이전 페이지로 돌아가기
+      },
+      onError: (error) => {
+        console.error("정산 요청 실패:", error);
+        alert("정산 요청에 실패했습니다. 다시 시도해주세요.");
+      },
+    });
   };
 
   return (
@@ -231,66 +310,76 @@ export default function SettlementRequestPage() {
             <h2 className="text-sm font-bold text-[#111827]">이웃 편집</h2>
           </div>
           <div className="space-y-0">
-            {neighbors.map((neighbor) => (
-              <div
-                key={neighbor.id}
-                className="flex items-center justify-between h-12"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 bg-[#EEF4FF] border border-[#DDE6FF] rounded-full flex items-center justify-center">
-                    <Users size={16} className="text-[#017BFF]" />
-                  </div>
-                  <span className="text-sm text-[#111827]">
-                    {neighbor.name}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {editingNeighborId === neighbor.id ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="text"
-                        value={tempAmount}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, "");
-                          const numericValue = parseInt(value, 10);
-                          if (isNaN(numericValue) || numericValue <= 500000) {
-                            setTempAmount(value);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleNeighborAmountSubmit();
-                          } else if (e.key === "Escape") {
-                            handleNeighborAmountCancel();
-                          }
-                        }}
-                        onBlur={handleNeighborAmountSubmit}
-                        autoFocus
-                        className="text-sm text-[#111827] bg-transparent border-b border-[#017BFF] outline-none w-16 text-right"
-                        placeholder="금액"
-                      />
-                      <span className="text-sm text-[#111827]">원</span>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        handleEditNeighborAmount(neighbor.id, neighbor.amount)
-                      }
-                      className="text-sm text-[#111827] hover:bg-gray-50 px-1 py-0.5 rounded"
-                    >
-                      {neighbor.amount.toLocaleString()}원
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleRemoveNeighbor(neighbor.id)}
-                    className="flex items-center justify-center"
-                    aria-label={`${neighbor.name} 삭제`}
-                  >
-                    <X size={14} className="text-[#6B7280]" />
-                  </button>
-                </div>
+            {participantsLoading ? (
+              <div className="text-center py-4 text-[#6B7280]">
+                참여자 목록을 불러오는 중...
               </div>
-            ))}
+            ) : neighbors.length === 0 ? (
+              <div className="text-center py-4 text-[#6B7280]">
+                참여자가 없습니다.
+              </div>
+            ) : (
+              neighbors.map((neighbor) => (
+                <div
+                  key={neighbor.id}
+                  className="flex items-center justify-between h-12"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 bg-[#EEF4FF] border border-[#DDE6FF] rounded-full flex items-center justify-center">
+                      <Users size={16} className="text-[#017BFF]" />
+                    </div>
+                    <span className="text-sm text-[#111827]">
+                      {neighbor.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {editingNeighborId === neighbor.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={tempAmount}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, "");
+                            const numericValue = parseInt(value, 10);
+                            if (isNaN(numericValue) || numericValue <= 500000) {
+                              setTempAmount(value);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleNeighborAmountSubmit();
+                            } else if (e.key === "Escape") {
+                              handleNeighborAmountCancel();
+                            }
+                          }}
+                          onBlur={handleNeighborAmountSubmit}
+                          autoFocus
+                          className="text-sm text-[#111827] bg-transparent border-b border-[#017BFF] outline-none w-16 text-right"
+                          placeholder="금액"
+                        />
+                        <span className="text-sm text-[#111827]">원</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          handleEditNeighborAmount(neighbor.id, neighbor.amount)
+                        }
+                        className="text-sm text-[#111827] hover:bg-gray-50 px-1 py-0.5 rounded"
+                      >
+                        {neighbor.amount.toLocaleString()}원
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleRemoveNeighbor(neighbor.id)}
+                      className="flex items-center justify-center"
+                      aria-label={`${neighbor.name} 삭제`}
+                    >
+                      <X size={14} className="text-[#6B7280]" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -329,8 +418,11 @@ export default function SettlementRequestPage() {
           onClick={handleSubmitRequest}
           size="wide"
           className="rounded-xl"
+          disabled={
+            createSettlementMutation.isPending || neighbors.length === 0
+          }
         >
-          정산 요청하기
+          {createSettlementMutation.isPending ? "요청 중..." : "정산 요청하기"}
         </Button>
       </div>
     </div>

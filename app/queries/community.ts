@@ -86,6 +86,34 @@ const fetchUserInfo = async (userId: number) => {
   return { nickname: "익명", profile_image: null };
 };
 
+// 참여자 수 조회 유틸리티 함수
+const fetchParticipantCount = async (postId: string): Promise<number> => {
+  try {
+    const headers: Record<string, string> = {};
+    const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+    if (tempToken && tempToken !== "your_temp_token_here") {
+      headers.Authorization = `Bearer ${tempToken}`;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/posts/${postId}/participants`,
+      {
+        headers,
+      },
+    );
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.data && result.data.participants) {
+        return result.data.participants.length;
+      }
+    }
+  } catch (error) {
+    console.error("참여자 수 조회 실패:", error);
+  }
+  return 0;
+};
+
 // 서버 데이터를 클라이언트 타입으로 변환
 const transformServerPost = async (
   serverPost: ServerPost,
@@ -112,13 +140,19 @@ const transformServerPost = async (
     ? await fetchUserInfo(serverPost.author_id)
     : { nickname: "익명", profile_image: null };
 
+  // 참여자 수 조회 (일반 게시글이 아닌 경우만)
+  const currentParticipants =
+    serverPost.category !== "일반"
+      ? await fetchParticipantCount(serverPost.id)
+      : 0;
+
   return {
     id: serverPost.id,
     region: serverPost.location,
     createdAgo: getTimeAgo(serverPost.created_at),
     category: serverPost.category as Post["category"],
     participants: {
-      current: 0, // 서버에서 참가자 수 정보가 없어 임시로 0
+      current: currentParticipants,
       max: serverPost.max_participants,
     },
     title: serverPost.title,
@@ -507,6 +541,63 @@ export const useUserProfileQuery = (userId?: number) => {
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 10, // 10분간 캐시 유지
+  });
+};
+
+// 모임 참여자 목록 조회
+export const useParticipantsQuery = (postId: string) => {
+  return useQuery({
+    queryKey: ["participants", postId],
+    queryFn: async (): Promise<
+      Array<{ id: string; name: string; user_id: number }>
+    > => {
+      const headers: Record<string, string> = {};
+
+      // 임시 토큰이 있으면 Authorization 헤더에 추가
+      const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+      if (tempToken && tempToken !== "your_temp_token_here") {
+        headers.Authorization = `Bearer ${tempToken}`;
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/${postId}/participants`,
+        {
+          headers,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // 참여자 목록을 우리가 필요한 형태로 변환
+      if (result.data && result.data.participants) {
+        return result.data.participants.map(
+          (participant: {
+            id?: string | number;
+            user_id?: number;
+            nickname?: string;
+            name?: string;
+          }) => ({
+            id:
+              participant.id?.toString() ||
+              participant.user_id?.toString() ||
+              "",
+            name: participant.nickname || participant.name || "익명",
+            user_id:
+              participant.user_id ||
+              (typeof participant.id === "number" ? participant.id : 0),
+          }),
+        );
+      }
+
+      // 임시 fallback (실제 API 응답 구조에 따라 조정 필요)
+      return [];
+    },
+    enabled: !!postId,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 };
 
