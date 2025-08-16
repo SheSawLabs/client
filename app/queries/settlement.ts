@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/constants";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface SettlementStartResponse {
   success: boolean;
@@ -52,6 +52,38 @@ interface Settlement {
 interface MySettlementsResponse {
   success: boolean;
   data: Settlement[];
+}
+
+interface CreateSettlementRequest {
+  post_id: string;
+  total_amount: number;
+  participants: Array<{
+    user_id: number;
+    amount: number;
+  }>;
+}
+
+interface CreateSettlementResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    post_id: string;
+    creator_id: number;
+    total_amount: number;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    participants: Array<{
+      id: string;
+      settlement_request_id: string;
+      user_id: number;
+      amount: number;
+      payment_status: string;
+      created_at: string;
+      updated_at: string;
+    }>;
+  };
 }
 
 // 정산 시작 API 호출
@@ -224,10 +256,65 @@ export const fetchMySettlements = async (): Promise<MySettlementsResponse> => {
   return result;
 };
 
+// 정산 요청 생성 API 호출
+export const createSettlement = async (
+  settlementData: CreateSettlementRequest,
+): Promise<CreateSettlementResponse> => {
+  const token = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+
+  console.log("정산 요청 생성 API 요청:", {
+    url: `${API_BASE_URL}/api/settlements`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: settlementData,
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/settlements`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(settlementData),
+  });
+
+  console.log("정산 요청 생성 API 응답 상태:", response.status);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("정산 요청 생성 API 오류 응답:", errorText);
+    throw new Error(
+      `정산 요청 생성 API 호출 실패: ${response.status} - ${errorText}`,
+    );
+  }
+
+  const result = await response.json();
+  console.log("정산 요청 생성 API 성공 응답:", result);
+  return result;
+};
+
 // React Query 훅 - 내 정산 참여 조회
 export const useMySettlementsQuery = () => {
   return useQuery({
     queryKey: ["/api/settlements/my/participations"],
     queryFn: fetchMySettlements,
+  });
+};
+
+// React Query 훅 - 정산 요청 생성
+export const useCreateSettlementMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createSettlement,
+    onSuccess: () => {
+      // 정산 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ["/api/settlements"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/settlements/my/participations"],
+      });
+    },
   });
 };
