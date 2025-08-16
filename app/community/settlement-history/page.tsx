@@ -17,7 +17,7 @@ export default function SettlementHistoryPage() {
     "pending",
   );
 
-  // 정산 데이터 조회
+  // 정산 데이터 조회 (새 API 사용)
   const { data: settlementData, isLoading } = usePostSettlementQuery(postId);
 
   const handleBack = () => {
@@ -46,8 +46,11 @@ export default function SettlementHistoryPage() {
 
   // 정산 데이터에서 참여자 분류
   const settlement = settlementData?.settlement;
-  // const pendingParticipants = settlement?.participants?.filter(p => p.payment_status === "pending") || [];
-  // const completedParticipants = settlement?.participants?.filter(p => p.payment_status === "completed") || [];
+  const pendingParticipants =
+    settlement?.participants?.filter((p) => p.payment_status === "pending") ||
+    [];
+  const completedParticipants =
+    settlement?.participants?.filter((p) => p.payment_status === "paid") || [];
 
   const totalAmount = settlement?.total_amount || 0;
   const requestDate = settlement?.created_at
@@ -199,7 +202,7 @@ export default function SettlementHistoryPage() {
               role="tab"
               aria-selected={activeTab === "pending"}
             >
-              미정산 3
+              미정산 {pendingParticipants.length}
             </button>
             <button
               onClick={() => setActiveTab("completed")}
@@ -211,7 +214,7 @@ export default function SettlementHistoryPage() {
               role="tab"
               aria-selected={activeTab === "completed"}
             >
-              정산 완료 1
+              정산 완료 {completedParticipants.length}
             </button>
           </div>
         </div>
@@ -220,80 +223,72 @@ export default function SettlementHistoryPage() {
         <div className="space-y-3 px-4">
           {activeTab === "pending" && (
             <>
-              {/* 미정산 대상자들 - 정적 데이터 */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#F9FAFB] border border-[#017BFF] rounded-full flex items-center justify-center">
-                    <Users size={16} className="text-[#6B7280]" />
-                  </div>
-                  <span className="text-sm text-[#111827]">김민수</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#111827]">3,000원</span>
-                  <button
-                    onClick={() => handleRemind("김민수")}
-                    className="w-4 h-4 bg-[#EEF4FF] rounded-full flex items-center justify-center"
-                    aria-label="김민수에게 알림"
+              {pendingParticipants.length > 0 ? (
+                pendingParticipants.map((participant) => (
+                  <div
+                    key={participant.user_id}
+                    className="flex items-center justify-between"
                   >
-                    <Bell size={10} className="text-[#017BFF]" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#F9FAFB] border border-[#017BFF] rounded-full flex items-center justify-center">
-                    <Users size={16} className="text-[#6B7280]" />
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[#F9FAFB] border border-[#017BFF] rounded-full flex items-center justify-center">
+                        <Users size={16} className="text-[#6B7280]" />
+                      </div>
+                      <span className="text-sm text-[#111827]">
+                        사용자 {participant.user_id}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-[#111827]">
+                        {participant.amount.toLocaleString()}원
+                      </span>
+                      <button
+                        onClick={() =>
+                          handleRemind(`사용자 ${participant.user_id}`)
+                        }
+                        className="w-4 h-4 bg-[#EEF4FF] rounded-full flex items-center justify-center"
+                        aria-label={`사용자 ${participant.user_id}에게 알림`}
+                      >
+                        <Bell size={10} className="text-[#017BFF]" />
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-sm text-[#111827]">이영희</span>
+                ))
+              ) : (
+                <div className="text-center py-8 text-[#6B7280]">
+                  미정산 참여자가 없습니다.
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#111827]">3,000원</span>
-                  <button
-                    onClick={() => handleRemind("이영희")}
-                    className="w-4 h-4 bg-[#EEF4FF] rounded-full flex items-center justify-center"
-                    aria-label="이영희에게 알림"
-                  >
-                    <Bell size={10} className="text-[#017BFF]" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#F9FAFB] border border-[#017BFF] rounded-full flex items-center justify-center">
-                    <Users size={16} className="text-[#6B7280]" />
-                  </div>
-                  <span className="text-sm text-[#111827]">박철호</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#111827]">3,000원</span>
-                  <button
-                    onClick={() => handleRemind("박철호")}
-                    className="w-4 h-4 bg-[#EEF4FF] rounded-full flex items-center justify-center"
-                    aria-label="박철호에게 알림"
-                  >
-                    <Bell size={10} className="text-[#017BFF]" />
-                  </button>
-                </div>
-              </div>
+              )}
             </>
           )}
 
           {activeTab === "completed" && (
             <>
-              {/* 정산 완료 대상자 - 정적 데이터 */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#F0F8E8] border border-[#519913] rounded-full flex items-center justify-center">
-                    <Users size={16} className="text-[#519913]" />
+              {completedParticipants.length > 0 ? (
+                completedParticipants.map((participant) => (
+                  <div
+                    key={participant.user_id}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[#F0F8E8] border border-[#519913] rounded-full flex items-center justify-center">
+                        <Users size={16} className="text-[#519913]" />
+                      </div>
+                      <span className="text-sm text-[#111827]">
+                        사용자 {participant.user_id}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-[#111827]">
+                        {participant.amount.toLocaleString()}원
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-sm text-[#111827]">정다은</span>
+                ))
+              ) : (
+                <div className="text-center py-8 text-[#6B7280]">
+                  정산 완료된 참여자가 없습니다.
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#111827]">3,000원</span>
-                </div>
-              </div>
+              )}
             </>
           )}
         </div>

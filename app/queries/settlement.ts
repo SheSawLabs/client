@@ -49,6 +49,32 @@ interface Settlement {
   participants: SettlementParticipant[];
 }
 
+interface SettlementDetailResponse {
+  success: boolean;
+  data: {
+    id: string;
+    post_id: string;
+    creator_id: number;
+    total_amount: number;
+    status: "pending" | "in_progress" | "completed" | "cancelled";
+    created_at: string;
+    updated_at: string;
+    completed_at: string | null;
+    participants: Array<{
+      id: string;
+      settlement_request_id: string;
+      user_id: number;
+      amount: number;
+      payment_status: "pending" | "paid" | "failed" | "refunded";
+      toss_payment_key: string | null;
+      toss_order_id: string | null;
+      paid_at: string | null;
+      created_at: string;
+      updated_at: string;
+    }>;
+  };
+}
+
 interface MySettlementsResponse {
   success: boolean;
   data: Settlement[];
@@ -308,12 +334,24 @@ export const fetchPostSettlement = async (
   postId: string,
 ): Promise<{
   hasSettlement: boolean;
-  settlement?: CreateSettlementResponse["data"];
+  settlement?: {
+    id: string;
+    post_id: string;
+    creator_id: number;
+    total_amount: number;
+    status: string;
+    created_at: string;
+    participants: Array<{
+      user_id: number;
+      amount: number;
+      payment_status: "pending" | "paid" | "failed" | "refunded";
+    }>;
+  };
 }> => {
   const token = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
 
   console.log("모임별 정산 요청 조회 API 요청:", {
-    url: `${API_BASE_URL}/api/settlements/post/${postId}`,
+    url: `${API_BASE_URL}/api/posts/${postId}/settlement`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -321,7 +359,7 @@ export const fetchPostSettlement = async (
   });
 
   const response = await fetch(
-    `${API_BASE_URL}/api/settlements/post/${postId}`,
+    `${API_BASE_URL}/api/posts/${postId}/settlement`,
     {
       method: "GET",
       headers: {
@@ -358,9 +396,58 @@ export const fetchPostSettlement = async (
 // React Query 훅 - 모임별 정산 요청 조회
 export const usePostSettlementQuery = (postId: string) => {
   return useQuery({
-    queryKey: ["/api/settlements/post", postId],
+    queryKey: ["/api/posts", postId, "settlement"],
     queryFn: () => fetchPostSettlement(postId),
     enabled: !!postId,
+    staleTime: 1000 * 60 * 2, // 2분간 캐시 유지
+  });
+};
+
+// 정산 상세 정보 조회 API 호출
+export const fetchSettlementDetail = async (
+  settlementId: string,
+): Promise<SettlementDetailResponse> => {
+  const token = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+
+  console.log("정산 상세 정보 조회 API 요청:", {
+    url: `${API_BASE_URL}/api/settlements/${settlementId}`,
+    settlementId,
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/settlements/${settlementId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && token !== "your_temp_token_here"
+          ? { Authorization: `Bearer ${token}` }
+          : {}),
+      },
+    },
+  );
+
+  console.log("정산 상세 정보 조회 API 응답 상태:", response.status);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("정산 상세 정보 조회 API 오류 응답:", errorText);
+    throw new Error(
+      `정산 상세 정보 조회 API 호출 실패: ${response.status} - ${errorText}`,
+    );
+  }
+
+  const result = await response.json();
+  console.log("정산 상세 정보 조회 API 성공 응답:", result);
+  return result;
+};
+
+// React Query 훅 - 정산 상세 정보 조회
+export const useSettlementDetailQuery = (settlementId: string) => {
+  return useQuery({
+    queryKey: ["/api/settlements", settlementId],
+    queryFn: () => fetchSettlementDetail(settlementId),
+    enabled: !!settlementId,
     staleTime: 1000 * 60 * 2, // 2분간 캐시 유지
   });
 };
@@ -377,9 +464,9 @@ export const useCreateSettlementMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["/api/settlements/my/participations"],
       });
-      // 모임별 정산 요청 쿼리도 무효화
+      // 모임별 정산 요청 쿼리도 무효화 (새 API)
       queryClient.invalidateQueries({
-        queryKey: ["/api/settlements/post"],
+        queryKey: ["/api/posts"],
       });
     },
   });
