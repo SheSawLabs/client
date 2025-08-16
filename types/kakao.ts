@@ -201,6 +201,7 @@ export interface KakakoMap {
     minLevel?: number;
     gridSize?: number;
     disableClickZoom?: boolean;
+    calculator?: number[];
     styles?: Array<{
       width: string;
       height: string;
