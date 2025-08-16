@@ -22,26 +22,24 @@ export default function PolicyHome() {
   const validPolicies = useMemo(() => {
     console.log("PolicyHome - policyData:", policyData);
 
-    if (!policyData?.data || !Array.isArray(policyData.data)) {
+    if (!policyData?.length || !Array.isArray(policyData)) {
       console.log("PolicyHome - No valid data array");
       return [];
     }
 
     // 이미 select에서 dDay와 isEnded가 계산되어 있음
-    const filtered = (policyData.data as PolicyWithStatus[]).filter(
-      (policy) => {
-        const isValid = isValidDate(policy.application_period);
-        console.log(
-          `PolicyHome - Policy "${policy.title}" period "${policy.application_period}" isValid:`,
-          isValid,
-          "dDay:",
-          policy.dDay,
-          "isEnded:",
-          policy.isEnded,
-        );
-        return isValid && policy.dDay !== null;
-      },
-    );
+    const filtered = (policyData as PolicyWithStatus[]).filter((policy) => {
+      const isValid = isValidDate(policy.application_period);
+      console.log(
+        `PolicyHome - Policy "${policy.title}" period "${policy.application_period}" isValid:`,
+        isValid,
+        "dDay:",
+        policy.dDay,
+        "isEnded:",
+        policy.isEnded,
+      );
+      return isValid && policy.dDay !== null;
+    });
 
     console.log("PolicyHome - Final valid policies:", filtered);
     return filtered;
