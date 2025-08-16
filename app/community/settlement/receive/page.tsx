@@ -35,11 +35,16 @@ export default function SettlementReceivePage() {
     const id = searchParams.get("id");
     const amountParam = searchParams.get("amount");
 
+    console.log("URL 파라미터 확인:", { id, amountParam });
+
     if (id) {
       setSettlementId(id);
+      console.log("settlementId 설정됨:", id);
     }
     if (amountParam) {
-      setAmount(parseInt(amountParam, 10));
+      const parsedAmount = parseInt(amountParam, 10);
+      setAmount(parsedAmount);
+      console.log("amount 설정됨:", parsedAmount);
     }
   }, [searchParams]);
   const handleImageUpload = () => {
@@ -68,6 +73,7 @@ export default function SettlementReceivePage() {
   };
 
   const handleConfirm = () => {
+    console.log("확인 버튼 클릭됨");
     setShowConfirmModal(true);
   };
 
@@ -110,13 +116,16 @@ export default function SettlementReceivePage() {
       const successUrl = `${baseUrl}/community/settlement/success`;
       const failUrl = `${baseUrl}/community/settlement/fail`;
 
-      console.log("결제 요청 데이터:", {
+      const paymentData = {
         amount: settlementData.data.amount,
         orderId: settlementData.data.orderId,
         orderName: settlementData.data.orderName,
         successUrl,
         failUrl,
-      });
+      };
+
+      console.log("결제 요청 데이터:", paymentData);
+      sessionStorage.setItem("lastPaymentData", JSON.stringify(paymentData));
 
       // 가상계좌로 결제 (앱 호출 없이 웹에서 직접 처리)
       console.log("가상계좌 결제 요청 시작...");
