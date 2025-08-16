@@ -1,7 +1,12 @@
 import React, { useCallback } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { ReviewKeywordChip } from "./ReviewKeywordChip";
 import { COLORS } from "@/constants";
 import { KeywordCategory } from "@/queries/reviewForm";
+import { useSwiper } from "@/hooks/useSwiper";
+
+// Swiper 스타일 import
+import "swiper/css";
 
 interface SelectedKeyword {
   category: string;
@@ -31,16 +36,23 @@ export const ReviewKeywordSlider: React.FC<ReviewKeywordSliderProps> = ({
     [selectedKeywords],
   );
 
+  // Swiper 설정 - 가로 스크롤, 자동재생 없음, bullet 없음, loop 없음
+  const swiperConfig = useSwiper({
+    slidesPerView: "auto",
+    spaceBetween: 24,
+    freeMode: true,
+    loop: false,
+    autoplay: false,
+    pagination: false,
+    navigation: false,
+  });
+
   return (
     <div className={`${className}`}>
-      {/* 전체 카테고리가 가로로 스크롤되는 슬라이더 */}
-      <div className="overflow-x-auto pb-4 min-w-max">
-        <div className="flex gap-6">
-          {Object.entries(keywordsData).map(([category, keywords]) => (
-            <div
-              key={category}
-              className="flex flex-col space-y-3 min-w-[200px]"
-            >
+      <Swiper {...swiperConfig} className="pb-4">
+        {Object.entries(keywordsData).map(([category, keywords]) => (
+          <SwiperSlide key={category} className="!w-auto">
+            <div className="flex flex-col space-y-3 min-w-[200px]">
               {/* 카테고리 제목 */}
               <h3
                 className="text-sm font-medium whitespace-nowrap"
@@ -62,9 +74,9 @@ export const ReviewKeywordSlider: React.FC<ReviewKeywordSliderProps> = ({
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
   );
 };
