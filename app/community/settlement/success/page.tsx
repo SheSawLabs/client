@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { checkPaymentStatus } from "@/app/queries/settlement";
+import { confirmPayment, checkPaymentStatus } from "@/app/queries/settlement";
 
 export default function SettlementSuccessPage() {
   const router = useRouter();
@@ -33,11 +33,24 @@ export default function SettlementSuccessPage() {
     const checkStatus = async () => {
       try {
         attempts++;
-        console.log(
-          `결제 상태 확인 시도 ${attempts}/${maxAttempts}`,
-          cleanedData,
-        );
+        console.log(`결제 처리 시도 ${attempts}/${maxAttempts}`, cleanedData);
 
+        // 첫 번째 시도에서만 결제 확인 API 호출
+        if (attempts === 1) {
+          console.log("결제 확인 API 호출 중...");
+          const confirmResult = await confirmPayment({
+            paymentKey: cleanedData.paymentKey,
+            orderId: cleanedData.orderId,
+            amount: cleanedData.amount,
+          });
+          console.log("결제 확인 API 응답:", confirmResult);
+
+          if (!confirmResult.success) {
+            throw new Error("결제 확인 실패");
+          }
+        }
+
+        // 결제 상태 조회
         const result = await checkPaymentStatus(
           cleanedData.orderId,
           cleanedData.paymentKey,
