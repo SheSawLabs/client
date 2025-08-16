@@ -99,7 +99,7 @@ export default function PolicyListPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <TopNav title="정책 정보" />
+      <TopNav title="정책 정보" onBackClick={() => router.replace("/policy")} />
 
       <div className="px-7 pt-6">
         {/* 카테고리 탭 */}

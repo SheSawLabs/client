@@ -49,10 +49,6 @@ export default function PolicyHome() {
   const upcomingPolicy =
     validPolicies.find((policy) => !policy.isEnded) || null;
 
-  const handleBackClick = () => {
-    router.back();
-  };
-
   const handleNotificationClick = () => {
     // 알림 기능 구현
     console.log("알림 클릭");
@@ -83,7 +79,7 @@ export default function PolicyHome() {
       <div className="min-h-screen bg-white">
         <TopNav
           title="정책 정보"
-          onBackClick={handleBackClick}
+          showBackButton={false}
           onNotificationClick={handleNotificationClick}
         />
         <div className="flex items-center justify-center py-20 px-7">
@@ -98,7 +94,7 @@ export default function PolicyHome() {
       <div className="min-h-screen bg-white">
         <TopNav
           title="정책 정보"
-          onBackClick={handleBackClick}
+          showBackButton={false}
           onNotificationClick={handleNotificationClick}
         />
         <div className="flex items-center justify-center py-20 px-7">
@@ -117,7 +113,7 @@ export default function PolicyHome() {
       {/* TopNav */}
       <TopNav
         title="정책 정보"
-        onBackClick={handleBackClick}
+        showBackButton={false}
         onNotificationClick={handleNotificationClick}
       />
 
