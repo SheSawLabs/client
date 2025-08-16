@@ -1,6 +1,11 @@
-import React, { useRef } from "react";
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { Policy } from "@/types/policy";
 import { PolicyCard } from "./PolicyCard";
+import { useSwiper } from "@/hooks/useSwiper";
+
+// Swiper 스타일 import
+import "swiper/css";
 
 interface PolicyCardSwiperProps {
   policies: Policy[];
@@ -17,39 +22,32 @@ export const PolicyCardSwiper: React.FC<PolicyCardSwiperProps> = ({
   className = "",
   onPolicyClick,
 }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // Swiper 설정 - 가로 스크롤, 자동재생 없음, bullet 없음, loop 없음
+  const swiperConfig = useSwiper({
+    slidesPerView: 1,
+    spaceBetween: 16,
+    freeMode: false,
+    loop: false,
+    autoplay: false,
+    pagination: false,
+    navigation: false,
+  });
 
   return (
-    <div className={`overflow-hidden ${className}`}>
-      <div
-        ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
-        style={{
-          scrollSnapType: "x mandatory",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-        {/* 왼쪽 패딩 */}
-        <div className="flex-shrink-0 w-8" />
-
+    <div className={className}>
+      <Swiper {...swiperConfig} className="pb-4 !px-8">
         {policies.map((policy) => (
-          <div
-            key={policy.id}
-            className="flex-shrink-0"
-            style={{ scrollSnapAlign: "start" }}
-          >
+          <SwiperSlide key={policy.id} className="!w-full">
             <PolicyCard
               policy={policy}
               onHeartClick={onHeartClick}
               isLiked={likedPolicies.has(policy.id)}
               onClick={onPolicyClick}
+              className="w-full"
             />
-          </div>
+          </SwiperSlide>
         ))}
-
-        {/* 오른쪽 패딩 */}
-        <div className="flex-shrink-0 w-8" />
-      </div>
+      </Swiper>
     </div>
   );
 };
