@@ -12,6 +12,7 @@ interface PolicyCardProps {
   onHeartClick?: (policyId: string) => void;
   isLiked?: boolean;
   className?: string;
+  onClick?: (policyId: string) => void;
 }
 
 export const PolicyCard: React.FC<PolicyCardProps> = ({
@@ -19,6 +20,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
   onHeartClick,
   isLiked = false,
   className = "",
+  onClick,
 }) => {
   // PolicyWithStatus 타입인지 확인
   const isEnded = "isEnded" in policy ? policy.isEnded : false;
@@ -42,10 +44,20 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       ? grayBackgroundColor
       : primaryBackgroundColor;
 
+  const handleCardClick = () => {
+    onClick?.(policy.id);
+  };
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onHeartClick?.(policy.id);
+  };
+
   return (
     <div
-      className={`p-4 border rounded-lg space-y-3 bg-white min-w-[280px] max-w-full ${cardOpacity} ${className}`}
+      className={`p-4 border rounded-lg space-y-3 bg-white min-w-[280px] max-w-full cursor-pointer hover:shadow-md transition-shadow ${cardOpacity} ${className}`}
       style={{ borderColor: COLORS.GRAY_200 }}
+      onClick={handleCardClick}
     >
       {/* 상단 행: D-Day와 하트 */}
       <div className="flex items-center justify-between">
@@ -61,7 +73,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
           <Tag label={policy.category} />
         </div>
         <button
-          onClick={() => onHeartClick?.(policy.id)}
+          onClick={handleHeartClick}
           className="p-1 hover:bg-gray-100 rounded transition-colors"
         >
           <Heart
