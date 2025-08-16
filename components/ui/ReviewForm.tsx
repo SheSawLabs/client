@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { RotateCcw } from "lucide-react";
 import { Typography } from "./Typography";
-import { ReviewKeywordSlider } from "./ReviewKeywordSlider";
+import { ReviewKeywordSwiper } from "./ReviewKeywordSwiper";
 import { ReviewParagraph } from "./ReviewParagraph";
 import { Button } from "./Button";
 import { Rating } from "./Rating";
@@ -161,7 +161,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
         <div className="-mx-6">
           {/* 모달 패딩을 벗어나도록 음수 마진 */}
           <div className="px-6">
-            <ReviewKeywordSlider
+            <ReviewKeywordSwiper
               keywordsData={keywordsData.data.availableKeywords}
               selectedKeywords={selectedKeywords}
               onKeywordSelect={handleKeywordSelect}
