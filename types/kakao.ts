@@ -199,6 +199,7 @@ export interface KakakoMap {
     map?: MapInstance | null;
     averageCenter?: boolean;
     minLevel?: number;
+    maxLevel?: number;
     gridSize?: number;
     disableClickZoom?: boolean;
     calculator?: number[];

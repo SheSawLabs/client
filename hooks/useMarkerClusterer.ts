@@ -56,13 +56,13 @@ export const useMarkerClusterer = ({
     const clusterer = new window.kakao.maps.MarkerClusterer({
       map,
       averageCenter: true,
-      minLevel: 0, // 모든 레벨에서 클러스터링 동작하도록 변경
+      minLevel: 3,
       gridSize: 60, // 클러스터 그리드 크기 설정 (기본값보다 작게)
       disableClickZoom: false,
-      calculator: [19, 39, 59], // 크기 범위 정의: ≤19, 20-39, 40-59, 60+
+      calculator: [6, 19, 39, 59], // 크기 범위 정의: 6-19, 20-39, 40-59, 60+
       styles: [
         {
-          // 2-19개: 기본 크기의 1.5배 (30px -> 45px)
+          // 6-19개: 기본 크기의 1.5배 (30px -> 45px)
           width: "45px",
           height: "45px",
           background: hexToRgba(COLORS.RED_500, 0.4),
