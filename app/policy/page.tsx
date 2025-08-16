@@ -128,7 +128,7 @@ export default function PolicyHome() {
         {/* 사용자 인사말 */}
         <div className="px-7">
           <h2
-            className="text-lg font-semibold"
+            className="text-lg font-semibold p-1"
             style={{ color: COLORS.GRAY_900 }}
           >
             {userName ? `${userName}님께 ` : ""}꼭 필요한 정책을 모았어요.

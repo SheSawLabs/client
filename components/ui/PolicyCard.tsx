@@ -55,7 +55,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
 
   return (
     <div
-      className={`p-4 border rounded-lg space-y-3 bg-white min-w-[280px] max-w-full cursor-pointer hover:shadow-md transition-shadow ${cardOpacity} ${className}`}
+      className={`p-4 border rounded-lg space-y-3 bg-white cursor-pointer hover:shadow-md transition-shadow ${cardOpacity} ${className || "min-w-[280px] max-w-full"}`}
       style={{ borderColor: COLORS.GRAY_200 }}
       onClick={handleCardClick}
     >
