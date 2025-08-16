@@ -286,14 +286,29 @@ export default function PostDetailPage() {
               </button>
             </div>
 
-            {/* 참여하기/나가기 버튼 (모임 게시글인 경우) */}
+            {/* 참여하기/나가기 버튼 또는 모임 관리 버튼 (모임 게시글인 경우) */}
             {post.category !== "일반" && (
-              <button
-                onClick={handleParticipationToggle}
-                className="px-2.5 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
-              >
-                {isParticipating ? "모임 나가기" : "참여하기"}
-              </button>
+              <>
+                {participantStatus?.isAuthor ? (
+                  // 본인이 만든 모임인 경우
+                  <div className="flex gap-2">
+                    <button className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50">
+                      1/N 요청하기
+                    </button>
+                    <button className="px-2.5 py-1 bg-[#017BFF] text-white text-xs font-medium rounded hover:bg-[#0056CC]">
+                      모임 닫기
+                    </button>
+                  </div>
+                ) : (
+                  // 다른 사람이 만든 모임인 경우
+                  <button
+                    onClick={handleParticipationToggle}
+                    className="px-2.5 py-1 bg-[#017BFF] text-white text-xs font-medium rounded hover:bg-[#0056CC]"
+                  >
+                    {isParticipating ? "모임 나가기" : "참여하기"}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
