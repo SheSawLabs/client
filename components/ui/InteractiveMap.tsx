@@ -17,6 +17,8 @@ import {
 import { FacilitiesFilters } from "./FacilitiesFilters";
 import { FacilityType } from "@/hooks/useFacilityFilters";
 import { useEffect, useState } from "react";
+import { useStreetlightQuery } from "@/queries/streetlight";
+import { useMarkerClusterer } from "@/hooks/useMarkerClusterer";
 
 const InteractiveMap = ({
   districtName,
@@ -33,6 +35,15 @@ const InteractiveMap = ({
 
   const { data: dongGeoJSONData, isSuccess: dongGeoJSONIsSuccess } =
     useDongGeoJSONDQuery();
+
+  // 가로등 데이터 조회
+  const { data: streetlightData } = useStreetlightQuery(dongInfo?.dong || null);
+
+  // MarkerClusterer 훅 사용
+  useMarkerClusterer({
+    map,
+    streetlights: streetlightData?.streetlights || [],
+  });
 
   useEffect(() => {
     window.kakao?.maps.load(() => {

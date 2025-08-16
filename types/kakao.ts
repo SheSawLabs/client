@@ -156,6 +156,18 @@ export interface MarkerImageInstance {
   getOffset: () => { x: number; y: number };
 }
 
+export interface MarkerClustererInstance {
+  addMarkers: (markers: MarkerInstance[]) => void;
+  removeMarkers: (markers: MarkerInstance[]) => void;
+  clear: () => void;
+  redraw: () => void;
+  setGridSize: (size: number) => void;
+  getGridSize: () => number;
+  setMaxZoom: (zoom: number) => void;
+  getMaxZoom: () => number;
+  setMap: (map: MapInstance | null) => void;
+}
+
 export interface KakakoMap {
   LatLng: new (lat: number, lng: number) => LatNLng;
   Size: new (
@@ -181,7 +193,27 @@ export interface KakakoMap {
     position: LatNLng;
     map?: MapInstance | null;
     image?: MarkerImageInstance;
+    title?: string;
   }) => MarkerInstance;
+  MarkerClusterer: new (options: {
+    map?: MapInstance | null;
+    averageCenter?: boolean;
+    minLevel?: number;
+    gridSize?: number;
+    disableClickZoom?: boolean;
+    styles?: Array<{
+      width: string;
+      height: string;
+      background: string;
+      borderRadius: string;
+      border: string;
+      color: string;
+      textAlign: string;
+      fontWeight: string;
+      fontSize: string;
+      lineHeight: string;
+    }>;
+  }) => MarkerClustererInstance;
   InfoWindow: new (options: { content: string }) => InfoWindowInstance;
   CustomOverlay: new (options: {
     map?: MapInstance | null;
