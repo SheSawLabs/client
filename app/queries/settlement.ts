@@ -303,6 +303,68 @@ export const useMySettlementsQuery = () => {
   });
 };
 
+// 모임별 정산 요청 조회 API 호출
+export const fetchPostSettlement = async (
+  postId: string,
+): Promise<{
+  hasSettlement: boolean;
+  settlement?: CreateSettlementResponse["data"];
+}> => {
+  const token = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+
+  console.log("모임별 정산 요청 조회 API 요청:", {
+    url: `${API_BASE_URL}/api/settlements/post/${postId}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/settlements/post/${postId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  console.log("모임별 정산 요청 조회 API 응답 상태:", response.status);
+
+  if (response.status === 404) {
+    // 정산 요청이 없는 경우
+    return { hasSettlement: false };
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("모임별 정산 요청 조회 API 오류 응답:", errorText);
+    throw new Error(
+      `모임별 정산 요청 조회 API 호출 실패: ${response.status} - ${errorText}`,
+    );
+  }
+
+  const result = await response.json();
+  console.log("모임별 정산 요청 조회 API 성공 응답:", result);
+
+  return {
+    hasSettlement: true,
+    settlement: result.data,
+  };
+};
+
+// React Query 훅 - 모임별 정산 요청 조회
+export const usePostSettlementQuery = (postId: string) => {
+  return useQuery({
+    queryKey: ["/api/settlements/post", postId],
+    queryFn: () => fetchPostSettlement(postId),
+    enabled: !!postId,
+    staleTime: 1000 * 60 * 2, // 2분간 캐시 유지
+  });
+};
+
 // React Query 훅 - 정산 요청 생성
 export const useCreateSettlementMutation = () => {
   const queryClient = useQueryClient();
@@ -314,6 +376,10 @@ export const useCreateSettlementMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/settlements"] });
       queryClient.invalidateQueries({
         queryKey: ["/api/settlements/my/participations"],
+      });
+      // 모임별 정산 요청 쿼리도 무효화
+      queryClient.invalidateQueries({
+        queryKey: ["/api/settlements/post"],
       });
     },
   });

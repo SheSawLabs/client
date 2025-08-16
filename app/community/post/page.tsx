@@ -20,6 +20,7 @@ import {
   useToggleLikeMutation,
   useLikeStatusQuery,
 } from "@/app/queries/community";
+import { usePostSettlementQuery } from "@/app/queries/settlement";
 
 export default function PostDetailPage() {
   const router = useRouter();
@@ -65,6 +66,7 @@ export default function PostDetailPage() {
   const { data: likeStatus, error: likeError } = useLikeStatusQuery(
     postId || "",
   );
+  const { data: settlementData } = usePostSettlementQuery(postId || "");
 
   // 디버깅용 로그
   if (likeError) {
@@ -292,16 +294,31 @@ export default function PostDetailPage() {
                 {participantStatus?.isAuthor ? (
                   // 본인이 만든 모임인 경우
                   <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        router.push(
-                          `/community/settlement-request?title=${encodeURIComponent(post.title)}&postId=${postId}`,
-                        )
-                      }
-                      className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50"
-                    >
-                      1/N 요청하기
-                    </button>
+                    {settlementData?.hasSettlement ? (
+                      // 정산 요청이 있는 경우
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/community/settlement-history?title=${encodeURIComponent(post.title)}&postId=${postId}`,
+                          )
+                        }
+                        className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50"
+                      >
+                        1/N 정산 내역
+                      </button>
+                    ) : (
+                      // 정산 요청이 없는 경우
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/community/settlement-request?title=${encodeURIComponent(post.title)}&postId=${postId}`,
+                          )
+                        }
+                        className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50"
+                      >
+                        1/N 요청하기
+                      </button>
+                    )}
                     <button className="px-2.5 py-1 bg-[#017BFF] text-white text-xs font-medium rounded hover:bg-[#0056CC]">
                       모임 닫기
                     </button>
