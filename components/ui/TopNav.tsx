@@ -8,6 +8,7 @@ export interface TopNavProps {
   onBackClick?: () => void;
   showNotification?: boolean;
   onNotificationClick?: () => void;
+  hasLogo?: boolean;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
       onBackClick,
       showNotification = true,
       onNotificationClick,
+      hasLogo = false,
       className,
     },
     ref,
@@ -31,9 +33,15 @@ const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
           className,
         )}
       >
-        {/* Left side - Back button */}
+        {/* Left side - Back button or Logo */}
         <div className="flex items-center">
-          {showBackButton ? (
+          {hasLogo ? (
+            <img
+              src="/assets/shesaw_logo.svg"
+              alt="쉿쏘"
+              className="w-12 h-8"
+            />
+          ) : showBackButton ? (
             <button
               onClick={onBackClick}
               className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-md transition-colors"
