@@ -294,7 +294,9 @@ export default function PostDetailPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
-                        router.push("/community/settlement-request")
+                        router.push(
+                          `/community/settlement-request?title=${encodeURIComponent(post.title)}`,
+                        )
                       }
                       className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50"
                     >

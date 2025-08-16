@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   X,
@@ -21,17 +21,38 @@ interface Neighbor {
 
 export default function SettlementRequestPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // URL에서 게시글 제목 가져오기 (fallback으로 기본값 사용)
+  const groupTitle = searchParams.get("title") || "렛츠고 소분모임";
+
   const [totalAmount, setTotalAmount] = useState(9000);
   const [neighbors, setNeighbors] = useState<Neighbor[]>([
-    { id: "1", name: "헤몽", amount: 3000 },
-    { id: "2", name: "또리", amount: 3000 },
-    { id: "3", name: "나나", amount: 3000 },
+    { id: "1", name: "헤몽", amount: 0 },
+    { id: "2", name: "또리", amount: 0 },
+    { id: "3", name: "나나", amount: 0 },
   ]);
   const [isEditingAmount, setIsEditingAmount] = useState(false);
   const [editingNeighborId, setEditingNeighborId] = useState<string | null>(
     null,
   );
   const [tempAmount, setTempAmount] = useState("");
+  const skipTotalAmountEffect = useRef(false);
+
+  // 총 금액이 변경될 때 개별 금액을 균등 분할 (이웃 수정으로 인한 변경이 아닐 때만)
+  useEffect(() => {
+    if (neighbors.length > 0 && !skipTotalAmountEffect.current) {
+      const perPersonAmount = Math.floor(totalAmount / neighbors.length);
+      setNeighbors((prevNeighbors) =>
+        prevNeighbors.map((neighbor) => ({
+          ...neighbor,
+          amount: perPersonAmount,
+        })),
+      );
+    }
+    // 플래그 리셋
+    skipTotalAmountEffect.current = false;
+  }, [totalAmount, neighbors.length]);
 
   const handleBack = () => {
     router.back();
@@ -49,6 +70,8 @@ export default function SettlementRequestPage() {
   const handleAmountSubmit = () => {
     const newAmount = parseInt(tempAmount.replace(/,/g, ""), 10);
     if (newAmount && newAmount <= 500000) {
+      // 총금액 직접 수정시에는 플래그를 false로 두어 useEffect가 실행되도록 함
+      skipTotalAmountEffect.current = false;
       setTotalAmount(newAmount);
     }
     setIsEditingAmount(false);
@@ -73,13 +96,24 @@ export default function SettlementRequestPage() {
     if (editingNeighborId) {
       const newAmount = parseInt(tempAmount.replace(/,/g, ""), 10);
       if (newAmount && newAmount <= 500000) {
-        setNeighbors(
-          neighbors.map((neighbor) =>
-            neighbor.id === editingNeighborId
-              ? { ...neighbor, amount: newAmount }
-              : neighbor,
-          ),
+        // 해당 이웃의 금액만 수정 (다른 이웃들은 그대로 유지)
+        const updatedNeighbors = neighbors.map((neighbor) =>
+          neighbor.id === editingNeighborId
+            ? { ...neighbor, amount: newAmount }
+            : neighbor,
         );
+
+        setNeighbors(updatedNeighbors);
+
+        // 총 금액을 모든 개별 금액의 합으로 업데이트
+        const newTotalAmount = updatedNeighbors.reduce(
+          (sum, neighbor) => sum + neighbor.amount,
+          0,
+        );
+
+        // 이웃 수정으로 인한 총금액 변경임을 표시 (useEffect 실행 방지)
+        skipTotalAmountEffect.current = true;
+        setTotalAmount(newTotalAmount);
       }
       setEditingNeighborId(null);
       setTempAmount("");
@@ -134,7 +168,7 @@ export default function SettlementRequestPage() {
         {/* 그룹 정보 */}
         <div className="flex flex-col items-center pt-4 pb-4">
           <Users size={16} className="text-[#111827] mb-2" />
-          <span className="text-sm text-[#111827]">렛츠고 소분모임</span>
+          <span className="text-sm text-[#111827]">{groupTitle}</span>
         </div>
 
         {/* 총 금액 카드 */}
