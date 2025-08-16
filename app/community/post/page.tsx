@@ -72,7 +72,6 @@ export default function PostDetailPage() {
   if (likeError) {
     console.error("Like status error:", likeError);
   }
-  console.log("Current likeStatus:", likeStatus);
   const toggleLikeMutation = useToggleLikeMutation();
 
   // 일반 게시글이거나 작성자이거나 참가자인 경우에만 댓글 조회
