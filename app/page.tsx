@@ -119,7 +119,7 @@ export default function Home() {
             <h2 className="text-lg font-semibold text-gray-900">
               오늘의 추천 커뮤니티
             </h2>
-            <ButtonWithArrow onClick={handleViewAllCommunity}>
+            <ButtonWithArrow type="short" onClick={handleViewAllCommunity}>
               더보기
             </ButtonWithArrow>
           </div>
@@ -153,7 +153,7 @@ export default function Home() {
         <div className="space-y-4">
           <div className="px-7 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">맞춤 정책</h2>
-            <ButtonWithArrow onClick={handleViewAllPolicies}>
+            <ButtonWithArrow type="short" onClick={handleViewAllPolicies}>
               더보기
             </ButtonWithArrow>
           </div>
