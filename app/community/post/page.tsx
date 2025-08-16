@@ -292,7 +292,12 @@ export default function PostDetailPage() {
                 {participantStatus?.isAuthor ? (
                   // 본인이 만든 모임인 경우
                   <div className="flex gap-2">
-                    <button className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50">
+                    <button
+                      onClick={() =>
+                        router.push("/community/settlement-request")
+                      }
+                      className="px-2.5 py-1 bg-[#EEF4FF] text-[#017BFF] border border-[#017BFF] text-xs font-medium rounded hover:bg-blue-50"
+                    >
                       1/N 요청하기
                     </button>
                     <button className="px-2.5 py-1 bg-[#017BFF] text-white text-xs font-medium rounded hover:bg-[#0056CC]">
