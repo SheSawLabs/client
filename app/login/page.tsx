@@ -1,57 +1,63 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
-import { Typography } from "@/components/ui/Typography";
+import { API_BASE_URL, COLORS } from "@/constants";
 
 export default function LoginPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const handleKakaoLogin = () => {
-    window.location.href = "http://localhost:3001/auth/kakao";
+    if (typeof window !== "undefined") {
+      window.location.href = `${API_BASE_URL}/auth/kakao`;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center items-center px-6">
-      <div className="w-full max-w-sm space-y-8">
-        {/* 로고 및 제목 */}
-        <div className="text-center space-y-4">
-          <Typography variant="h1" className="text-3xl font-bold text-gray-900">
-            Shesaw
-          </Typography>
-          <Typography variant="p" className="text-gray-600">
-            안전한 우리 동네를 위한 첫 걸음
-          </Typography>
-        </div>
-
-        {/* 로그인 설명 */}
-        <div className="text-center space-y-2">
-          <Typography
-            variant="h3"
-            className="text-xl font-semibold text-gray-900"
-          >
-            로그인
-          </Typography>
-          <Typography variant="p" className="text-gray-500 text-sm">
-            카카오 계정으로 간편하게 시작하세요
-          </Typography>
+    <div className="h-screen bg-white flex flex-col justify-center items-center px-6 overflow-hidden">
+      <div
+        className="w-full max-w-sm flex flex-col justify-center items-center"
+        style={{ height: "calc(100vh - 3rem)" }}
+      >
+        {/* 메인 이미지 */}
+        <div className="flex justify-center mb-16">
+          <Image
+            src="/assets/shesaw_main_image.svg"
+            alt="Shesaw 메인 이미지"
+            width={200}
+            height={200}
+            className="w-48 h-48"
+          />
         </div>
 
         {/* 카카오 로그인 버튼 */}
-        <div className="space-y-4">
-          <Button
-            onClick={handleKakaoLogin}
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-4 text-base"
-            size="lg"
-          >
-            카카오로 로그인하기
-          </Button>
-        </div>
-
-        {/* 하단 안내 */}
-        <div className="text-center">
-          <Typography variant="small" className="text-gray-400 text-xs">
-            로그인하면 서비스 이용약관 및 개인정보처리방침에 동의하게 됩니다.
-          </Typography>
-        </div>
+        {isMounted && (
+          <div className="w-full">
+            <Button
+              onClick={handleKakaoLogin}
+              className="w-full text-black font-medium py-4 text-base rounded-lg flex items-center justify-center gap-3"
+              style={{
+                backgroundColor: COLORS.KAKAO_YELLOW,
+                border: "none",
+              }}
+              size="lg"
+            >
+              <Image
+                src="/icons/kakao.svg"
+                alt="카카오 아이콘"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
+              카카오로 시작하기
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

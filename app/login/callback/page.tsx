@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Typography } from "@/components/ui/Typography";
+import { API_BASE_URL } from "@/constants";
 
 export default function LoginCallbackPage() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function LoginCallbackPage() {
 
       try {
         const response = await fetch(
-          `http://localhost:3001/auth/kakao/callback?code=${code}`,
+          `${API_BASE_URL}/auth/kakao/callback?code=${code}`,
         );
 
         if (!response.ok) {
