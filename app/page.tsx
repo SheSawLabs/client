@@ -113,7 +113,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* TopNav with Logo */}
       <TopNav
         title=""

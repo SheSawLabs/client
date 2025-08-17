@@ -73,7 +73,7 @@ export default function PolicyListPage() {
 
   if (policiesIsLoading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <TopNav title="정책 정보" />
         <div className="px-7 pt-6">
           <div className="flex justify-center items-center h-64">
@@ -86,7 +86,7 @@ export default function PolicyListPage() {
 
   if (policiesIsError) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <TopNav title="정책 정보" />
         <div className="px-7 pt-6">
           <div className="flex justify-center items-center h-64">
@@ -98,7 +98,7 @@ export default function PolicyListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <TopNav title="정책 정보" onBackClick={() => router.replace("/policy")} />
 
       <div className="px-7 pt-6">

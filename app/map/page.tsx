@@ -156,10 +156,6 @@ export default function MapPage() {
             selectedDistrict={selectedDistrict}
             setSelectedDistrict={handleDistrictSelect}
           />
-          {/* 안전등급 표시 */}
-          <div className="mb-2">
-            <SafetyLevel />
-          </div>
           {/* 안전등급 가이드 */}
           <div className="flex justify-center mb-4">
             <div
@@ -173,12 +169,12 @@ export default function MapPage() {
             </div>
           </div>
           {selectedDistrict && (
-            <div className="flex justify-end">
+            <div className="fixed bottom-20 left-4 right-4 bg-white/95 backdrop-blur-sm pb-4 pt-2 rounded-t-lg">
               <Button
                 onClick={handleNext}
                 disabled={!selectedDistrict}
                 size="wide"
-                className="px-6 py-2"
+                className="shadow-lg"
               >
                 {`${selectedDistrict} 보러가기`}
               </Button>
@@ -206,13 +202,17 @@ export default function MapPage() {
               selectedDong={selectedDong}
             />
           </div>
+          {/* 안전등급 표시 */}
+          <div className="mb-2">
+            <SafetyLevel />
+          </div>
           {selectedDong && (
-            <div className="z-10">
+            <div className="fixed bottom-20 left-4 right-4 bg-white/95 backdrop-blur-sm pb-4 pt-2 rounded-t-lg">
               <Button
                 onClick={handleNext}
                 disabled={!selectedDong}
                 size="wide"
-                className="px-6 py-2"
+                className="shadow-lg"
               >
                 {`${selectedDong} 보러가기`}
               </Button>

@@ -20,8 +20,6 @@ export default function PolicyHome() {
 
   // 유효한 날짜가 있는 정책들만 필터링 (쿼리에서 이미 정렬됨)
   const validPolicies = useMemo(() => {
-    console.log("PolicyHome - policyData:", policyData);
-
     if (!policyData?.length || !Array.isArray(policyData)) {
       console.log("PolicyHome - No valid data array");
       return [];
@@ -76,7 +74,7 @@ export default function PolicyHome() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <TopNav
           title="정책 정보"
           showBackButton={false}
@@ -91,7 +89,7 @@ export default function PolicyHome() {
 
   if (isError || !validPolicies.length) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <TopNav
           title="정책 정보"
           showBackButton={false}
@@ -109,7 +107,7 @@ export default function PolicyHome() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* TopNav */}
       <TopNav
         title="정책 정보"
