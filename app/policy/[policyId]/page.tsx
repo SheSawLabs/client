@@ -79,7 +79,7 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <TopNav title="정책 상세" onBackClick={handleBackClick} />
         <div className="px-7 pt-6">
           <div className="flex justify-center items-center h-64">
@@ -92,7 +92,7 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
 
   if (isError || !policy) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <TopNav title="정책 상세" onBackClick={handleBackClick} />
         <div className="px-7 pt-6">
           <div className="flex justify-center items-center h-64">
@@ -108,7 +108,7 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <TopNav title="정책 상세" onBackClick={handleBackClick} />
 
       <div className="px-7 pt-6 pb-8">
@@ -153,7 +153,8 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
 
         <Button
           onClick={handleApplyClick}
-          className="w-full py-4 text-base font-medium"
+          size="wide"
+          className="text-base font-medium"
           disabled={!policy.link}
         >
           신청하러 가기
