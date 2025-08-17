@@ -15,42 +15,33 @@ export interface FacilityFilter {
 }
 
 export const useFacilityFilters = () => {
-  const [activeFilters, setActiveFilters] = useState<Set<FacilityType>>(
-    new Set(),
-  );
+  const [selectedFilter, setSelectedFilter] = useState<FacilityType>("all");
 
-  const toggleFilter = useCallback((facilityType: FacilityType) => {
-    setActiveFilters((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(facilityType)) {
-        newSet.delete(facilityType);
-      } else {
-        newSet.add(facilityType);
-      }
-      return newSet;
-    });
+  const selectFilter = useCallback((facilityType: FacilityType) => {
+    setSelectedFilter(facilityType);
   }, []);
 
   const isFilterActive = useCallback(
     (facilityType: FacilityType): boolean => {
-      return activeFilters.has(facilityType);
+      return selectedFilter === facilityType;
     },
-    [activeFilters],
+    [selectedFilter],
   );
 
   const clearAllFilters = useCallback(() => {
-    setActiveFilters(new Set());
+    setSelectedFilter("all");
   }, []);
 
   const getActiveFilters = useCallback((): FacilityType[] => {
-    return Array.from(activeFilters);
-  }, [activeFilters]);
+    return selectedFilter === "all" ? [] : [selectedFilter];
+  }, [selectedFilter]);
 
   return {
-    toggleFilter,
+    toggleFilter: selectFilter, // 기존 API 호환성을 위해 유지
+    selectFilter,
     isFilterActive,
     clearAllFilters,
     getActiveFilters,
-    activeFiltersCount: activeFilters.size,
+    selectedFilter,
   };
 };
