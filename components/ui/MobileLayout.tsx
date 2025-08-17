@@ -21,6 +21,7 @@ const hideNavBarPaths = [
   "/community/notifications",
   "/community/settlement",
   "/login",
+  "/on-boarding",
 ];
 
 export function MobileLayout({ children, className }: MobileLayoutProps) {
