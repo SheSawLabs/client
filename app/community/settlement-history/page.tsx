@@ -234,7 +234,8 @@ export default function SettlementHistoryPage() {
                         <Users size={16} className="text-[#6B7280]" />
                       </div>
                       <span className="text-sm text-[#111827]">
-                        사용자 {participant.user_id}
+                        {participant.nickname ||
+                          `사용자 ${participant.user_id}`}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -243,10 +244,13 @@ export default function SettlementHistoryPage() {
                       </span>
                       <button
                         onClick={() =>
-                          handleRemind(`사용자 ${participant.user_id}`)
+                          handleRemind(
+                            participant.nickname ||
+                              `사용자 ${participant.user_id}`,
+                          )
                         }
                         className="w-4 h-4 bg-[#EEF4FF] rounded-full flex items-center justify-center"
-                        aria-label={`사용자 ${participant.user_id}에게 알림`}
+                        aria-label={`${participant.nickname || `사용자 ${participant.user_id}`}에게 알림`}
                       >
                         <Bell size={10} className="text-[#017BFF]" />
                       </button>
@@ -274,7 +278,8 @@ export default function SettlementHistoryPage() {
                         <Users size={16} className="text-[#519913]" />
                       </div>
                       <span className="text-sm text-[#111827]">
-                        사용자 {participant.user_id}
+                        {participant.nickname ||
+                          `사용자 ${participant.user_id}`}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">

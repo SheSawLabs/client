@@ -35,6 +35,8 @@ interface ServerPost {
   created_at: string;
   updated_at: string;
   author_id: number | null;
+  author_nickname?: string;
+  author_profile_image?: string;
   views?: number;
   comments_count?: number;
   likes_count?: number;
@@ -46,45 +48,6 @@ interface PostsResponse {
   data: ServerPost[];
   filter: string | null;
 }
-
-// 사용자 정보 캐시 (간단한 메모리 캐시)
-const userCache = new Map<
-  number,
-  { nickname: string; profile_image: string | null }
->();
-
-// 사용자 정보 조회 유틸리티 함수
-const fetchUserInfo = async (userId: number) => {
-  if (userCache.has(userId)) {
-    return userCache.get(userId)!;
-  }
-
-  try {
-    const headers: Record<string, string> = {};
-    const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
-    if (tempToken && tempToken !== "your_temp_token_here") {
-      headers.Authorization = `Bearer ${tempToken}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-      headers,
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      const userInfo = {
-        nickname: result.data.user.nickname,
-        profile_image: result.data.user.profile_image,
-      };
-      userCache.set(userId, userInfo);
-      return userInfo;
-    }
-  } catch (error) {
-    console.error("사용자 정보 조회 실패:", error);
-  }
-
-  return { nickname: "익명", profile_image: null };
-};
 
 // 참여자 수 조회 유틸리티 함수
 const fetchParticipantCount = async (postId: string): Promise<number> => {
@@ -114,6 +77,38 @@ const fetchParticipantCount = async (postId: string): Promise<number> => {
   return 0;
 };
 
+// 토큰에서 사용자 정보 추출 (임시 해결책)
+const getUserInfoFromToken = (userId: number) => {
+  try {
+    const token = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+    if (!token) return null;
+
+    // JWT 토큰 decode with proper UTF-8 handling
+    const base64Payload = token.split(".")[1];
+    // base64 padding 추가
+    const paddedPayload =
+      base64Payload + "=".repeat((4 - (base64Payload.length % 4)) % 4);
+
+    // UTF-8 디코딩을 위해 TextDecoder 사용
+    const uint8Array = Uint8Array.from(atob(paddedPayload), (c) =>
+      c.charCodeAt(0),
+    );
+    const decodedString = new TextDecoder("utf-8").decode(uint8Array);
+    const payload = JSON.parse(decodedString);
+
+    // 토큰의 user_id와 일치하는지 확인
+    if (payload.user_id === userId || payload.user_id === userId.toString()) {
+      return {
+        nickname: payload.nickname || `사용자${userId}`,
+        profile_image: null,
+      };
+    }
+  } catch (error) {
+    console.error("토큰 파싱 실패:", error);
+  }
+  return null;
+};
+
 // 서버 데이터를 클라이언트 타입으로 변환
 const transformServerPost = async (
   serverPost: ServerPost,
@@ -135,10 +130,19 @@ const transformServerPost = async (
     return `${diffInWeeks}주 전`;
   };
 
-  // 작성자 정보 조회
-  const authorInfo = serverPost.author_id
-    ? await fetchUserInfo(serverPost.author_id)
-    : { nickname: "익명", profile_image: null };
+  // 작성자 정보는 서버에서 JOIN으로 가져온 데이터 사용, 없으면 토큰에서 확인
+  let authorInfo = {
+    nickname: serverPost.author_nickname || "익명",
+    profile_image: serverPost.author_profile_image || null,
+  };
+
+  // 서버에서 author_nickname이 없고 author_id가 있으면 토큰에서 확인
+  if (!serverPost.author_nickname && serverPost.author_id) {
+    const tokenUserInfo = getUserInfoFromToken(serverPost.author_id);
+    if (tokenUserInfo) {
+      authorInfo = tokenUserInfo;
+    }
+  }
 
   // 참여자 수 조회 (일반 게시글이 아닌 경우만)
   const currentParticipants =
@@ -302,31 +306,6 @@ export const useCreatePostMutation = () => {
   });
 };
 
-// 모임 참가
-export const useJoinMeetupMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (postId: string): Promise<void> => {
-      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    },
-    onSuccess: (_, postId) => {
-      // 특정 게시글과 게시글 목록을 새로고침
-      queryClient.invalidateQueries({ queryKey: ["post", postId] });
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-    },
-  });
-};
-
 // 모임 탈퇴
 export const useLeaveMeetupMutation = () => {
   const queryClient = useQueryClient();
@@ -352,41 +331,6 @@ export const useLeaveMeetupMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
-  });
-};
-
-// 참가자 상태 확인
-export const useParticipantStatusQuery = (postId: string) => {
-  return useQuery({
-    queryKey: ["participant", postId],
-    queryFn: async (): Promise<{
-      isParticipant: boolean;
-      isAuthor: boolean;
-    }> => {
-      const headers: Record<string, string> = {};
-
-      // 임시 토큰이 있으면 Authorization 헤더에 추가
-      const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
-      if (tempToken && tempToken !== "your_temp_token_here") {
-        headers.Authorization = `Bearer ${tempToken}`;
-      }
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/posts/${postId}/participants`,
-        {
-          headers,
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result.data || result;
-    },
-    enabled: !!postId,
-    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 };
 
@@ -545,6 +489,69 @@ export const useUserProfileQuery = (userId?: number) => {
 };
 
 // 모임 참여자 목록 조회
+// 참가자 상태 확인 (작성자/참가자 여부)
+export const useParticipantStatusQuery = (postId: string) => {
+  return useQuery({
+    queryKey: ["participant-status", postId],
+    queryFn: async (): Promise<{
+      isParticipant: boolean;
+      isAuthor: boolean;
+    }> => {
+      const headers: Record<string, string> = {};
+
+      // 임시 토큰이 있으면 Authorization 헤더에 추가
+      const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+      if (tempToken && tempToken !== "your_temp_token_here") {
+        headers.Authorization = `Bearer ${tempToken}`;
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/${postId}/participants`,
+        {
+          headers,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // 서버 응답에서 현재 사용자의 상태 확인
+      // 임시로 토큰에서 user_id 추출
+      let currentUserId = null;
+      if (tempToken) {
+        try {
+          const payload = JSON.parse(atob(tempToken.split(".")[1]));
+          currentUserId = parseInt(payload.user_id);
+        } catch (error) {
+          console.error("토큰 파싱 실패:", error);
+        }
+      }
+
+      // 서버에서 이미 계산해서 보내주는 값들을 사용
+      const isAuthor = result.data?.isAuthor || false;
+      const isParticipant = result.data?.isParticipant || false;
+
+      // 디버깅 로그
+      console.log("🔍 [PARTICIPANT STATUS] currentUserId:", currentUserId);
+      console.log(
+        "🔍 [PARTICIPANT STATUS] server isAuthor:",
+        result.data?.isAuthor,
+      );
+      console.log(
+        "🔍 [PARTICIPANT STATUS] server isParticipant:",
+        result.data?.isParticipant,
+      );
+      console.log("🔍 [PARTICIPANT STATUS] result.data:", result.data);
+
+      return { isParticipant, isAuthor };
+    },
+    enabled: !!postId,
+  });
+};
+
 export const useParticipantsQuery = (postId: string) => {
   return useQuery({
     queryKey: ["participants", postId],
@@ -571,6 +578,10 @@ export const useParticipantsQuery = (postId: string) => {
       }
 
       const result = await response.json();
+
+      // 디버깅 로그
+      console.log("🔍 [PARTICIPANTS] API 응답:", result);
+      console.log("🔍 [PARTICIPANTS] participants:", result.data?.participants);
 
       // 참여자 목록을 우리가 필요한 형태로 변환
       if (result.data && result.data.participants) {
@@ -630,12 +641,65 @@ export const useCommentsQuery = (
 
       const result = await response.json();
       // 서버에서 { data: { comments: [...] } } 형태로 반환
-      if (result.data && result.data.comments) {
-        return result.data.comments;
+      let comments = result.data?.comments || result.data || result;
+
+      // 댓글 데이터에도 토큰 닉네임 로직 적용
+      if (Array.isArray(comments)) {
+        comments = comments.map((comment: Comment) => {
+          // 서버에서 author_nickname이 없고 author_id가 있으면 토큰에서 확인
+          if (!comment.author_nickname && comment.author_id) {
+            const tokenUserInfo = getUserInfoFromToken(comment.author_id);
+            if (tokenUserInfo) {
+              comment.author_nickname = tokenUserInfo.nickname;
+              comment.author_profile_image = tokenUserInfo.profile_image;
+            }
+          }
+          return comment;
+        });
       }
-      return result.data || result;
+
+      return comments;
     },
     enabled: !!postId && options?.enabled !== false,
     staleTime: 1000 * 60 * 2, // 2분간 캐시 유지
+  });
+};
+
+// 모임 참가하기
+export const useJoinMeetupMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string): Promise<unknown> => {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      // 임시 토큰이 있으면 Authorization 헤더에 추가
+      const tempToken = process.env.NEXT_PUBLIC_TEMP_AUTH_TOKEN;
+      if (tempToken && tempToken !== "your_temp_token_here") {
+        headers.Authorization = `Bearer ${tempToken}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/join`, {
+        method: "POST",
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    onSuccess: (_, postId) => {
+      // 관련 쿼리들 무효화하여 새로고침
+      queryClient.invalidateQueries({
+        queryKey: ["participant-status", postId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["participants", postId] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
   });
 };

@@ -19,6 +19,7 @@ import {
   useParticipantStatusQuery,
   useToggleLikeMutation,
   useLikeStatusQuery,
+  useJoinMeetupMutation,
 } from "@/app/queries/community";
 import { usePostSettlementQuery } from "@/app/queries/settlement";
 
@@ -26,7 +27,6 @@ export default function PostDetailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [commentInput, setCommentInput] = useState("");
-  const [isParticipating, setIsParticipating] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
 
   const getCategoryLabel = (category: string) => {
@@ -60,6 +60,21 @@ export default function PostDetailPage() {
     }
   };
 
+  const getCategoryImage = (category: string) => {
+    switch (category) {
+      case "안전":
+      case "수리":
+        return "/images/categories/repair.png";
+      case "소분":
+        return "/images/categories/group.png";
+      case "취미":
+        return "/images/categories/hobby.png";
+      case "일반":
+      default:
+        return null; // 일반 카테고리는 기본 이미지 없음
+    }
+  };
+
   const postId = searchParams.get("id");
   const { data: post, isLoading, error } = usePostQuery(postId || "");
   const { data: participantStatus } = useParticipantStatusQuery(postId || "");
@@ -73,6 +88,7 @@ export default function PostDetailPage() {
     console.error("Like status error:", likeError);
   }
   const toggleLikeMutation = useToggleLikeMutation();
+  const joinMeetupMutation = useJoinMeetupMutation();
 
   // 일반 게시글이거나 작성자이거나 참가자인 경우에만 댓글 조회
   const canViewComments =
@@ -126,7 +142,22 @@ export default function PostDetailPage() {
   };
 
   const handleParticipationToggle = () => {
-    setIsParticipating(!isParticipating);
+    if (!postId) return;
+
+    // 현재는 참가만 구현 (탈퇴 API가 없음)
+    if (!participantStatus?.isParticipant) {
+      joinMeetupMutation.mutate(postId, {
+        onSuccess: () => {
+          console.log("모임 참가 성공");
+        },
+        onError: (error) => {
+          console.error("모임 참가 실패:", error);
+          alert("모임 참가에 실패했습니다. 다시 시도해주세요.");
+        },
+      });
+    } else {
+      alert("모임 탈퇴 기능은 아직 구현되지 않았습니다.");
+    }
   };
 
   // 날짜 포맷팅 함수 (예: "8월 15일")
@@ -191,6 +222,17 @@ export default function PostDetailPage() {
       <div className="flex-1 overflow-y-auto">
         {/* 게시글 정보 영역 */}
         <div className="px-6 pt-4">
+          {/* 카테고리 기본 이미지 */}
+          {getCategoryImage(post.category) && (
+            <div className="-mx-6 mb-4">
+              <img
+                src={getCategoryImage(post.category)!}
+                alt={`${getCategoryLabel(post.category)} 기본 이미지`}
+                className="w-full h-48 object-cover"
+              />
+            </div>
+          )}
+
           {/* 작성자 정보 행 */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -326,9 +368,14 @@ export default function PostDetailPage() {
                   // 다른 사람이 만든 모임인 경우
                   <button
                     onClick={handleParticipationToggle}
-                    className="px-2.5 py-1 bg-[#017BFF] text-white text-xs font-medium rounded hover:bg-[#0056CC]"
+                    disabled={joinMeetupMutation.isPending}
+                    className="px-2.5 py-1 bg-[#017BFF] text-white text-xs font-medium rounded hover:bg-[#0056CC] disabled:opacity-50"
                   >
-                    {isParticipating ? "모임 나가기" : "참여하기"}
+                    {joinMeetupMutation.isPending
+                      ? "처리중..."
+                      : participantStatus?.isParticipant
+                        ? "모임 나가기"
+                        : "참여하기"}
                   </button>
                 )}
               </>
@@ -401,12 +448,12 @@ export default function PostDetailPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                             <span className="text-xs font-medium text-gray-600">
-                              익
+                              {(comment.author_nickname || "익명").charAt(0)}
                             </span>
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-gray-700">
-                              익명
+                              {comment.author_nickname || "익명"}
                             </span>
                             <span className="text-xs text-gray-500">
                               {(() => {
