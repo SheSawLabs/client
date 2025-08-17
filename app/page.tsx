@@ -19,11 +19,27 @@ export default function Home() {
 
   // 임시 사용자 정보 (추후 실제 데이터와 연동)
   const userName = "도윤"; // 임시 사용자명
-  const dongInfo: Dong | null = {
-    dong: "신림동",
+  const mockDongInfo: Dong | null = {
+    dong_code: "54208",
     district: "관악구",
-    grade: "E",
-  }; // 임시 동 정보
+    dong: "낙성대동",
+    grade: "C",
+    score: 61.2,
+    coordinates: {
+      lat: 37.467231,
+      lng: 126.960046,
+    },
+    facilities: {
+      cctv: 215,
+      streetlight: 0,
+      police_station: 1,
+      safety_house: 3,
+      delivery_box: 0,
+    },
+    risk_factors: {
+      sexual_offender: 0,
+    },
+  };
 
   // 정책 데이터 가져오기
   const { data: policyData, isLoading: policyLoading } = usePolicyListQuery();
@@ -108,7 +124,7 @@ export default function Home() {
         {/* 현재 위치 안전도 배너 */}
         <div className="px-7">
           <HomeLocationBanner
-            dongInfo={dongInfo}
+            dongInfo={mockDongInfo}
             onNavigateToMap={handleNavigateToMap}
           />
         </div>

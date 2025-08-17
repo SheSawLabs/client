@@ -38,8 +38,8 @@ const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
           {hasLogo ? (
             <img
               src="/assets/shesaw_logo.svg"
-              alt="쉿쏘"
-              className="w-12 h-8"
+              alt="시소 로고"
+              className="ml-2"
             />
           ) : showBackButton ? (
             <button
