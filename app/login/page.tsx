@@ -2,15 +2,40 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { API_BASE_URL, COLORS } from "@/constants";
 
 export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+
+    // 에러 파라미터 체크
+    const error = searchParams.get("error");
+    if (error) {
+      let errorMessage = "로그인에 실패했습니다. 다시 시도해주세요.";
+
+      switch (error) {
+        case "auth_failed":
+          errorMessage = "카카오 인증에 실패했습니다.";
+          break;
+        case "no_code":
+          errorMessage = "인증 코드가 제공되지 않았습니다.";
+          break;
+        case "process_failed":
+          errorMessage = "로그인 처리 중 오류가 발생했습니다.";
+          break;
+      }
+
+      alert(errorMessage);
+      // URL에서 에러 파라미터 제거
+      router.replace("/login");
+    }
+  }, [searchParams, router]);
 
   const handleKakaoLogin = () => {
     if (typeof window !== "undefined") {

@@ -96,7 +96,13 @@ export const useLogoutMutation = () => {
       return response.json();
     },
     onSuccess: () => {
-      localStorage.removeItem("authToken");
+      // 쿠키에서 토큰 제거
+      if (typeof window !== "undefined") {
+        document.cookie =
+          "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
       queryClient.clear();
     },
   });
