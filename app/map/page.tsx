@@ -17,6 +17,30 @@ import { InteractiveMap } from "@/components/ui/InteractiveMap";
 import { useDistrictByDistrictNameQuery } from "../queries/map";
 import { Dong } from "@/types/map";
 
+// 각 단계를 감싸는 Wrapper 컴포넌트
+interface StepWrapperProps {
+  children: React.ReactNode;
+  hasButton?: boolean;
+  buttonContent?: React.ReactNode;
+}
+
+const StepWrapper = ({
+  children,
+  hasButton,
+  buttonContent,
+}: StepWrapperProps) => {
+  return (
+    <div className="relative h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto">{children}</div>
+      {hasButton && buttonContent && (
+        <div className="absolute bottom-20 left-4 right-4 bg-white/95 backdrop-blur-sm pb-4 pt-2 rounded-t-lg z-10">
+          {buttonContent}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function MapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -144,85 +168,90 @@ export default function MapPage() {
   }, [currentStep, dongInfo]);
 
   return (
-    <div className="pb-20">
+    <div className="h-full flex flex-col">
       <TopNav
         title="동네 안전"
         showBackButton={true}
         onBackClick={onBackClick}
       />
+
       {currentStep === "gu-selection" && (
-        <div className="p-4">
-          <DistrictPolygons
-            selectedDistrict={selectedDistrict}
-            setSelectedDistrict={handleDistrictSelect}
-          />
-          {/* 안전등급 가이드 */}
-          <div className="flex justify-center mb-4">
-            <div
-              onClick={() => openModal(<SafetyGuideDetail />)}
-              className="cursor-pointer"
+        <StepWrapper
+          hasButton={!!selectedDistrict}
+          buttonContent={
+            <Button
+              onClick={handleNext}
+              disabled={!selectedDistrict}
+              size="wide"
+              className="shadow-lg"
             >
-              <GuideTag
-                icon={<HelpCircle className="w-3 h-3" />}
-                text="안전 등급이란?"
-              />
+              {`${selectedDistrict} 보러가기`}
+            </Button>
+          }
+        >
+          <div className="p-4">
+            <DistrictPolygons
+              selectedDistrict={selectedDistrict}
+              setSelectedDistrict={handleDistrictSelect}
+            />
+            {/* 안전등급 가이드 */}
+            <div className="flex justify-center mb-4">
+              <div
+                onClick={() => openModal(<SafetyGuideDetail />)}
+                className="cursor-pointer"
+              >
+                <GuideTag
+                  icon={<HelpCircle className="w-3 h-3" />}
+                  text="안전 등급이란?"
+                />
+              </div>
             </div>
           </div>
-          {selectedDistrict && (
-            <div className="fixed bottom-20 left-4 right-4 bg-white/95 backdrop-blur-sm pb-4 pt-2 rounded-t-lg">
-              <Button
-                onClick={handleNext}
-                disabled={!selectedDistrict}
-                size="wide"
-                className="shadow-lg"
-              >
-                {`${selectedDistrict} 보러가기`}
-              </Button>
-            </div>
-          )}
-        </div>
+        </StepWrapper>
       )}
 
       {currentStep === "dong-selection" && (
-        <div className="px-4">
-          {/* 동 지도 영역 */}
-          <p className="flex items-center justify-center mt-6 text-center">
-            <span>{selectedDistrict}</span>
-            {selectedDong && (
-              <span className="ml-2">
-                <span className="mr-2">&gt;</span>
-                {selectedDong}
-              </span>
-            )}
-          </p>
-          <div className="mt-8 mb-8">
-            <DongPolygons
-              districtName={selectedDistrict || ""}
-              onDongClick={handleDongClick}
-              selectedDong={selectedDong}
-            />
-          </div>
-          {/* 안전등급 표시 */}
-          <div className="mb-2">
-            <SafetyLevel />
-          </div>
-          {selectedDong && (
-            <div className="fixed bottom-20 left-4 right-4 bg-white/95 backdrop-blur-sm pb-4 pt-2 rounded-t-lg">
-              <Button
-                onClick={handleNext}
-                disabled={!selectedDong}
-                size="wide"
-                className="shadow-lg"
-              >
-                {`${selectedDong} 보러가기`}
-              </Button>
+        <StepWrapper
+          hasButton={!!selectedDong}
+          buttonContent={
+            <Button
+              onClick={handleNext}
+              disabled={!selectedDong}
+              size="wide"
+              className="shadow-lg"
+            >
+              {`${selectedDong} 보러가기`}
+            </Button>
+          }
+        >
+          <div className="px-4">
+            {/* 동 지도 영역 */}
+            <p className="flex items-center justify-center mt-6 text-center">
+              <span>{selectedDistrict}</span>
+              {selectedDong && (
+                <span className="ml-2">
+                  <span className="mr-2">&gt;</span>
+                  {selectedDong}
+                </span>
+              )}
+            </p>
+            <div className="mt-8 mb-8">
+              <DongPolygons
+                districtName={selectedDistrict || ""}
+                onDongClick={handleDongClick}
+                selectedDong={selectedDong}
+              />
             </div>
-          )}
-        </div>
+            {/* 안전등급 표시 */}
+            <div className="mb-2">
+              <SafetyLevel />
+            </div>
+          </div>
+        </StepWrapper>
       )}
 
       {currentStep === "interactive-map" && (
-        <div className="relative h-screen">
+        <div className="flex-1 relative">
           <InteractiveMap
             districtName={selectedDistrict || ""}
             dongInfo={dongInfo}
