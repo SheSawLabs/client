@@ -107,6 +107,13 @@ export const FacilitiesFilters: React.FC<FacilitiesFiltersProps> = ({
             WebkitOverflowScrolling: "touch",
           }}
         >
+          <Badge
+            key={"facilities-all"}
+            label="전체"
+            isActive={isFilterActive("all")}
+            onClick={() => handleTagClick("all")}
+            className="flex-shrink-0"
+          />
           {facilitiesData.map((item) => (
             <Badge
               key={item.type}

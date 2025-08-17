@@ -3,7 +3,7 @@ import { COLORS } from "@/constants";
 
 interface BadgeProps {
   label: string;
-  count: number;
+  count?: number;
   isActive?: boolean;
   onClick?: () => void;
   className?: string;
@@ -11,7 +11,7 @@ interface BadgeProps {
 
 export const Badge: React.FC<BadgeProps> = ({
   label,
-  count,
+  count = 0,
   isActive = false,
   onClick,
   className = "",
@@ -37,8 +37,12 @@ export const Badge: React.FC<BadgeProps> = ({
       }
     >
       <span>{label}</span>
-      <span className="font-semibold">{count}</span>
-      <span>곳</span>
+      {count > 0 && (
+        <>
+          <span className="font-semibold">{count}</span>
+          <span>곳</span>
+        </>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 
 export type FacilityType =
+  | "all"
   | "cctv"
   | "streetlight"
   | "police_station"
