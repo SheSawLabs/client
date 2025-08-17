@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { TopNav } from "@/components/ui/TopNav";
 import { PolicyTags } from "@/components/ui/PolicyTags";
 import { PolicyInfoItem } from "@/components/ui/PolicyInfoItem";
@@ -16,6 +17,25 @@ interface PolicyDetailPageProps {
 function PolicyDetailPage({ params }: PolicyDetailPageProps) {
   const router = useRouter();
   const { policyId } = params;
+
+  // ChunkLoadError 방지를 위한 에러 핸들링
+  useEffect(() => {
+    const handleChunkLoadError = (event: ErrorEvent) => {
+      if (
+        event.message?.includes("Loading chunk") ||
+        event.message?.includes("ChunkLoadError")
+      ) {
+        console.warn("ChunkLoadError detected, attempting to reload page");
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener("error", handleChunkLoadError);
+
+    return () => {
+      window.removeEventListener("error", handleChunkLoadError);
+    };
+  }, []);
 
   const {
     data: policy,
