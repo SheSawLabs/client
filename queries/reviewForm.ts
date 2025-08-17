@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/constants";
 import { ApiResponse } from "@/types/common";
+import { getAuthTokenFromCookie } from "@/utils/auth";
 
 // 키워드 데이터 타입
 export interface KeywordCategory {
@@ -71,13 +72,22 @@ export const useReviewSubmitMutation = (
     mutationFn: async (
       data: ReviewSubmitRequest,
     ): Promise<ReviewSubmitResponse> => {
+      const authToken = getAuthTokenFromCookie();
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      // 인증 토큰이 있으면 Authorization 헤더에 추가
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+      }
+
       const response = await fetch(
         `${API_BASE_URL}/api/review/analyze-complete`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
           body: JSON.stringify(data),
         },
       );
