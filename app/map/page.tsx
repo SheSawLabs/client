@@ -49,6 +49,17 @@ export default function MapPage() {
   const { data: districtData, isSuccess: districtIsSuccess } =
     useDistrictByDistrictNameQuery(selectedDistrict || "");
 
+  // 데이터 로딩 및 관리
+  useEffect(() => {
+    if (!districtIsSuccess || !districtData) return;
+
+    const dongData = districtData.data?.find(
+      (dong) => dong.dong === selectedDong,
+    );
+
+    setDongInfo(dongData || null);
+  }, [districtData, selectedDong, districtIsSuccess]);
+
   // URL 업데이트 헬퍼 함수
   const updateUrl = (params: {
     district?: string | null;
@@ -68,42 +79,42 @@ export default function MapPage() {
     router.push(`/map?${newParams.toString()}`, { scroll: false });
   };
 
-  useEffect(() => {
-    if (!districtIsSuccess || !districtData) return;
-
-    const dongData = districtData.data?.find(
-      (dong) => dong.dong === selectedDong,
-    );
-
-    setDongInfo(dongData || null);
-  }, [districtData, selectedDong, districtIsSuccess]);
-
-  const handleNext = () => {
-    return currentStep === "gu-selection"
-      ? handleGuSelection()
-      : handleDongSelection();
-  };
-
-  const handleGuSelection = () => {
-    if (selectedDistrict) {
-      updateUrl({ step: "dong-selection" });
-    }
-  };
-
-  const handleDongSelection = () => {
-    if (selectedDong) {
-      updateUrl({ step: "interactive-map" });
-    }
-  };
-
   // 구 선택 핸들러
   const handleDistrictSelect = (district: string | null) => {
-    updateUrl({ district, dong: null, step: "gu-selection" });
+    updateUrl({
+      district,
+      dong: null,
+      step: district ? "gu-selection" : undefined,
+    });
   };
 
-  // 동 클릭 핸들러
+  // 동 선택 핸들러
   const handleDongClick = (dong: string) => {
-    updateUrl({ dong, step: "interactive-map" });
+    updateUrl({
+      dong,
+      step: "dong-selection",
+    });
+  };
+
+  // 구 선택에서 다음 단계로 이동
+  const handleGuSelection = () => {
+    if (!selectedDistrict) return;
+    updateUrl({ step: "dong-selection" });
+  };
+
+  // 동 선택에서 다음 단계로 이동
+  const handleDongSelection = () => {
+    if (!selectedDong) return;
+    updateUrl({ step: "interactive-map" });
+  };
+
+  // 다음 버튼 핸들러
+  const handleNext = () => {
+    if (currentStep === "gu-selection") {
+      handleGuSelection();
+    } else if (currentStep === "dong-selection") {
+      handleDongSelection();
+    }
   };
 
   const onBackClick = () => {
@@ -175,18 +186,26 @@ export default function MapPage() {
       )}
 
       {currentStep === "dong-selection" && (
-        <div className="relative h-screen">
+        <div className="px-4">
           {/* 동 지도 영역 */}
-          <div className="h-full p-4">
+          <p className="flex items-center justify-center mt-6 text-center">
+            <span>{selectedDistrict}</span>
+            {selectedDong && (
+              <span className="ml-2">
+                <span className="mr-2">&gt;</span>
+                {selectedDong}
+              </span>
+            )}
+          </p>
+          <div className="mt-8 mb-8">
             <DongPolygons
               districtName={selectedDistrict || ""}
               onDongClick={handleDongClick}
               selectedDong={selectedDong}
-              className="h-full"
             />
           </div>
           {selectedDong && (
-            <div className="flex justify-end">
+            <div className="z-10">
               <Button
                 onClick={handleNext}
                 disabled={!selectedDong}
