@@ -72,7 +72,16 @@ export default function Home() {
   };
 
   const handleNavigateToMap = () => {
-    router.push("/map");
+    if (mockDongInfo) {
+      const params = new URLSearchParams({
+        step: "interactive-map",
+        district: mockDongInfo.district,
+        dong: mockDongInfo.dong,
+      });
+      router.push(`/map?${params.toString()}`);
+    } else {
+      router.push("/map");
+    }
   };
 
   const handleViewAllCommunity = () => {
