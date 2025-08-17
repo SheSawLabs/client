@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Badge } from "./Badge";
-import { FACILITIES_LABELS } from "@/constants";
+import { RoundChip } from "./RoundChip";
+import { FACILITIES_LABELS, COLORS } from "@/constants";
 import { Dong } from "@/types/map";
 import { FacilityType, useFacilityFilters } from "@/hooks/useFacilityFilters";
 
@@ -107,22 +107,39 @@ export const FacilitiesFilters: React.FC<FacilitiesFiltersProps> = ({
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <Badge
-            key={"facilities-all"}
-            label="전체"
-            isActive={isFilterActive("all")}
+          <div
+            key="facilities-all"
             onClick={() => handleTagClick("all")}
-            className="flex-shrink-0"
-          />
-          {facilitiesData.map((item) => (
-            <Badge
-              key={item.type}
-              label={item.label}
-              count={item.count}
-              isActive={isFilterActive(item.type)}
-              onClick={() => handleTagClick(item.type)}
-              className="flex-shrink-0"
+            className="flex-shrink-0 cursor-pointer"
+          >
+            <RoundChip
+              label="전체"
+              backgroundColor={isFilterActive("all") ? "#e6edf9" : "#f3f4f6"}
+              borderColor={isFilterActive("all") ? COLORS.PRIMARY : "#e5e7eb"}
+              textColor={isFilterActive("all") ? COLORS.PRIMARY : "#6b7280"}
+              size="md"
             />
+          </div>
+          {facilitiesData.map((item) => (
+            <div
+              key={item.type}
+              onClick={() => handleTagClick(item.type)}
+              className="flex-shrink-0 cursor-pointer"
+            >
+              <RoundChip
+                label={`${item.label} ${item.count}`}
+                backgroundColor={
+                  isFilterActive(item.type) ? "#e6edf9" : "#f3f4f6"
+                }
+                borderColor={
+                  isFilterActive(item.type) ? COLORS.PRIMARY : "#e5e7eb"
+                }
+                textColor={
+                  isFilterActive(item.type) ? COLORS.PRIMARY : "#6b7280"
+                }
+                size="md"
+              />
+            </div>
           ))}
         </div>
       </div>
