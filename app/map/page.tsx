@@ -20,7 +20,7 @@ import { Dong } from "@/types/map";
 export default function MapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { openBottomSheet } = useBottomSheet();
+  const { openBottomSheet, closeBottomSheet } = useBottomSheet();
   const { openModal } = useModal();
 
   // URL 파라미터에서 상태 읽기
@@ -138,6 +138,8 @@ export default function MapPage() {
   useEffect(() => {
     if (currentStep === "interactive-map" && dongInfo) {
       openDongDetailBottomSheet();
+    } else if (currentStep !== "interactive-map") {
+      closeBottomSheet();
     }
   }, [currentStep, dongInfo]);
 
