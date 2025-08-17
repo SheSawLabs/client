@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         path: "/",
       });
 
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/on-boarding", request.url));
     } else {
       throw new Error(data.message || "로그인에 실패했습니다");
     }
