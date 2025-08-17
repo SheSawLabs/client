@@ -20,7 +20,7 @@ export const FilterTag: React.FC<FilterTagProps> = ({
       className={`flex items-center gap-1 py-1 text-sm font-medium rounded-full transition-colors ${className}`}
       style={{
         backgroundColor: "transparent",
-        color: COLORS.PRIMARY,
+        color: isActive ? COLORS.PRIMARY : COLORS.GRAY_600,
         border: "none",
       }}
     >

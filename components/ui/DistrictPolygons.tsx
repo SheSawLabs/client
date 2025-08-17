@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useDistrictJsonQuery, type GeoJSONData } from "@/app/queries/map";
+import { COLORS } from "@/constants";
 
 interface DistrictFeature {
   type: "Feature";
@@ -187,13 +188,28 @@ const DistrictPolygons = ({
 
       ctx.closePath();
 
-      // 폴리곤 채우기 (흰색, 선택시 연한 회색)
-      ctx.fillStyle =
-        district.name === selectedDistrict ? "#DAE6FD" : "#ffffff";
+      const isSelected = district.name === selectedDistrict;
+
+      // 폴리곤 채우기
+      ctx.fillStyle = isSelected ? COLORS.PRIMARY : "#ffffff";
       ctx.fill();
 
-      // 테두리 그리기 (검은색)
-      ctx.strokeStyle = "#000000";
+      // 선택된 구에 그림자 효과 추가
+      if (isSelected) {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+        ctx.fill();
+        // 그림자 효과 초기화
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      }
+
+      // 테두리 그리기
+      ctx.strokeStyle = isSelected ? COLORS.PRIMARY : COLORS.GRAY_400;
       ctx.lineWidth = 1;
       ctx.stroke();
 
@@ -202,7 +218,7 @@ const DistrictPolygons = ({
         district.center.x,
         district.center.y,
       );
-      ctx.fillStyle = "#000000";
+      ctx.fillStyle = isSelected ? "#ffffff" : COLORS.GRAY_400;
       ctx.font = "20px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
