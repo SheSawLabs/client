@@ -345,6 +345,8 @@ export const fetchPostSettlement = async (
       user_id: number;
       amount: number;
       payment_status: "pending" | "paid" | "failed" | "refunded";
+      nickname?: string;
+      profile_image?: string;
     }>;
   };
 }> => {
