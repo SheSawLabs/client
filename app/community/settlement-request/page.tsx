@@ -209,8 +209,9 @@ export default function SettlementRequestPage() {
     createSettlementMutation.mutate(settlementData, {
       onSuccess: (response) => {
         console.log("정산 요청 성공:", response);
-        alert("정산 요청이 성공적으로 생성되었습니다!");
-        router.back(); // 이전 페이지로 돌아가기
+        router.push(
+          `/community/settlement-history?postId=${postId}&title=${encodeURIComponent(groupTitle)}`,
+        ); // 정산 내역 페이지로 이동
       },
       onError: (error) => {
         console.error("정산 요청 실패:", error);
