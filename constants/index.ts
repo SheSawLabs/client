@@ -32,21 +32,19 @@ export type SafetyLevel = 1 | 2 | 3 | 4 | 5;
 export const SAFETY_LABELS = {
   A: {
     LABEL: "매우 좋음",
-    DESCRIPTION: "매우 안전한 지역으로 언제든 편안하게 이동하실 수 있어요.",
+    DESCRIPTION: "안전과 청결이 매우 우수해요.",
   },
   B: {
     LABEL: "좋음",
-    DESCRIPTION:
-      "비교적 안전한 지역이지만 야간에는 주변을 살펴가며 이동해주세요.",
+    DESCRIPTION: "쾌적하고 안심되는 환경이에요.",
   },
   C: {
     LABEL: "양호",
-    DESCRIPTION:
-      "일반적인 안전 수준이므로 평소보다 조금 더 주의해서 이동해주세요.",
+    DESCRIPTION: "대체로 안전한 편이에요.",
   },
   D: {
     LABEL: "관심 필요",
-    DESCRIPTION: "주의가 필요한 지역이므로 가급적 동반자와 함께 이동해주세요.",
+    DESCRIPTION: "인적이 드문 구간이 있어요.",
   },
   E: {
     LABEL: "주의 필요",
