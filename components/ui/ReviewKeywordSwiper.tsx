@@ -13,14 +13,14 @@ interface SelectedKeyword {
   keyword: string;
 }
 
-interface ReviewKeywordSliderProps {
+interface ReviewKeywordSwiperProps {
   keywordsData: KeywordCategory;
   selectedKeywords: SelectedKeyword[];
   onKeywordSelect: (category: string, keyword: string) => void;
   className?: string;
 }
 
-export const ReviewKeywordSlider: React.FC<ReviewKeywordSliderProps> = ({
+export const ReviewKeywordSwiper: React.FC<ReviewKeywordSwiperProps> = ({
   keywordsData,
   selectedKeywords,
   onKeywordSelect,
