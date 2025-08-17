@@ -112,8 +112,7 @@ export default function MapPage() {
     } else if (currentStep === "interactive-map") {
       updateUrl({ dong: null, step: "dong-selection" });
     } else {
-      // Navigate back to the previous page
-      window.history.back();
+      router.replace("/");
     }
   };
 
@@ -160,17 +159,18 @@ export default function MapPage() {
               />
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <Button
-              onClick={handleNext}
-              disabled={!selectedDistrict}
-              size="wide"
-              className="px-6 py-2"
-            >
-              다음
-            </Button>
-          </div>
+          {selectedDistrict && (
+            <div className="flex justify-end">
+              <Button
+                onClick={handleNext}
+                disabled={!selectedDistrict}
+                size="wide"
+                className="px-6 py-2"
+              >
+                {`${selectedDistrict} 보러가기`}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
