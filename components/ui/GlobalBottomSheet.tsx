@@ -63,11 +63,6 @@ export const GlobalBottomSheet: React.FC = () => {
     handleMove(e.touches[0].clientY);
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
-    e.preventDefault();
-    handleMove(e.clientY);
-  };
-
   const handleEnd = () => {
     setIsDragging(false);
 
@@ -82,11 +77,44 @@ export const GlobalBottomSheet: React.FC = () => {
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleEnd);
+      const handleMouseMoveGlobal = (e: MouseEvent) => {
+        e.preventDefault();
+        handleMove(e.clientY);
+      };
+
+      const handleMouseUpGlobal = (e: MouseEvent) => {
+        e.preventDefault();
+        handleEnd();
+      };
+
+      // document가 아닌 window에 이벤트를 등록하여 화면 경계를 넘어서도 추적
+      window.addEventListener("mousemove", handleMouseMoveGlobal, {
+        capture: true,
+      });
+      window.addEventListener("mouseup", handleMouseUpGlobal, {
+        capture: true,
+      });
+      // 마우스가 window를 벗어나거나 다시 들어와도 계속 추적
+      window.addEventListener("mouseout", handleMouseMoveGlobal, {
+        capture: true,
+      });
+      window.addEventListener("mouseover", handleMouseMoveGlobal, {
+        capture: true,
+      });
+
       return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleEnd);
+        window.removeEventListener("mousemove", handleMouseMoveGlobal, {
+          capture: true,
+        });
+        window.removeEventListener("mouseup", handleMouseUpGlobal, {
+          capture: true,
+        });
+        window.removeEventListener("mouseout", handleMouseMoveGlobal, {
+          capture: true,
+        });
+        window.removeEventListener("mouseover", handleMouseMoveGlobal, {
+          capture: true,
+        });
       };
     }
   }, [isDragging, dragStartY, initialHeight]);
