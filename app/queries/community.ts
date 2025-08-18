@@ -35,6 +35,7 @@ interface ServerPost {
   created_at: string;
   updated_at: string;
   author_id: number | null;
+  author_name?: string;
   author_nickname?: string;
   author_profile_image?: string;
   views?: number;
@@ -132,12 +133,16 @@ const transformServerPost = async (
 
   // 작성자 정보는 서버에서 JOIN으로 가져온 데이터 사용, 없으면 토큰에서 확인
   let authorInfo = {
-    nickname: serverPost.author_nickname || "익명",
+    nickname: serverPost.author_name || serverPost.author_nickname || "익명",
     profile_image: serverPost.author_profile_image || null,
   };
 
-  // 서버에서 author_nickname이 없고 author_id가 있으면 토큰에서 확인
-  if (!serverPost.author_nickname && serverPost.author_id) {
+  // 서버에서 author_name과 author_nickname이 모두 없고 author_id가 있으면 토큰에서 확인
+  if (
+    !serverPost.author_name &&
+    !serverPost.author_nickname &&
+    serverPost.author_id
+  ) {
     const tokenUserInfo = getUserInfoFromToken(serverPost.author_id);
     if (tokenUserInfo) {
       authorInfo = tokenUserInfo;

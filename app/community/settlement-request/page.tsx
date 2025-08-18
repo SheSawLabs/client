@@ -30,7 +30,7 @@ export default function SettlementRequestPage() {
   const groupTitle = searchParams.get("title") || "렛츠고 소분모임";
   const postId = searchParams.get("postId") || "";
 
-  const [totalAmount, setTotalAmount] = useState(9000);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
 
   // 모임 참여자 목록 조회
@@ -51,7 +51,7 @@ export default function SettlementRequestPage() {
     if (participants.length > 0) {
       const participantNeighbors = participants.map((participant) => ({
         ...participant,
-        amount: Math.floor(totalAmount / participants.length),
+        amount: 0,
       }));
       setNeighbors(participantNeighbors);
     }
@@ -60,7 +60,8 @@ export default function SettlementRequestPage() {
   // 총 금액이 변경될 때 개별 금액을 균등 분할 (이웃 수정으로 인한 변경이 아닐 때만)
   useEffect(() => {
     if (neighbors.length > 0 && !skipTotalAmountEffect.current) {
-      const perPersonAmount = Math.floor(totalAmount / neighbors.length);
+      const perPersonAmount =
+        totalAmount > 0 ? Math.floor(totalAmount / neighbors.length) : 0;
       setNeighbors((prevNeighbors) =>
         prevNeighbors.map((neighbor) => ({
           ...neighbor,
@@ -288,7 +289,9 @@ export default function SettlementRequestPage() {
             ) : (
               <>
                 <span className="text-[22px] font-extrabold text-[#111827]">
-                  {totalAmount.toLocaleString()} 원
+                  {totalAmount > 0
+                    ? `${totalAmount.toLocaleString()} 원`
+                    : "금액을 입력해주세요"}
                 </span>
                 <button
                   onClick={handleEditAmount}

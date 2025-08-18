@@ -60,7 +60,7 @@ export default function SettlementSuccessPage() {
         if (result.success && result.data.isPaymentCompleted) {
           setIsProcessing(false);
           setTimeout(() => {
-            router.push("/community");
+            router.push("/community/settlement");
           }, 3000);
         } else if (result.success) {
           // 결제가 아직 완료되지 않음
@@ -100,10 +100,10 @@ export default function SettlementSuccessPage() {
           </h1>
           <p className="text-sm text-[#6B7280] mb-6">{error}</p>
           <button
-            onClick={() => router.push("/community")}
+            onClick={() => router.push("/community/settlement")}
             className="px-6 py-3 bg-[#0f5fda] text-white rounded-[12px] font-semibold"
           >
-            커뮤니티로 돌아가기
+            정산 알림으로 돌아가기
           </button>
         </div>
       </div>

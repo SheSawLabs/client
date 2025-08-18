@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowLeft, Users, Calendar, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { X, ChevronRight } from "lucide-react";
 import { useMySettlementsQuery } from "@/app/queries/settlement";
 
 export default function SettlementListPage() {
@@ -11,33 +10,57 @@ export default function SettlementListPage() {
     error: settlementsError,
   } = useMySettlementsQuery();
 
-  const handleBack = () => {
-    window.history.back();
+  const handleClose = () => {
+    window.location.href = "/community/groups";
   };
 
-  const handleSettlementClick = (settlementId: string, amount: number) => {
-    // 정산 받기 페이지로 이동 (settlement_id와 amount를 쿼리 파라미터로 전달)
-    window.location.href = `/community/settlement/receive?id=${settlementId}&amount=${amount}`;
+  const handleNotificationSettings = () => {
+    // 알림 설정 페이지로 이동
+    console.log("알림 설정으로 이동");
   };
 
-  const formatAmount = (amount: number) => {
-    return amount.toLocaleString();
+  const handleSettlementClick = (
+    settlementId: string,
+    amount: number,
+    title: string,
+  ) => {
+    // 정산하러가기
+    window.location.href = `/community/settlement/receive?id=${settlementId}&amount=${amount}&title=${encodeURIComponent(title)}`;
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
+
+    if (diffInHours < 1) return "방금 전";
+    if (diffInHours < 24) return `${diffInHours}시간 전`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}일 전`;
+
     return date.toLocaleDateString("ko-KR", {
-      month: "long",
+      month: "numeric",
       day: "numeric",
     });
   };
 
   if (isSettlementsLoading) {
     return (
-      <div className="h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-6 h-6 border-2 border-[#0f5fda] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-          <p className="text-sm text-[#6B7280]">로딩 중...</p>
+      <div className="min-h-screen bg-white px-6">
+        {/* 상단 헤더 */}
+        <header className="h-14 flex items-center justify-between bg-white">
+          <div className="w-5"></div>
+          <h1 className="text-[15px] font-semibold text-[#111827]">알림</h1>
+          <button onClick={handleClose} aria-label="닫기">
+            <X size={18} className="text-[#111827]" />
+          </button>
+        </header>
+
+        <div className="flex items-center justify-center pt-32">
+          <p className="text-[#6B7280]">로딩 중...</p>
         </div>
       </div>
     );
@@ -45,14 +68,18 @@ export default function SettlementListPage() {
 
   if (settlementsError) {
     return (
-      <div className="h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-sm text-red-500 mb-2">오류가 발생했습니다</p>
-          <p className="text-xs text-[#6B7280]">
-            {settlementsError instanceof Error
-              ? settlementsError.message
-              : "알 수 없는 오류"}
-          </p>
+      <div className="min-h-screen bg-white px-6">
+        {/* 상단 헤더 */}
+        <header className="h-14 flex items-center justify-between bg-white">
+          <div className="w-5"></div>
+          <h1 className="text-[15px] font-semibold text-[#111827]">알림</h1>
+          <button onClick={handleClose} aria-label="닫기">
+            <X size={18} className="text-[#111827]" />
+          </button>
+        </header>
+
+        <div className="flex items-center justify-center pt-32">
+          <p className="text-red-500">오류가 발생했습니다</p>
         </div>
       </div>
     );
@@ -61,102 +88,174 @@ export default function SettlementListPage() {
   const settlements = settlementsData?.data || [];
 
   return (
-    <div className="h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white px-6">
       {/* 상단 헤더 */}
-      <header className="h-14 flex items-center justify-between px-4 border-b border-[#E5E7EB] bg-white flex-shrink-0">
-        <button onClick={handleBack} className="p-1" aria-label="뒤로가기">
-          <ArrowLeft size={20} className="text-[#111827]" />
+      <header className="h-14 flex items-center justify-between bg-white">
+        <div className="w-5"></div>
+        <h1 className="text-[15px] font-semibold text-[#111827]">알림</h1>
+        <button onClick={handleClose} aria-label="닫기">
+          <X size={18} className="text-[#111827]" />
         </button>
-        <h1 className="text-[15px] font-semibold text-[#111827]">정산 요청</h1>
-        <div className="w-8" />
       </header>
 
-      {/* 본문 */}
-      <div className="flex-1 overflow-y-auto px-4 max-w-[420px] mx-auto w-full">
+      {/* 상단 안내 배너 */}
+      <button
+        onClick={handleNotificationSettings}
+        className="w-full h-11 bg-[#EEF4FF] px-4 py-2 flex items-center justify-between rounded-lg mb-4 mt-8"
+        role="button"
+        aria-label="알림 설정하기"
+      >
+        <div className="flex items-center">
+          <div
+            className="w-4 h-4 bg-[#017BFF] rounded-full flex items-center justify-center mr-2"
+            aria-hidden="true"
+          >
+            <span className="text-white text-xs font-bold">!</span>
+          </div>
+          <span className="text-[13px] text-[#017BFF]">
+            알림 받기를 설정하고 유용한 알림들을 받아보세요.
+          </span>
+        </div>
+        <ChevronRight size={14} className="text-[#017BFF]" aria-hidden="true" />
+      </button>
+
+      {/* 알림 리스트 */}
+      <div className="py-4 space-y-3">
         {settlements.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <Users size={48} className="text-[#E5E7EB] mx-auto mb-4" />
-              <p className="text-[#6B7280] text-sm">
-                아직 받은 정산 요청이 없어요
-              </p>
-            </div>
+          <div className="text-center pt-32">
+            <p className="text-[#6B7280] text-sm">받은 알림이 없습니다</p>
           </div>
         ) : (
-          <div className="py-4">
-            {settlements.map((settlement) => {
-              const participant = settlement.participants[0]; // 현재 사용자의 참여 정보
-              return (
+          settlements.map((settlement, index) => {
+            const participant = settlement.participants[0];
+            const showAd = index === 1 || index === 3 || index === 6; // 여러 위치에 광고 표시
+
+            return (
+              <>
                 <div
                   key={settlement.id}
-                  className="bg-white border border-[#E5E7EB] rounded-[12px] p-4 mb-3 shadow-sm"
+                  className="bg-white border border-[#E5E7EB] rounded-lg p-3"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  {/* 상단: 카테고리 라벨 + 시간 */}
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-[#F3F4F6] rounded-full flex items-center justify-center mr-3">
-                        <Users size={20} className="text-[#0f5fda]" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[#111827]">
-                          정산 요청
-                        </p>
-                        <div className="flex items-center">
-                          <Calendar size={12} className="text-[#6B7280] mr-1" />
-                          <p className="text-xs text-[#6B7280]">
-                            {formatDate(settlement.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[#111827]">
-                        {formatAmount(participant.amount)}원
-                      </p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          participant.payment_status === "pending"
-                            ? "bg-[#FEF3C7] text-[#D97706]"
-                            : participant.payment_status === "completed"
-                              ? "bg-[#D1FAE5] text-[#059669]"
-                              : "bg-[#FEE2E2] text-[#DC2626]"
-                        }`}
+                      <div
+                        className="w-4 h-4 bg-[#017BFF] rounded-full flex items-center justify-center mr-1"
+                        aria-hidden="true"
                       >
-                        {participant.payment_status === "pending"
-                          ? "대기 중"
-                          : participant.payment_status === "completed"
-                            ? "완료"
-                            : "실패"}
+                        <span className="text-white text-xs font-bold">$</span>
+                      </div>
+                      <span className="text-xs text-[#6B7280] font-medium">
+                        정산
                       </span>
                     </div>
+                    <span className="text-xs text-[#6B7280]">
+                      {formatDate(settlement.created_at)}
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-[#6B7280]">전체 금액</p>
-                      <p className="text-sm text-[#111827]">
-                        {formatAmount(settlement.total_amount)}원
-                      </p>
-                    </div>
+                  {/* 본문 */}
+                  <div className="mb-2">
+                    <p className="text-sm text-[#111827] leading-[1.4] mb-1">
+                      {settlement.post_title}에서 정산요청이 왔어요!
+                    </p>
+                    <p className="text-xs text-[#6B7280]">
+                      내 정산 금액:{" "}
+                      <span className="font-bold">
+                        {participant.amount.toLocaleString()}원
+                      </span>
+                    </p>
+                  </div>
 
-                    {participant.payment_status === "pending" && (
-                      <Button
+                  {/* 우측 하단 링크 */}
+                  <div className="flex justify-end">
+                    {participant.payment_status === "pending" ? (
+                      <button
                         onClick={() =>
                           handleSettlementClick(
                             settlement.id,
                             participant.amount,
+                            settlement.post_title,
                           )
                         }
-                        className="h-8 px-3 bg-[#0f5fda] text-white text-xs font-medium rounded-[8px] hover:bg-[#0f5fda]/90 flex items-center"
+                        className="flex items-center text-xs text-[#4B5563]"
+                        role="button"
+                        aria-label="정산하러가기"
                       >
-                        결제하기
-                        <ChevronRight size={12} className="ml-1" />
-                      </Button>
+                        정산하러가기
+                        <ChevronRight
+                          size={12}
+                          className="ml-1 text-[#4B5563]"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    ) : (
+                      <span className="text-xs text-[#4B5563]">정산 완료</span>
                     )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* 광고 카드 */}
+                {showAd && (
+                  <div className="bg-white border border-[#E5E7EB] rounded-lg p-3">
+                    {/* 상단: 카테고리 라벨 */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div
+                          className="w-4 h-4 bg-[#4B5563] rounded-full flex items-center justify-center mr-1"
+                          aria-hidden="true"
+                        >
+                          <span className="text-white text-[8px] font-bold">
+                            Ad
+                          </span>
+                        </div>
+                        <span className="text-xs text-[#6B7280] font-medium">
+                          광고
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 본문 */}
+                    <div className="mb-2">
+                      {index === 1 && (
+                        <>
+                          <p className="text-sm text-[#111827] leading-[1.4] mb-1">
+                            🎉 새로운 할인 혜택을 확인해보세요!
+                          </p>
+                          <p className="text-xs text-[#6B7280]">
+                            지금 가입하면 첫 주문{" "}
+                            <span className="font-bold">20% 할인</span>
+                          </p>
+                        </>
+                      )}
+                      {index === 3 && (
+                        <>
+                          <p className="text-sm text-[#111827] leading-[1.4] mb-1">
+                            💰 이달 마지막 특가 이벤트!
+                          </p>
+                          <p className="text-xs text-[#6B7280]">
+                            모든 상품{" "}
+                            <span className="font-bold">최대 30% 할인</span>
+                          </p>
+                        </>
+                      )}
+                      {index === 6 && (
+                        <>
+                          <p className="text-sm text-[#111827] leading-[1.4] mb-1">
+                            🚚 무료 배송 이벤트 진행 중!
+                          </p>
+                          <p className="text-xs text-[#6B7280]">
+                            지금 주문하면{" "}
+                            <span className="font-bold">배송비 무료</span>
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })
         )}
       </div>
     </div>

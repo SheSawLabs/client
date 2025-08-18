@@ -30,12 +30,14 @@ export default function SettlementReceivePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [settlementId, setSettlementId] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
+  const [title, setTitle] = useState<string>("");
 
   useEffect(() => {
     const id = searchParams.get("id");
     const amountParam = searchParams.get("amount");
+    const titleParam = searchParams.get("title");
 
-    console.log("URL 파라미터 확인:", { id, amountParam });
+    console.log("URL 파라미터 확인:", { id, amountParam, titleParam });
 
     if (id) {
       setSettlementId(id);
@@ -45,6 +47,10 @@ export default function SettlementReceivePage() {
       const parsedAmount = parseInt(amountParam, 10);
       setAmount(parsedAmount);
       console.log("amount 설정됨:", parsedAmount);
+    }
+    if (titleParam) {
+      setTitle(titleParam);
+      console.log("title 설정됨:", titleParam);
     }
   }, [searchParams]);
   const handleImageUpload = () => {
@@ -210,7 +216,7 @@ export default function SettlementReceivePage() {
           <div className="text-center mb-6">
             <div className="flex flex-col items-center">
               <Users size={16} className="text-[#111827] mb-1" />
-              <p className="text-sm text-[#111827]">렛츠고 소분모임</p>
+              <p className="text-sm text-[#111827]">{title}</p>
             </div>
           </div>
 
