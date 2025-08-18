@@ -47,6 +47,8 @@ interface Settlement {
   created_at: string;
   updated_at: string;
   participants: SettlementParticipant[];
+  post_title?: string;
+  post_category?: string;
 }
 
 interface SettlementDetailResponse {

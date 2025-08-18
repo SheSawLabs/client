@@ -85,6 +85,10 @@ export default function GroupsPage() {
   };
 
   const handleNotificationClick = () => {
+    router.push("/community/settlement");
+  };
+
+  const handleKeywordNotificationClick = () => {
     router.push("/community/notifications");
   };
 
@@ -155,6 +159,7 @@ export default function GroupsPage() {
           onCategoryChange={setActiveCategory}
           onInterestToggle={() => setIsInterestOnly(!isInterestOnly)}
           onSortChange={handleSortChange}
+          onKeywordNotificationClick={handleKeywordNotificationClick}
         />
         <div className="flex flex-col items-center px-8 py-8 text-center mt-32">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -188,6 +193,7 @@ export default function GroupsPage() {
         onCategoryChange={setActiveCategory}
         onInterestToggle={() => setIsInterestOnly(!isInterestOnly)}
         onSortChange={handleSortChange}
+        onKeywordNotificationClick={handleKeywordNotificationClick}
       />
 
       {/* 피드 */}

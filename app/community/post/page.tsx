@@ -70,8 +70,9 @@ export default function PostDetailPage() {
       case "취미":
         return "/images/categories/hobby.png";
       case "일반":
+        return "/images/categories/general.png"; // 일반 카테고리 기본 이미지 추가
       default:
-        return null; // 일반 카테고리는 기본 이미지 없음
+        return null;
     }
   };
 
