@@ -154,6 +154,12 @@ export default function SettlementRequestPage() {
     console.log("사진 첨부");
   };
 
+  const getDefaultProfileImage = () => {
+    // 완전 랜덤하게 선택 (매번 다를 수 있음)
+    const imageIndex = Math.floor(Math.random() * 2); // 0 또는 1
+    return `/images/default-profile-${imageIndex + 1}.png`;
+  };
+
   const handleSubmitRequest = () => {
     if (!postId || neighbors.length === 0) {
       alert("참여자가 없거나 모임 정보가 없습니다.");
@@ -329,8 +335,12 @@ export default function SettlementRequestPage() {
                   className="flex items-center justify-between h-12"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 bg-[#EEF4FF] border border-[#DDE6FF] rounded-full flex items-center justify-center">
-                      <Users size={16} className="text-[#017BFF]" />
+                    <div className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                      <img
+                        src={getDefaultProfileImage()}
+                        alt={neighbor.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     </div>
                     <span className="text-sm text-[#111827]">
                       {neighbor.name}

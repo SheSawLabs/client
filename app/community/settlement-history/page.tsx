@@ -9,6 +9,12 @@ export default function SettlementHistoryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const getDefaultProfileImage = () => {
+    // 완전 랜덤하게 선택 (매번 다를 수 있음)
+    const imageIndex = Math.floor(Math.random() * 2); // 0 또는 1
+    return `/images/default-profile-${imageIndex + 1}.png`;
+  };
+
   // URL에서 게시글 제목과 모임 ID 가져오기
   const groupTitle = searchParams.get("title") || "렛츠고 소분모임";
   const postId = searchParams.get("postId") || "";
@@ -230,8 +236,18 @@ export default function SettlementHistoryPage() {
                     className="flex items-center justify-between"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#F9FAFB] border border-[#017BFF] rounded-full flex items-center justify-center">
-                        <Users size={16} className="text-[#6B7280]" />
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                        <img
+                          src={
+                            participant.profile_image ||
+                            getDefaultProfileImage()
+                          }
+                          alt={
+                            participant.nickname ||
+                            `사용자 ${participant.user_id}`
+                          }
+                          className="w-full h-full rounded-full object-cover"
+                        />
                       </div>
                       <span className="text-sm text-[#111827]">
                         {participant.nickname ||
@@ -274,8 +290,18 @@ export default function SettlementHistoryPage() {
                     className="flex items-center justify-between"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#F0F8E8] border border-[#519913] rounded-full flex items-center justify-center">
-                        <Users size={16} className="text-[#519913]" />
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                        <img
+                          src={
+                            participant.profile_image ||
+                            getDefaultProfileImage()
+                          }
+                          alt={
+                            participant.nickname ||
+                            `사용자 ${participant.user_id}`
+                          }
+                          className="w-full h-full rounded-full object-cover"
+                        />
                       </div>
                       <span className="text-sm text-[#111827]">
                         {participant.nickname ||
