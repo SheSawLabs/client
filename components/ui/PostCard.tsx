@@ -46,8 +46,10 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
     }
   };
 
-  const getAuthorInitial = (name: string) => {
-    return name.charAt(0);
+  const getDefaultProfileImage = () => {
+    // 완전 랜덤하게 선택 (매번 다를 수 있음)
+    const imageIndex = Math.floor(Math.random() * 2); // 0 또는 1
+    return `/images/default-profile-${imageIndex + 1}.png`;
   };
 
   return (
@@ -118,16 +120,12 @@ export function PostCard({ post, onClick, className }: PostCardProps) {
         {/* 작성자 */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">by</span>
-          <div className="flex items-center justify-center w-5 h-5 bg-gray-100 rounded-full text-[10px] font-medium text-gray-600">
-            {post.author.avatarUrl ? (
-              <img
-                src={post.author.avatarUrl}
-                alt={post.author.name}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              getAuthorInitial(post.author.name)
-            )}
+          <div className="flex items-center justify-center w-5 h-5 bg-gray-100 rounded-full text-[10px] font-medium text-gray-600 overflow-hidden">
+            <img
+              src={post.author.avatarUrl || getDefaultProfileImage()}
+              alt={post.author.name}
+              className="w-full h-full rounded-full object-cover"
+            />
           </div>
           <span className="text-xs text-gray-500">{post.author.name}</span>
         </div>

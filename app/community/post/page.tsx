@@ -175,6 +175,12 @@ export default function PostDetailPage() {
     }
   };
 
+  const getDefaultProfileImage = () => {
+    // 완전 랜덤하게 선택 (매번 다를 수 있음)
+    const imageIndex = Math.floor(Math.random() * 2); // 0 또는 1
+    return `/images/default-profile-${imageIndex + 1}.png`;
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
@@ -237,10 +243,20 @@ export default function PostDetailPage() {
           {/* 작성자 정보 행 */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">
-                  {post.author.name.charAt(0)}
-                </span>
+              <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                {post.author.avatarUrl ? (
+                  <img
+                    src={post.author.avatarUrl}
+                    alt={post.author.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={getDefaultProfileImage()}
+                    alt={post.author.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                )}
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-gray-700">
@@ -447,10 +463,20 @@ export default function PostDetailPage() {
                       <div key={comment.id} className="space-y-2">
                         {/* 댓글 작성자 정보 */}
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-600">
-                              {(comment.author_nickname || "익명").charAt(0)}
-                            </span>
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                            {comment.author_profile_image ? (
+                              <img
+                                src={comment.author_profile_image}
+                                alt={comment.author_nickname || "익명"}
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            ) : (
+                              <img
+                                src={getDefaultProfileImage()}
+                                alt={comment.author_nickname || "익명"}
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            )}
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-gray-700">
