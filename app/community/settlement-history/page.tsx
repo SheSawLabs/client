@@ -118,13 +118,7 @@ export default function SettlementHistoryPage() {
     <div className="flex flex-col min-h-screen bg-white">
       {/* 상단 헤더 */}
       <header className="flex items-center justify-between h-14 px-4 bg-white">
-        <button
-          onClick={handleBack}
-          className="flex items-center justify-center"
-          aria-label="뒤로가기"
-        >
-          <ChevronLeft size={20} className="text-[#111827]" />
-        </button>
+        <div className="w-8" />
         <h1 className="text-[15px] font-semibold text-[#111827]">
           1/N 정산 내역
         </h1>

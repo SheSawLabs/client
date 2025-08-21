@@ -2,15 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ChevronLeft,
-  X,
-  Users,
-  Edit2,
-  ChevronRight,
-  Receipt,
-  Camera,
-} from "lucide-react";
+import { X, Users, Edit2, ChevronRight, Receipt, Camera } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useParticipantsQuery } from "@/app/queries/community";
 import { useCreateSettlementMutation } from "@/app/queries/settlement";
@@ -72,10 +64,6 @@ export default function SettlementRequestPage() {
     // 플래그 리셋
     skipTotalAmountEffect.current = false;
   }, [totalAmount, neighbors.length]);
-
-  const handleBack = () => {
-    router.back();
-  };
 
   const handleClose = () => {
     router.back();
@@ -230,14 +218,8 @@ export default function SettlementRequestPage() {
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* 상단 헤더 */}
-      <header className="flex items-center justify-between h-14 px-4 bg-white border-b border-[#E5E7EB]">
-        <button
-          onClick={handleBack}
-          className="flex items-center justify-center"
-          aria-label="뒤로가기"
-        >
-          <ChevronLeft size={20} className="text-[#111827]" />
-        </button>
+      <header className="flex items-center justify-between h-14 px-4 bg-white">
+        <div className="w-8" />
         <h1 className="text-[15px] font-semibold text-[#111827]">
           1/N 요청하기
         </h1>
