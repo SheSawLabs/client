@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CommunityHeader } from "@/components/ui/CommunityHeader";
+import { TopNav } from "@/components/ui/TopNav";
 import { CommunityFilters } from "@/components/ui/CommunityFilters";
 import { PostCard } from "@/components/ui/PostCard";
 import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
@@ -95,7 +95,11 @@ export default function GroupsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <CommunityHeader title="커뮤니티" />
+        <TopNav
+          title="커뮤니티"
+          showBackButton={false}
+          onNotificationClick={handleNotificationClick}
+        />
         <div className="flex-1 px-6 py-4">
           <div className="space-y-4">
             {[...Array(4)].map((_, i) => (
@@ -129,7 +133,11 @@ export default function GroupsPage() {
   if (error) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <CommunityHeader title="커뮤니티" />
+        <TopNav
+          title="커뮤니티"
+          showBackButton={false}
+          onNotificationClick={handleNotificationClick}
+        />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">⚠️</span>
@@ -148,8 +156,9 @@ export default function GroupsPage() {
   if (!data?.posts || data.posts.length === 0) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <CommunityHeader
+        <TopNav
           title="커뮤니티"
+          showBackButton={false}
           onNotificationClick={handleNotificationClick}
         />
         <CommunityFilters
@@ -180,8 +189,9 @@ export default function GroupsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* 헤더 */}
-      <CommunityHeader
+      <TopNav
         title="커뮤니티"
+        showBackButton={false}
         onNotificationClick={handleNotificationClick}
       />
 
