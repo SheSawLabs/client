@@ -33,22 +33,27 @@ export const SAFETY_LABELS = {
   A: {
     LABEL: "매우 좋음",
     DESCRIPTION: "안전과 청결이 매우 우수해요.",
+    LEVEL: "500 - 400",
   },
   B: {
     LABEL: "좋음",
     DESCRIPTION: "쾌적하고 안심되는 환경이에요.",
+    LEVEL: "400 - 300",
   },
   C: {
     LABEL: "양호",
     DESCRIPTION: "대체로 안전한 편이에요.",
+    LEVEL: "300 - 200",
   },
   D: {
     LABEL: "관심 필요",
     DESCRIPTION: "인적이 드문 구간이 있어요.",
+    LEVEL: "200 - 100",
   },
   E: {
     LABEL: "주의 필요",
     DESCRIPTION: "혼자 이동 시 주변을 꼭 살펴주세요.",
+    LEVEL: "100 - 0",
   },
 } as const;
 

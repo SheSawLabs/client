@@ -3,9 +3,9 @@
 import "./globals.css";
 import QueryProvider from "../components/providers/QueryProvider";
 import { MobileLayout } from "../components/ui/MobileLayout";
+import { ErrorBoundary } from "../components/error/ErrorBoundary";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 
 export default function RootLayout({
   children,
@@ -14,48 +14,6 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const isPlayground = pathname.startsWith("/playground");
-
-  // 전역 ChunkLoadError 핸들링
-  useEffect(() => {
-    const handleChunkLoadError = (event: ErrorEvent) => {
-      if (
-        event.message?.includes("Loading chunk") ||
-        event.message?.includes("ChunkLoadError") ||
-        event.error?.name === "ChunkLoadError"
-      ) {
-        console.warn("Global ChunkLoadError detected:", event.error);
-
-        // 현재 페이지를 새로고침하여 청크를 다시 로드
-        window.location.reload();
-      }
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (
-        event.reason?.message?.includes("Loading chunk") ||
-        event.reason?.message?.includes("ChunkLoadError") ||
-        event.reason?.name === "ChunkLoadError"
-      ) {
-        console.warn(
-          "Global ChunkLoadError in promise rejection:",
-          event.reason,
-        );
-        event.preventDefault(); // 기본 에러 처리 방지
-        window.location.reload();
-      }
-    };
-
-    window.addEventListener("error", handleChunkLoadError);
-    window.addEventListener("unhandledrejection", handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener("error", handleChunkLoadError);
-      window.removeEventListener(
-        "unhandledrejection",
-        handleUnhandledRejection,
-      );
-    };
-  }, []);
 
   return (
     <html lang="ko">
@@ -72,13 +30,15 @@ export default function RootLayout({
           src="https://js.tosspayments.com/v1/payment"
           strategy="beforeInteractive"
         />
-        <QueryProvider>
-          {isPlayground ? (
-            <div className="min-h-screen bg-gray-50">{children}</div>
-          ) : (
-            <MobileLayout>{children}</MobileLayout>
-          )}
-        </QueryProvider>
+        <ErrorBoundary>
+          <QueryProvider>
+            {isPlayground ? (
+              <div className="min-h-screen bg-gray-50">{children}</div>
+            ) : (
+              <MobileLayout>{children}</MobileLayout>
+            )}
+          </QueryProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
