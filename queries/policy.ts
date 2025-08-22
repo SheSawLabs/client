@@ -68,29 +68,13 @@ export const usePolicyDetailQuery = (policyId: string) => {
   return useQuery({
     queryKey: ["policy", policyId],
     queryFn: async () => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/policies/${policyId}`,
-        );
+      const response = await fetch(`${API_BASE_URL}/api/policies/${policyId}`);
 
-        if (!response.ok) {
-          throw new Error("정책 상세 정보를 불러오는데 실패했습니다");
-        }
-
-        return response.json();
-      } catch (error) {
-        // ChunkLoadError나 네트워크 오류 시 재시도
-        if (
-          error instanceof Error &&
-          (error.message.includes("Loading chunk") ||
-            error.message.includes("ChunkLoadError") ||
-            error.name === "ChunkLoadError")
-        ) {
-          console.warn("ChunkLoadError in policy detail query, retrying...");
-          throw error; // React Query가 retry 로직을 처리하도록 함
-        }
-        throw error;
+      if (!response.ok) {
+        throw new Error("정책 상세 정보를 불러오는데 실패했습니다");
       }
+
+      return response.json();
     },
     select: (data: { success: boolean; data: Policy }): PolicyWithStatus => {
       const policy = data.data;
@@ -104,19 +88,9 @@ export const usePolicyDetailQuery = (policyId: string) => {
       };
     },
     enabled: !!policyId,
-    retry: (failureCount, error) => {
-      // ChunkLoadError의 경우 최대 2번 재시도
-      if (
-        error instanceof Error &&
-        (error.message.includes("Loading chunk") ||
-          error.message.includes("ChunkLoadError") ||
-          error.name === "ChunkLoadError")
-      ) {
-        return failureCount < 2;
-      }
-      // 다른 에러의 경우 기본 재시도 로직
-      return failureCount < 3;
-    },
+    retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000, // 5분간 fresh 상태 유지
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 유지
   });
 };

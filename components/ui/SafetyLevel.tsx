@@ -20,8 +20,14 @@ export const SafetyLevel: React.FC<SafetyLevelProps> = ({ className }) => {
             className="w-12 h-2 rounded-full"
             style={{ backgroundColor: SAFETY_COLORS[grade as SafetyGrade] }}
           />
-          <div className="text-xs text-gray-600 mt-1 break-words text-center px-1">
+          <div className="text-xs text-gray-600 mt-3 break-words text-center px-1">
             {info.LABEL}
+          </div>
+          <div
+            className="text-gray-600 mt-1 break-words text-center px-1"
+            style={{ fontSize: "10px" }}
+          >
+            {info.LEVEL}
           </div>
         </div>
       ))}

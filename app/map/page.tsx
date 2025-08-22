@@ -243,7 +243,7 @@ export default function MapPage() {
               />
             </div>
             {/* 안전등급 표시 */}
-            <div className="mb-2">
+            <div className="mt-2 mb-2">
               <SafetyLevel />
             </div>
           </div>

@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense } from "react";
 import { TopNav } from "@/components/ui/TopNav";
 import { PolicyTags } from "@/components/ui/PolicyTags";
 import { PolicyInfoItem } from "@/components/ui/PolicyInfoItem";
 import { Button } from "@/components/ui/Button";
+import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import { usePolicyDetailQuery } from "@/queries/policy";
 
 interface PolicyDetailPageProps {
@@ -14,29 +15,36 @@ interface PolicyDetailPageProps {
   };
 }
 
-function PolicyDetailPage({ params }: PolicyDetailPageProps) {
+// 로딩 컴포넌트
+function PolicyDetailLoading() {
+  return (
+    <div className="bg-white">
+      <TopNav title="정책 상세" onBackClick={() => {}} />
+      <div className="px-7 pt-6">
+        <div className="space-y-4 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-8 bg-gray-200 rounded w-4/5"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          </div>
+          <div className="space-y-6 pt-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-5 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 실제 컨텐츠 컴포넌트
+function PolicyDetailContent({ policyId }: { policyId: string }) {
   const router = useRouter();
-  const { policyId } = params;
-
-  // ChunkLoadError 방지를 위한 에러 핸들링
-  useEffect(() => {
-    const handleChunkLoadError = (event: ErrorEvent) => {
-      if (
-        event.message?.includes("Loading chunk") ||
-        event.message?.includes("ChunkLoadError")
-      ) {
-        console.warn("ChunkLoadError detected, attempting to reload page");
-        window.location.reload();
-      }
-    };
-
-    window.addEventListener("error", handleChunkLoadError);
-
-    return () => {
-      window.removeEventListener("error", handleChunkLoadError);
-    };
-  }, []);
-
   const {
     data: policy,
     isLoading,
@@ -98,32 +106,14 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
   );
 
   if (isLoading) {
-    return (
-      <div className="bg-white">
-        <TopNav title="정책 상세" onBackClick={handleBackClick} />
-        <div className="px-7 pt-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-gray-500">로딩 중...</div>
-          </div>
-        </div>
-      </div>
-    );
+    return <PolicyDetailLoading />;
   }
 
   if (isError || !policy) {
-    return (
-      <div className="bg-white">
-        <TopNav title="정책 상세" onBackClick={handleBackClick} />
-        <div className="px-7 pt-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-red-500">
-              {error instanceof Error
-                ? error.message
-                : "정책 정보를 불러올 수 없습니다."}
-            </div>
-          </div>
-        </div>
-      </div>
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "정책 정보를 불러올 수 없습니다.",
     );
   }
 
@@ -181,6 +171,16 @@ function PolicyDetailPage({ params }: PolicyDetailPageProps) {
         </Button>
       </div>
     </div>
+  );
+}
+
+function PolicyDetailPage({ params }: PolicyDetailPageProps) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PolicyDetailLoading />}>
+        <PolicyDetailContent policyId={params.policyId} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
