@@ -81,26 +81,18 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       {/* 사용자 정보 */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-          {review.author?.profile_image ? (
+          <div className="w-full h-full flex items-center justify-center border border-gray-300">
             <img
-              src={review.author.profile_image}
-              alt={review.author.nickname}
-              className="w-full h-full object-cover"
+              src="/icons/default-profile.svg" // 기본 프로필 이미지 경로
+              alt="기본 프로필"
+              className="w-4/5 h-4/5 object-cover"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center border border-gray-300">
-              <img
-                src="/icons/default-profile.svg" // 기본 프로필 이미지 경로
-                alt="기본 프로필"
-                className="w-4/5 h-4/5 object-cover"
-              />
-            </div>
-          )}
+          </div>
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="font-medium text-gray-900">
-              {review.author?.nickname || "익명"}
+              {review.nickname || "익명"}
             </span>
             <span className="text-sm text-gray-500">•</span>
             <span className="text-sm text-gray-500">{daysAgo}</span>

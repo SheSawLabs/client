@@ -46,11 +46,7 @@ export interface Review {
   analysisMethod: string;
   createdAt: string;
   updatedAt: string;
-  // 클라이언트에서 추가로 가져온 사용자 정보
-  author?: {
-    nickname: string;
-    profile_image: string | null;
-  };
+  nickname?: string | null;
 }
 
 export interface DongReview {
