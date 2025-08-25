@@ -93,7 +93,7 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
     return (
       <div className={`space-y-4 ${className}`}>
         <h3 className="text-lg font-semibold text-gray-900">동네 안전 리뷰</h3>
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-4 text-gray-500">
           <p>
             {reviewListIsError
               ? "리뷰를 불러올 수 없습니다."

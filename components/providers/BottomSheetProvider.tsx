@@ -38,7 +38,7 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<ReactNode | null>(null);
   const [config, setConfig] = useState<BottomSheetConfig>({
-    defaultHeight: "30%",
+    defaultHeight: "40%",
     minHeight: "15%",
     maxHeight: "90%",
   });

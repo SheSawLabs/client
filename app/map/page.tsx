@@ -153,7 +153,7 @@ export default function MapPage() {
 
   const openDongDetailBottomSheet = () => {
     openBottomSheet(<DongSafetyDetail dongInfo={dongInfo} />, {
-      defaultHeight: "40%",
+      defaultHeight: "60%",
       minHeight: "15%",
       maxHeight: "70%",
     });
