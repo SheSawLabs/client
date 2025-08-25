@@ -150,7 +150,7 @@ export const GlobalBottomSheet: React.FC = () => {
         </div>
 
         {/* 콘텐츠 영역 */}
-        <div className="px-6 pt-8 pb-20 h-full overflow-y-auto">{content}</div>
+        <div className="px-6 pt-4 pb-20 h-full overflow-y-auto">{content}</div>
       </div>
     </div>
   );
