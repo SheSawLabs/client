@@ -12,6 +12,7 @@ import { Edit } from "lucide-react";
 import { useReviewListByLocationQuery } from "@/queries/review";
 import { useModal } from "@/hooks/useModal";
 import { FilterTags } from "./FilterTags";
+import { LineGraph } from "./LineGraph";
 
 interface ReviewSummaryProps {
   districtName?: string;
@@ -76,6 +77,21 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
       : 0;
   }, [reviewListData]);
 
+  // topKeywords 데이터 (첫 번째 페이지에서 가져옴)
+  const topKeywords = useMemo(() => {
+    return reviewListData?.pages?.[0]?.data?.topKeywords || [];
+  }, [reviewListData]);
+
+  // 전체 리뷰 수 (topKeywords percentage 계산에 사용된 총 개수)
+  const totalReviewCount = useMemo(() => {
+    if (!topKeywords.length) return 0;
+    // percentage가 가장 높은 키워드의 count와 percentage로 역산
+    const highestKeyword = topKeywords[0];
+    return highestKeyword
+      ? Math.round((highestKeyword.count * 100) / highestKeyword.percentage)
+      : 0;
+  }, [topKeywords]);
+
   // 로딩 상태
   if (reviewListIsLoading) {
     return (
@@ -123,17 +139,19 @@ export const ReviewSummary: React.FC<ReviewSummaryProps> = ({
       {/* 평점 */}
       <Rating rating={averageRating} />
 
-      {/* 키워드 그래프 (API 연결 필요) */}
-      {/* <div className="flex flex-col gap-4">
-        {dongReview.topKeywords.slice(0, 3).map((keyword, index) => (
-          <LineGraph
-            key={index}
-            keyword={keyword.keyword}
-            count={keyword.count}
-            totalCount={dongReview.totalCount}
-          />
-        ))}
-      </div> */}
+      {/* 키워드 그래프 */}
+      {topKeywords.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {topKeywords.slice(0, 3).map((keyword, index) => (
+            <LineGraph
+              key={index}
+              keyword={keyword.keyword}
+              count={keyword.count}
+              totalCount={totalReviewCount}
+            />
+          ))}
+        </div>
+      )}
 
       {/* 전체 리뷰 보러가기 */}
       <ButtonWithArrow onClick={handleViewAllReviews}>

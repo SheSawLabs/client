@@ -19,6 +19,11 @@ interface ReviewListPagination {
 interface ReviewListData {
   reviews: Review[];
   pagination: ReviewListPagination;
+  topKeywords?: {
+    keyword: string;
+    count: number;
+    percentage: number;
+  }[];
 }
 
 type ReviewListApiResponse = ApiResponse<ReviewListData>;
