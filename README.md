@@ -1,12 +1,29 @@
-# Shesaw
+# 시소 프로젝트 소개
 
-A modern Next.js project with shadcn/ui, Tailwind CSS, and React Query.
+여성의 경험이 모여 만든, 믿을 수 있는 주거 안전 앱
 
-## Package Manager
+**시소**는 여성 1인 가구가 혼자여도 안전하고, 함께여서 더 든든한 주거 생활을 영위하는 것이 목표입니다.
 
-This project uses **pnpm** as the package manager. Please use pnpm for all package management operations.
+조금이라도 더 안전할 수 있도록, 안전에 기반되는 **안전지도맵, 정책알림, 소분모임 커뮤니티**를 제공합니다.
+
+![Pitch Deck 1](public/assets/pitch_deck_1.png)
+![Pitch Deck 2](public/assets/pitch_deck_2.png)
+![Pitch Deck 3](public/assets/pitch_deck_3.png)
+![Pitch Deck 4](public/assets/pitch_deck_4.png)
+![Pitch Deck 5](public/assets/pitch_deck_5.png)
+![Pitch Deck 6](public/assets/pitch_deck_6.png)
+![Pitch Deck 7](public/assets/pitch_deck_7.png)
+![Pitch Deck 8](public/assets/pitch_deck_8.png)
+![Pitch Deck 9](public/assets/pitch_deck_9.png)
+
+<video width="100%" controls>
+  <source src="public/assets/preview.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ## Getting Started
+
+This project uses **pnpm** as the package manager. Please use pnpm for all package management operations.
 
 First, install dependencies:
 
@@ -68,18 +85,6 @@ Open [http://localhost:3001](http://localhost:3001) with your browser to see the
 └── utils/         # Utility functions
     └── cn.ts      # Class name utility (shadcn/ui)
 ```
-
-## Features
-
-- ✅ Next.js 13 with App Router
-- ✅ TypeScript support
-- ✅ shadcn/ui component library
-- ✅ Tailwind CSS utility classes
-- ✅ React Query for server state management
-- ✅ React Hook Form for form handling
-- ✅ ESLint 9 with flat config
-- ✅ Husky git hooks with lint-staged
-- ✅ SVG loader configuration
 
 ## Commands
 
