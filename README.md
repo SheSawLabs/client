@@ -16,10 +16,7 @@
 ![Pitch Deck 8](public/assets/pitch_deck_8.png)
 ![Pitch Deck 9](public/assets/pitch_deck_9.png)
 
-<video width="100%" controls>
-  <source src="public/assets/preview.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![Preview_video](public/assets/preview.gif)
 
 ## Getting Started
 
